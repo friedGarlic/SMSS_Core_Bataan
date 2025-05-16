@@ -6,10 +6,6 @@ Partial Class Reports_and_Query_t_rpt_receiving
     Dim rpt As New ReportDocument
 
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
-        'Me.CrystalReportViewer1.ReportSource = Me.CrystalReportSource1
-        'Me.CrystalReportSource1.ReportDocument.SetDatabaseLogon(objDerived.username, objDerived.Password)
-        'Me.CrystalReportSource1.ReportDocument.SetParameterValue(0, Session("Received_ID"))
-
 
         rpt.FileName = Server.MapPath("rpt_receiving.rpt")
         rpt.SetDatabaseLogon(objDerived.username, objDerived.Password)

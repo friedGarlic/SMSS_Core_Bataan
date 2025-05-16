@@ -564,279 +564,280 @@ Partial Class Inventory_t_for_Receiving
 
     End Sub
     Protected Sub btnSave_Click(sender As Object, e As EventArgs)
-        Try
+        'Try
 
-            'Check if receiving exist and is returned
+        'Check if receiving exist and is returned
 
-            Dim rcvIDed As Object = objDerived.GetValue("SELECT * FROM AMS.Tb_Receiving WHERE POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "' ", CommandType.Text)
+        Dim rcvIDed As Object = objDerived.GetValue("SELECT * FROM AMS.Tb_Receiving WHERE POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "' ", CommandType.Text)
 
-            If rcvIDed IsNot Nothing AndAlso rcvIDed IsNot DBNull.Value Then
+        If rcvIDed IsNot Nothing AndAlso rcvIDed IsNot DBNull.Value Then
 
-                Dim rcv1 As Long = 0
-                rcv1 = objDerived.GetValue("SELECT Received_ID FROM AMS.Tb_Receiving WHERE POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "'", CommandType.Text)
+            Dim rcv1 As Long = 0
+            rcv1 = objDerived.GetValue("SELECT Received_ID FROM AMS.Tb_Receiving WHERE POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "'", CommandType.Text)
 
-                'reset flag for if displaying to report or not:
-                Dim resetIsDisplayReport = "update AMS.Tb_Receiving_Dtl set AMS.Tb_Receiving_Dtl.IsDisplayReport = 0 where AMS.Tb_Receiving_Dtl.Received_ID = '" & rcv1 & "' "
-                objDerived.Execute(resetIsDisplayReport, CommandType.Text)
+            'reset flag for if displaying to report or not:
+            Dim resetIsDisplayReport = "update AMS.Tb_Receiving_Dtl set AMS.Tb_Receiving_Dtl.IsDisplayReport = 0 where AMS.Tb_Receiving_Dtl.Received_ID = '" & rcv1 & "' "
+            objDerived.Execute(resetIsDisplayReport, CommandType.Text)
 
-                Dim dt As DataTable = objDerived.GetDataTable("EXEC [AMS].[sp_InspectionAcceptance_Items] '" & grdAIR.SelectedDataKey("POHdr_ID") & "','" & rcv1 & "','" & grdAIR.SelectedDataKey("Supplier_Id") & "'", CommandType.Text)
+            Dim dt As DataTable = objDerived.GetDataTable("EXEC [AMS].[sp_InspectionAcceptance_Items] '" & grdAIR.SelectedDataKey("POHdr_ID") & "','" & rcv1 & "','" & grdAIR.SelectedDataKey("Supplier_Id") & "'", CommandType.Text)
 
-                Dim cb1 As CheckBox
+            Dim cb1 As CheckBox
 
-                If dt.Rows.Count > 0 Then
+            If dt.Rows.Count > 0 Then
 
-                    For xa As Integer = 0 To grdItems.Rows.Count - 1
-                        cb1 = CType(Me.grdItems.Rows(xa).Cells(0).FindControl("CheckBox1"), CheckBox)
-                        Dim txtQty As TextBox = CType(grdItems.Rows(xa).Cells(0).FindControl("txtQty"), TextBox)
-
-
-                        If cb1.Visible AndAlso cb1.Checked Then
-                            'System.Diagnostics.Debug.WriteLine(dt.Rows(xa).Item("Item_ID").ToString())
-                            Dim num As String = dt.Rows(xa).Item("Item_ID").ToString() '160
-                            Dim rcvID As String = dt.Rows(xa).Item("Received_ID").ToString() '40100
-                            Dim qty As String = dt.Rows(xa).Item("qty").ToString()
-
-                            'Split the headers from returning items, to proceeding items that goes to acceptance.
-
-                            Dim RcvDtl_ID As Long = objDerived.GetValue("SELECT Received_Dtl_ID FROM AMS.Tb_Receiving_Dtl WHERE Received_ID = '" & rcvID & "' AND Item_ID = '" & num & "'", CommandType.Text)
-
-                            Dim receivedQtyTextValue As Decimal
-
-                            If Not Decimal.TryParse(txtQty.Text, receivedQtyTextValue) Then
-                                receivedQtyTextValue = 0 ' Default to 0 if parsing fails
-                            End If
-
-                            Dim Cndtion As String = CType(CType(grdItems.Rows(xa).FindControl("txtCondition"), TextBox).Text, String)
-                            Dim Lction As String = CType(CType(grdItems.Rows(xa).FindControl("txtLocation"), TextBox).Text, String)
-                            Dim MarketValue As Decimal = CType(CType(grdItems.Rows(xa).FindControl("txtMarketValue"), TextBox).Text, Decimal)
-
-                            'items needs to be created to receive_dtl table, items fresh from po approval.
-                            If IsDBNull(RcvDtl_ID) OrElse Convert.ToInt64(RcvDtl_ID) = 0 Then
-                                With rcv_dtl
-                                    .Received_ID = rcvID
-                                    .Item_ID = pPurchase_Order_detail.Rows(xa)("Item_ID")
-                                    .PO_Qty = pPurchase_Order_detail.Rows(xa)("qty") 'objDerived.GetValue("SELECT qty FROM [dbo].[View_PO_ItemQty] WHERE POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "' AND Item_ID = '" & pPurchase_Order_detail.Rows(x)("Item_ID") & "'", CommandType.Text)
-                                    .Qty_Received = Math.Abs(receivedQtyTextValue - qty)
-                                    .Cost = pPurchase_Order_detail.Rows(xa)("cost")
-                                    .Condition = Cndtion
-                                    .Location = Lction
-                                    .Status = 1
-                                    .Qty_Inspecting = receivedQtyTextValue
-                                End With
-
-                                RcvDtl_ID = rcv_dtl.save
-                                objDerived.GetRecords("UPDATE AMS.Tb_Receiving_Dtl SET OtherSpecs = '" & pPurchase_Order_detail.Rows(xa)("PO_Remarks") & "' ,MarketValue = '" & MarketValue & "' WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'", CommandType.Text)
-
-                            End If
+                For xa As Integer = 0 To grdItems.Rows.Count - 1
+                    cb1 = CType(Me.grdItems.Rows(xa).Cells(0).FindControl("CheckBox1"), CheckBox)
+                    Dim txtQty As TextBox = CType(grdItems.Rows(xa).Cells(0).FindControl("txtQty"), TextBox)
 
 
-                            'where AMS.Tb_Receiving_Dtl.Received_ID = 50151 and AMS.Tb_Receiving_Dtl.Item_ID = 94
+                    If cb1.Visible AndAlso cb1.Checked Then
+                        'System.Diagnostics.Debug.WriteLine(dt.Rows(xa).Item("Item_ID").ToString())
+                        Dim num As String = dt.Rows(xa).Item("Item_ID").ToString() '160
+                        Dim rcvID As String = dt.Rows(xa).Item("Received_ID").ToString() '40100
+                        Dim qty As String = dt.Rows(xa).Item("qty").ToString()
 
-                            Dim calResult As Decimal
-                            Dim calResultInspecting As Decimal
+                        'Split the headers from returning items, to proceeding items that goes to acceptance.
 
-                            Dim result As Object = objDerived.GetValue("select AMS.Tb_Receiving_Dtl.Qty_Receiving from AMS.Tb_Receiving_Dtl  WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'", CommandType.Text)
-                            Dim Qty_ReceivingValue As Decimal
+                        Dim RcvDtl_ID As Long = objDerived.GetValue("SELECT Received_Dtl_ID FROM AMS.Tb_Receiving_Dtl WHERE Received_ID = '" & rcvID & "' AND Item_ID = '" & num & "'", CommandType.Text)
 
-                            If result IsNot DBNull.Value Then
-                                ' Try parsing the result as Decimal
-                                If Decimal.TryParse(result.ToString(), Qty_ReceivingValue) Then
-                                End If
-                            End If
+                        Dim receivedQtyTextValue As Decimal
 
-                            If Qty_ReceivingValue = 0 Then
-                                Dim resultPOQty As Object = objDerived.GetValue("select AMS.Tb_Receiving_Dtl.PO_Qty from AMS.Tb_Receiving_Dtl  WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'", CommandType.Text)
-
-                                If resultPOQty IsNot DBNull.Value Then
-                                    ' Try parsing the result as Decimal
-                                    If Decimal.TryParse(resultPOQty.ToString(), Qty_ReceivingValue) Then
-                                    End If
-                                End If
-                            End If
-
-                            Dim result2 As Object = objDerived.GetValue("select AMS.Tb_Receiving_Dtl.Qty_Inspecting from AMS.Tb_Receiving_Dtl  WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'", CommandType.Text)
-                            Dim Qty_InspectedValue As Decimal
-
-                            If result2 IsNot DBNull.Value Then
-                                ' Try parsing the result as Decimal
-                                If Decimal.TryParse(result2.ToString(), Qty_InspectedValue) Then
-                                End If
-                            End If
-
-                            If (receivedQtyTextValue <= Qty_ReceivingValue) Then
-                                calResult = Math.Abs(Qty_ReceivingValue - receivedQtyTextValue)
-                                calResultInspecting = Qty_InspectedValue + receivedQtyTextValue
-                            Else
-                                MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "The quantity desired to return is more that existing quantity, Reminder: Reload to see existing quantity.")
-
-                                Exit Sub
-                            End If
-
-                            'UPDATE QTY_Accepted VALUE
-                            Dim updateDtlSQL As String = "UPDATE AMS.Tb_Receiving_Dtl SET Qty_Receiving = '" & calResult & "' WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'"
-                            objDerived.Execute(updateDtlSQL, CommandType.Text)
-
-                            'UPDATE QTY_Inspected VALUE
-                            Dim updateDtlReceived As String = "UPDATE AMS.Tb_Receiving_Dtl SET Qty_Inspecting = '" & calResultInspecting & "' WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'"
-                            objDerived.Execute(updateDtlReceived, CommandType.Text)
-
-                            Dim updateItemReportDisplay = "update AMS.Tb_Receiving_Dtl set AMS.Tb_Receiving_Dtl.IsDisplayReport = 1 where AMS.Tb_Receiving_Dtl.Received_Dtl_ID = '" & RcvDtl_ID & "' "
-                            objDerived.Execute(updateItemReportDisplay, CommandType.Text)
-
-                            Dim updateTempQuantity As String = "update AMS.Tb_Receiving_Dtl set AMS.Tb_Receiving_Dtl.tempReportQuantity = '" & receivedQtyTextValue & "' where AMS.Tb_Receiving_Dtl.Received_Dtl_ID = '" & RcvDtl_ID & "' "
-                            objDerived.Execute(updateTempQuantity, CommandType.Text)
-
-                            Dim dt2 As DataTable = objDerived.GetDataTable("EXEC [AMS].[sp_InspectionAcceptance_Items] '" & grdAIR.SelectedDataKey("POHdr_ID") & "','" & rcv1 & "','" & grdAIR.SelectedDataKey("Supplier_Id") & "'", CommandType.Text)
-                            If dt2.Rows.Count = 0 Then
-                                Dim updateHdrSQL As String = "UPDATE AMS.Tb_Receiving SET Status = 1 WHERE Received_ID = " & rcvID
-                                objDerived.Execute(updateHdrSQL, CommandType.Text)
-                            End If
-
-                            Session("Received_ID") = rcvID 'mainly for report.
-
-                            'Inform the user and refresh the inspection display.
+                        If Not Decimal.TryParse(txtQty.Text, receivedQtyTextValue) Then
+                            receivedQtyTextValue = 0 ' Default to 0 if parsing fails
                         End If
-                    Next
-                End If
 
-                MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Transaction has been successfully saved.")
-                LoadAllItems()
-                LoadrbALL()
-                btnPreview.Enabled = True
-                btnSave.Enabled = False
+                        Dim Cndtion As String = CType(CType(grdItems.Rows(xa).FindControl("txtCondition"), TextBox).Text, String)
+                        Dim Lction As String = CType(CType(grdItems.Rows(xa).FindControl("txtLocation"), TextBox).Text, String)
+                        Dim MarketValue As Decimal = CType(CType(grdItems.Rows(xa).FindControl("txtMarketValue"), TextBox).Text, Decimal)
 
-            Else
+                        'items needs to be created to receive_dtl table, items fresh from po approval.
+                        If IsDBNull(RcvDtl_ID) OrElse Convert.ToInt64(RcvDtl_ID) = 0 Then
+                            With rcv_dtl
+                                .Received_ID = rcvID
+                                .Item_ID = pPurchase_Order_detail.Rows(xa)("Item_ID")
+                                .PO_Qty = pPurchase_Order_detail.Rows(xa)("qty") 'objDerived.GetValue("SELECT qty FROM [dbo].[View_PO_ItemQty] WHERE POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "' AND Item_ID = '" & pPurchase_Order_detail.Rows(x)("Item_ID") & "'", CommandType.Text)
+                                .Qty_Received = Math.Abs(receivedQtyTextValue - qty)
+                                .Cost = pPurchase_Order_detail.Rows(xa)("cost")
+                                .Condition = Cndtion
+                                .Location = Lction
+                                .Status = 1
+                                .Qty_Inspecting = receivedQtyTextValue
+                            End With
 
-                Dim cb As CheckBox
-                Session("cb") = 0
+                            RcvDtl_ID = rcv_dtl.save
+                            objDerived.GetRecords("UPDATE AMS.Tb_Receiving_Dtl SET OtherSpecs = '" & pPurchase_Order_detail.Rows(xa)("PO_Remarks") & "' ,MarketValue = '" & MarketValue & "' WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'", CommandType.Text)
 
-                For i As Integer = 0 To grdItems.Rows.Count - 1
-                    cb = CType(Me.grdItems.Rows(i).Cells(0).FindControl("CheckBox1"), CheckBox)
-                    If cb.Checked = True Then
-                        Session("cb") = 1
-                        Exit For
-                    End If
-                Next
-                If Session("cb") = 0 Then
-                    MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "No selected item.")
-                    Exit Sub
-                End If
-
-                Dim AllotmentClass_ID As Long
-                AllotmentClass_ID = objDerived.GetValue("SELECT AllotmentClass_ID FROM AMS.View_AccountList WHERE GA_ID = '" & grdAIR.SelectedDataKey("GA_ID") & "'", CommandType.Text)
-
-                If ddReceiveBy.SelectedItem.Text = "Select" Then
-                    MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Select received by and inspected by.")
-                    Exit Sub
-                End If
-
-                Dim receivedDate As String = Date.Today.ToString("MM/dd/yyyy")
-
-                '=-= SAVE AMS.Tb_Receiving
-                With rcv
-                    .Received_Date = txtDateReceivedBy.Text
-                    .ReceivedBY = ddReceiveBy.SelectedItem.Value
-                    .POHdr_ID = grdAIR.SelectedDataKey("POHdr_ID")
-                    .PO_No = grdAIR.SelectedDataKey("PO_No")
-                    .Supplier_ID = grdAIR.SelectedDataKey("Supplier_Id")
-                    .GA_ID = grdAIR.SelectedDataKey("GA_ID")
-                    .isAccepted = False
-                    .UserID = Session("@UserName")
-                    .Status = 1
-
-                End With
-
-                Dim RR_No As String
-
-                Dim rcvID As Long = objDerived.GetValue("SELECT * FROM AMS.Tb_Receiving WHERE POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "' AND Received_Date = '" & txtDateReceivedBy.Text & "'", CommandType.Text)
-
-                If rcvID = 0 Then
-                    rcvID = rcv.save
-
-                    RR_No = objDerived.GetValue("SELECT [AMS].[func_GenerateRR_No] ('" & txtDateReceivedBy.Text & "')", CommandType.Text)
-                    objDerived.GetRecords("UPDATE AMS.Tb_Receiving SET RR_No = '" & RR_No & "',InvoiceNo = '" & txtInvoiceNumber.Text & "' WHERE Received_ID = '" & rcvID & "'", CommandType.Text)
-
-                Else
-                    rcv.Received_ID = rcvID
-                    rcv.update()
-                End If
-
-                Session("Received_ID") = rcvID
-
-                'objDerived.GetRecords("UPDATE AMS.Tb_Receiving SET InspectedBy = '" & ddInspectedBy.SelectedItem.Value & "',InspectedBy2 = '" & ddInspectedBy2.SelectedItem.Value & "',InspectedBy3 = '" & ddInspectedBy3.SelectedItem.Value & "' WHERE Received_ID = '" & rcvID & "'", CommandType.Text)
-                objDerived.GetRecords("UPDATE AMS.Tb_Receiving SET InspectedBy2 = 0 ,InspectedBy3 = 0 WHERE Received_ID = '" & rcvID & "'", CommandType.Text)
-                objDerived.GetRecords("UPDATE AMS.PO_Hdr SET isDelivered = 1  WHERE POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "'", CommandType.Text)
+                        End If
 
 
-                For x As Integer = 0 To grdItems.Rows.Count - 1
-                    cb = CType(Me.grdItems.Rows(x).Cells(0).FindControl("CheckBox1"), CheckBox)
-                    If cb.Checked = True Then
-                        Dim RcvQty As Decimal = CType(CType(grdItems.Rows(x).FindControl("txtQty"), TextBox).Text, Decimal)
-                        Dim Cndtion As String = CType(CType(grdItems.Rows(x).FindControl("txtCondition"), TextBox).Text, String)
-                        Dim Lction As String = CType(CType(grdItems.Rows(x).FindControl("txtLocation"), TextBox).Text, String)
-                        Dim MarketValue As Decimal = CType(CType(grdItems.Rows(x).FindControl("txtMarketValue"), TextBox).Text, Decimal)
+                        'where AMS.Tb_Receiving_Dtl.Received_ID = 50151 and AMS.Tb_Receiving_Dtl.Item_ID = 94
 
-                        Dim result As Object = objDerived.GetValue("SELECT AMS.PO_Dtl.qty FROM AMS.PO_Dtl WHERE POHdr_ID = '" & pPurchase_Order_detail.Rows(x)("POHdr_ID") & "'", CommandType.Text)
-                        Dim Qty As Decimal
+                        Dim calResult As Decimal
+                        Dim calResultInspecting As Decimal
+
+                        Dim result As Object = objDerived.GetValue("select AMS.Tb_Receiving_Dtl.Qty_Receiving from AMS.Tb_Receiving_Dtl  WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'", CommandType.Text)
+                        Dim Qty_ReceivingValue As Decimal
 
                         If result IsNot DBNull.Value Then
-                            If Decimal.TryParse(result.ToString(), Qty) Then
+                            ' Try parsing the result as Decimal
+                            If Decimal.TryParse(result.ToString(), Qty_ReceivingValue) Then
                             End If
                         End If
 
-                        If (RcvQty > Qty) Then
+                        If Qty_ReceivingValue = 0 Then
+                            Dim resultPOQty As Object = objDerived.GetValue("select AMS.Tb_Receiving_Dtl.PO_Qty from AMS.Tb_Receiving_Dtl  WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'", CommandType.Text)
 
-                            MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Input Quantity is greater than existing Quantity, Reload to see existing quantity first.")
+                            If resultPOQty IsNot DBNull.Value Then
+                                ' Try parsing the result as Decimal
+                                If Decimal.TryParse(resultPOQty.ToString(), Qty_ReceivingValue) Then
+                                End If
+                            End If
+                        End If
+
+                        Dim result2 As Object = objDerived.GetValue("select AMS.Tb_Receiving_Dtl.Qty_Inspecting from AMS.Tb_Receiving_Dtl  WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'", CommandType.Text)
+                        Dim Qty_InspectedValue As Decimal
+
+                        If result2 IsNot DBNull.Value Then
+                            ' Try parsing the result as Decimal
+                            If Decimal.TryParse(result2.ToString(), Qty_InspectedValue) Then
+                            End If
+                        End If
+
+                        If (receivedQtyTextValue <= Qty_ReceivingValue) Then
+                            calResult = Math.Abs(Qty_ReceivingValue - receivedQtyTextValue)
+                            calResultInspecting = Qty_InspectedValue + receivedQtyTextValue
+                        Else
+                            MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "The quantity desired to return is more that existing quantity, Reminder: Reload to see existing quantity.")
 
                             Exit Sub
                         End If
 
-                        '=-= SAVE AMS.Tb_Receiving_Dtl
-                        With rcv_dtl
-                            .Received_ID = rcvID
-                            .Item_ID = pPurchase_Order_detail.Rows(x)("Item_ID")
-                            .PO_Qty = pPurchase_Order_detail.Rows(x)("qty") 'objDerived.GetValue("SELECT qty FROM [dbo].[View_PO_ItemQty] WHERE POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "' AND Item_ID = '" & pPurchase_Order_detail.Rows(x)("Item_ID") & "'", CommandType.Text)
-                            .Qty_Received = Math.Abs(RcvQty - Qty)
-                            .Cost = pPurchase_Order_detail.Rows(x)("cost")
-                            .Condition = Cndtion
-                            .Location = Lction
-                            .Status = 1
-                            .Qty_Inspecting = RcvQty
+                        'UPDATE QTY_Accepted VALUE
+                        Dim updateDtlSQL As String = "UPDATE AMS.Tb_Receiving_Dtl SET Qty_Receiving = '" & calResult & "' WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'"
+                        objDerived.Execute(updateDtlSQL, CommandType.Text)
 
+                        'UPDATE QTY_Inspected VALUE
+                        Dim updateDtlReceived As String = "UPDATE AMS.Tb_Receiving_Dtl SET Qty_Inspecting = '" & calResultInspecting & "' WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'"
+                        objDerived.Execute(updateDtlReceived, CommandType.Text)
 
-                        End With
+                        Dim updateItemReportDisplay = "update AMS.Tb_Receiving_Dtl set AMS.Tb_Receiving_Dtl.IsDisplayReport = 1 where AMS.Tb_Receiving_Dtl.Received_Dtl_ID = '" & RcvDtl_ID & "' "
+                        objDerived.Execute(updateItemReportDisplay, CommandType.Text)
 
-                        Dim RcvDtl_ID As Long = objDerived.GetValue("SELECT Received_Dtl_ID FROM AMS.Tb_Receiving_Dtl WHERE Received_ID = '" & rcvID & "' AND Item_ID = '" & pPurchase_Order_detail.Rows(x)("Item_ID") & "'", CommandType.Text)
-                        If RcvDtl_ID = 0 Then
-                            RcvDtl_ID = rcv_dtl.save
-                            objDerived.GetRecords("UPDATE AMS.Tb_Receiving_Dtl SET OtherSpecs = '" & pPurchase_Order_detail.Rows(x)("PO_Remarks") & "' ,MarketValue = '" & MarketValue & "' WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'", CommandType.Text)
-                        Else
-                            rcv_dtl.Received_Dtl_ID = RcvDtl_ID
-                            rcv_dtl.update()
-                            objDerived.GetRecords("UPDATE AMS.Tb_Receiving_Dtl SET OtherSpecs = '" & pPurchase_Order_detail.Rows(x)("PO_Remarks") & "', MarketValue = '" & MarketValue & "' WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'", CommandType.Text)
+                        Dim updateTempQuantity As String = "update AMS.Tb_Receiving_Dtl set AMS.Tb_Receiving_Dtl.tempReportQuantity = '" & receivedQtyTextValue & "' where AMS.Tb_Receiving_Dtl.Received_Dtl_ID = '" & RcvDtl_ID & "' "
+                        objDerived.Execute(updateTempQuantity, CommandType.Text)
 
+                        Dim dt2 As DataTable = objDerived.GetDataTable("EXEC [AMS].[sp_InspectionAcceptance_Items] '" & grdAIR.SelectedDataKey("POHdr_ID") & "','" & rcv1 & "','" & grdAIR.SelectedDataKey("Supplier_Id") & "'", CommandType.Text)
+                        If dt2.Rows.Count = 0 Then
+                            Dim updateHdrSQL As String = "UPDATE AMS.Tb_Receiving SET Status = 1 WHERE Received_ID = " & rcvID
+                            objDerived.Execute(updateHdrSQL, CommandType.Text)
                         End If
 
-                        Session("Received_Dtl_ID") = RcvDtl_ID
+                        Session("Received_ID") = rcvID 'mainly for report.
 
-                        Session("Received_ID") = rcvID
+                        'Inform the user and refresh the inspection display.
                     End If
                 Next
-
-
-                Session("Received_ID") = rcvID
-
-                MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Transaction has been successfully saved.")
-                LoadAllItems()
-                LoadrbALL()
-                btnPreview.Enabled = True
-                btnSave.Enabled = False
             End If
 
-        Catch ex As Exception
-            Dim script As String = "console.log('" & ex.Message & "')"
-            ScriptManager.RegisterStartupScript(Me, Me.GetType(), "TRY SCRIPT RETURN", script, True)
-        End Try
+            MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Transaction has been successfully saved.")
+            LoadAllItems()
+            LoadrbALL()
+            btnPreview.Enabled = True
+            btnSave.Enabled = False
+
+        Else
+
+            Dim cb As CheckBox
+            Session("cb") = 0
+
+            For i As Integer = 0 To grdItems.Rows.Count - 1
+                cb = CType(Me.grdItems.Rows(i).Cells(0).FindControl("CheckBox1"), CheckBox)
+                If cb.Checked = True Then
+                    Session("cb") = 1
+                    Exit For
+                End If
+            Next
+            If Session("cb") = 0 Then
+                MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "No selected item.")
+                Exit Sub
+            End If
+
+            Dim AllotmentClass_ID As Long
+            AllotmentClass_ID = objDerived.GetValue("SELECT AllotmentClass_ID FROM AMS.View_AccountList WHERE GA_ID = '" & grdAIR.SelectedDataKey("GA_ID") & "'", CommandType.Text)
+
+            If ddReceiveBy.SelectedItem.Text = "Select" Then
+                MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Select received by and inspected by.")
+                Exit Sub
+            End If
+
+            Dim receivedDate As String = Date.Today.ToString("MM/dd/yyyy")
+
+            '=-= SAVE AMS.Tb_Receiving
+            With rcv
+                .Received_Date = txtDateReceivedBy.Text
+                .ReceivedBY = ddReceiveBy.SelectedItem.Value
+                .POHdr_ID = grdAIR.SelectedDataKey("POHdr_ID")
+                .PO_No = grdAIR.SelectedDataKey("PO_No")
+                .Supplier_ID = grdAIR.SelectedDataKey("Supplier_Id")
+                .GA_ID = grdAIR.SelectedDataKey("GA_ID")
+                .isAccepted = False
+                .UserID = Session("@UserName")
+                .Status = 1
+
+            End With
+
+            Dim RR_No As String
+
+            Dim rcvID As Long = objDerived.GetValue("SELECT * FROM AMS.Tb_Receiving WHERE POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "' AND Received_Date = '" & txtDateReceivedBy.Text & "'", CommandType.Text)
+
+            If rcvID = 0 Then
+                rcvID = rcv.save
+
+                RR_No = objDerived.GetValue("SELECT [AMS].[func_GenerateRR_No] ('" & txtDateReceivedBy.Text & "')", CommandType.Text)
+                objDerived.GetRecords("UPDATE AMS.Tb_Receiving SET RR_No = '" & RR_No & "',InvoiceNo = '" & txtInvoiceNumber.Text & "' WHERE Received_ID = '" & rcvID & "'", CommandType.Text)
+
+            Else
+                rcv.Received_ID = rcvID
+                rcv.update()
+            End If
+
+            Session("Received_ID") = rcvID
+
+            'objDerived.GetRecords("UPDATE AMS.Tb_Receiving SET InspectedBy = '" & ddInspectedBy.SelectedItem.Value & "',InspectedBy2 = '" & ddInspectedBy2.SelectedItem.Value & "',InspectedBy3 = '" & ddInspectedBy3.SelectedItem.Value & "' WHERE Received_ID = '" & rcvID & "'", CommandType.Text)
+            objDerived.GetRecords("UPDATE AMS.Tb_Receiving SET InspectedBy2 = 0 ,InspectedBy3 = 0 WHERE Received_ID = '" & rcvID & "'", CommandType.Text)
+            objDerived.GetRecords("UPDATE AMS.PO_Hdr SET isDelivered = 1  WHERE POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "'", CommandType.Text)
+
+
+            For x As Integer = 0 To grdItems.Rows.Count - 1
+                cb = CType(Me.grdItems.Rows(x).Cells(0).FindControl("CheckBox1"), CheckBox)
+                If cb.Checked = True Then
+                    Dim RcvQty As Decimal = CType(CType(grdItems.Rows(x).FindControl("txtQty"), TextBox).Text, Decimal)
+                    Dim Cndtion As String = CType(CType(grdItems.Rows(x).FindControl("txtCondition"), TextBox).Text, String)
+                    Dim Lction As String = CType(CType(grdItems.Rows(x).FindControl("txtLocation"), TextBox).Text, String)
+                    Dim MarketValue As Decimal = CType(CType(grdItems.Rows(x).FindControl("txtMarketValue"), TextBox).Text, Decimal)
+
+                    Dim result As Object = objDerived.GetValue("SELECT AMS.PO_Dtl.qty FROM AMS.PO_Dtl WHERE POHdr_ID = '" & pPurchase_Order_detail.Rows(x)("POHdr_ID") & "'", CommandType.Text)
+                    Dim Qty As Decimal
+
+                    If result IsNot DBNull.Value Then
+                        If Decimal.TryParse(result.ToString(), Qty) Then
+                        End If
+                    End If
+
+                    If (RcvQty > Qty) Then
+
+                        MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Input Quantity is greater than existing Quantity, Reload to see existing quantity first.")
+
+                        Exit Sub
+                    End If
+
+                    '=-= SAVE AMS.Tb_Receiving_Dtl
+                    With rcv_dtl
+                        .Received_ID = rcvID
+                        .Item_ID = pPurchase_Order_detail.Rows(x)("Item_ID")
+                        .PO_Qty = pPurchase_Order_detail.Rows(x)("qty") 'objDerived.GetValue("SELECT qty FROM [dbo].[View_PO_ItemQty] WHERE POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "' AND Item_ID = '" & pPurchase_Order_detail.Rows(x)("Item_ID") & "'", CommandType.Text)
+                        .Qty_Received = Math.Abs(RcvQty - Qty)
+                        .Cost = pPurchase_Order_detail.Rows(x)("cost")
+                        .Condition = Cndtion
+                        .Location = Lction
+                        .Status = 1
+                        .Qty_Inspecting = RcvQty
+                        .IsDisplayReport = 1
+                        .tempReportQuantity = RcvQty
+
+                    End With
+
+                    Dim RcvDtl_ID As Long = objDerived.GetValue("SELECT Received_Dtl_ID FROM AMS.Tb_Receiving_Dtl WHERE Received_ID = '" & rcvID & "' AND Item_ID = '" & pPurchase_Order_detail.Rows(x)("Item_ID") & "'", CommandType.Text)
+                    If RcvDtl_ID = 0 Then
+                        RcvDtl_ID = rcv_dtl.save
+                        objDerived.GetRecords("UPDATE AMS.Tb_Receiving_Dtl SET OtherSpecs = '" & pPurchase_Order_detail.Rows(x)("PO_Remarks") & "' ,MarketValue = '" & MarketValue & "' WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'", CommandType.Text)
+                    Else
+                        rcv_dtl.Received_Dtl_ID = RcvDtl_ID
+                        rcv_dtl.update()
+                        objDerived.GetRecords("UPDATE AMS.Tb_Receiving_Dtl SET OtherSpecs = '" & pPurchase_Order_detail.Rows(x)("PO_Remarks") & "', MarketValue = '" & MarketValue & "' WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'", CommandType.Text)
+
+                    End If
+
+                    Session("Received_Dtl_ID") = RcvDtl_ID
+
+                    Session("Received_ID") = rcvID
+                End If
+            Next
+
+
+            Session("Received_ID") = rcvID
+
+            MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Transaction has been successfully saved.")
+            LoadAllItems()
+            LoadrbALL()
+            btnPreview.Enabled = True
+            btnSave.Enabled = False
+        End If
+
+        'Catch ex As Exception
+        '    Dim script As String = "console.log('" & ex.Message & "')"
+        '    ScriptManager.RegisterStartupScript(Me, Me.GetType(), "TRY SCRIPT RETURN", script, True)
+        ''End Try
     End Sub
 
     'Protected Sub btnPreview_Click(sender As Object, e As EventArgs)

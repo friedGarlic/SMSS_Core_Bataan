@@ -272,6 +272,25 @@ Namespace Receiving
             End Set
         End Property
 
+        Private pIsDisplayReport As Decimal
+        Public Property IsDisplayReport() As Decimal
+            Get
+                Return pIsDisplayReport
+            End Get
+            Set(ByVal value As Decimal)
+                pIsDisplayReport = value
+            End Set
+        End Property
+
+        Private ptempReportQuantity As Decimal
+        Public Property tempReportQuantity() As Decimal
+            Get
+                Return ptempReportQuantity
+            End Get
+            Set(ByVal value As Decimal)
+                ptempReportQuantity = value
+            End Set
+        End Property
 
         Public Function save() As Long
             Dim objDerived As New DerivedDal
@@ -287,6 +306,8 @@ Namespace Receiving
             objDerived.cmd.Parameters.AddWithValue("@Location", Location)
             objDerived.cmd.Parameters.AddWithValue("@Status", Status)
             objDerived.cmd.Parameters.AddWithValue("@Qty_Inspecting", Qty_Inspecting)
+            objDerived.cmd.Parameters.AddWithValue("@tempReportQuantity", tempReportQuantity)
+            objDerived.cmd.Parameters.AddWithValue("@IsDisplayReport", IsDisplayReport)
             objDerived.cmd.Parameters.Add("@CurrID", SqlDbType.BigInt).Direction = ParameterDirection.Output
             i = objDerived.Execute("@CurrID", "[AMS].[spSave_Receiving_Dtl]", CommandType.StoredProcedure, Nothing)
             Return i
@@ -306,6 +327,9 @@ Namespace Receiving
             objDerived.cmd.Parameters.AddWithValue("@Condition", Condition)
             objDerived.cmd.Parameters.AddWithValue("@Location", Location)
             objDerived.cmd.Parameters.AddWithValue("@Status", Status)
+            objDerived.cmd.Parameters.AddWithValue("@Qty_Inspecting", Qty_Inspecting)
+            objDerived.cmd.Parameters.AddWithValue("@tempReportQuantity", tempReportQuantity)
+            objDerived.cmd.Parameters.AddWithValue("@IsDisplayReport", IsDisplayReport)
             objDerived.cmd.Parameters.Add("@CurrID", SqlDbType.BigInt).Direction = ParameterDirection.Output
             i = objDerived.Execute("@CurrID", "[AMS].[spSave_Receiving_Dtl]", CommandType.StoredProcedure, Nothing)
             Return i
