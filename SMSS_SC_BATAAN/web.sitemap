@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<siteMap xmlns="http://schemas.microsoft.com/AspNet/SiteMap-File-1.0" >
+  <siteMapNode  url="~/etc/body.aspx" title="Home">
+    <siteMapNode title="Account Manager">
+      <siteMapNode url="~/Membership/CreatingUserAccounts.aspx" title="Create New Account" />
+      <siteMapNode url="~/Membership/ManageUsers.aspx" title="Manage Users" />
+      <siteMapNode url="~/Roles/ManageRoles.aspx" title="Manage Roles" />
+      <siteMapNode url="~/Roles/UsersAndRoles.aspx" title="Users and Roles" />
+    </siteMapNode>
+
+    <siteMapNode title="Application Manager">
+      <!--<siteMapNode url="~/Menu/ManageApplication.aspx" title="Manage Application" />-->
+      <siteMapNode url="~/Menu/ManageMenu.aspx" title="Manage Menu" />
+      <siteMapNode url="~/Menu/MangeSubMenu.aspx" title="Manage SubMenu" />
+      <siteMapNode url="~/Menu/ManageComponent.aspx" title="Manage Components" />
+    </siteMapNode>
+    <siteMapNode title="Log Activities Manager">
+      <siteMapNode url="~/AuditTrail/ManageLogTable.aspx" title="Manage Log Tables" />
+      <siteMapNode url="~/AuditTrail/AuditTrails.aspx" title="Audit Trail" />
+    </siteMapNode>
+    <siteMapNode title="Password Manager">
+      <siteMapNode url="~/membership/ChangePassword.aspx" title="Manage Passwords" />
+    </siteMapNode>
+  </siteMapNode>
+</siteMap>

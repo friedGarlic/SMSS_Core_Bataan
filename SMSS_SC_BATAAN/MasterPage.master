@@ -1,0 +1,527 @@
+<%@ Master Language="VB" CodeFile="MasterPage.master.vb" Inherits="MasterPage_MasterPage" %>
+
+<%@ Register Assembly="System.Web.Extensions, Version=1.0.61025.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35"
+    Namespace="System.Web.UI" TagPrefix="asp" %>
+
+
+
+<%--<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="cc1" %>--%>
+<%--<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="asp" %>--%>
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<script runat="server">
+
+
+
+
+</script>
+
+<%--<link href="StyleSheet.css" rel="stylesheet" type="text/css" />--%>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+
+<head id="Head1" runat="server">
+    <link SUPPLY MANAGEMENT SUPPORT SYSTEM</title>
+
+
+<style type="text/css">
+        
+#lazada {
+    width: 100%;
+   
+    display: flex;
+    flex-wrap: wrap;
+}
+
+    #lazada div {
+        padding: 15px 15px 15px 15px;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        min-height: 200px;
+    }
+    .ajax__calendar_container {
+            z-index: 1000;
+        }
+
+        .popupHover {
+            background-image: url(~/images/gridrow.JPG);
+            background-repeat: repeat-x;
+            background-position: left top;
+
+        }
+        .vertical-line {
+      border-left: 1px solid;
+   
+}  
+        .vertical-line-left {
+    border-right: 1px solid;
+    
+}  
+      
+        .auto-style1 {
+            width: 100%;
+            height: 19px;
+        }
+      
+        .auto-style2 {
+            width: 100%;
+            height: 23px;
+        }
+      
+        .hidden {
+            display: none;
+        }
+    
+    .marquee-container {
+            display: flex;
+            align-items: center; /* Align items vertically centered */
+            margin-top: 5px; /* Adjust top margin if needed */
+        }
+        .marquee {
+            flex: 1; /* Allow marquee to take available space */
+            white-space: nowrap; /* Ensure text does not wrap */
+            overflow: hidden; /* Hide overflowed text */
+        }
+
+    .auto-style7 {
+        height: 11468612px;
+    }
+
+    </style>
+ <%--   auto accounting format on keypresss--%>
+    <script language="javascript" type="text/javascript">
+
+        function Comma(Num) { //function to add commas to textboxes
+        Num += '';
+        Num = Num.replace(',', ''); Num = Num.replace(',', ''); Num = Num.replace(',', '');
+        Num = Num.replace(',', ''); Num = Num.replace(',', ''); Num = Num.replace(',', '');
+        x = Num.split('.');
+        x1 = x[0];
+        x2 = x.length > 1 ? '.' + x[1] : '';
+        var rgx = /(\d+)(\d{3})/;
+        while (rgx.test(x1))
+            x1 = x1.replace(rgx, '$1' + ',' + '$2');
+        return x1 + x2;
+    }
+    </script>
+<%--  --END-- auto accounting format on keypresss--%>
+
+    <link href="StyleSheet.css" rel="stylesheet" type="text/css" />
+    <link href="~/Styles/SMSS_StyleSheet.css" rel="stylesheet" type="text/css" />
+
+    <%--<link href="StyleSheet.css" rel="stylesheet" type="text/css" />--%>
+    <%--<script type="text/javascript" src="../MasterPage/js/floating-1.8.js"></script> --%>
+       
+  <script  type="text/javascript" src="../Membership/MasterPage/js/autoCurrency.js"></script>
+
+    <script type="text/javascript"> 
+          
+function Write()
+{
+Alert("hello");
+}
+        function fun1(e, button1) {
+            var evt = e ? e : window.event;
+            var bt = document.getElementById(button1);
+            if (bt) {
+                if (evt.keyCode == 13) {
+                    bt.click();
+                    return false;
+                }
+            }
+        }
+    </script>
+
+
+
+    <%--================DISABLE ENTER KEY AND BACKSPACE KEY ================--%>
+    <script type="text/javascript">
+        function killBackSpace(e) {
+            e = e ? e : window.event;
+            var t = e.target ? e.target : e.srcElement ? e.srcElement : null;
+            if (t && t.tagName && (t.type && /(password)|(text)|(file)/.test(t.type.toLowerCase())) || t.tagName.toLowerCase() == 'textarea')
+                return true;
+            var k = e.keyCode ? e.keyCode : e.which ? e.which : null;
+            if (k == 13) {
+                if (e.preventDefault)
+                    e.preventDefault();
+                return false;
+            };
+
+            if (k == 8) {
+                if (e.preventDefault)
+                    e.preventDefault();
+                return false;
+            };
+            return true;
+        };
+
+        if (typeof document.addEventListener != 'undefined')
+            document.addEventListener('keydown', killBackSpace, false);
+        else if (typeof document.attachEvent != 'undefined')
+            document.attachEvent('onkeydown', killBackSpace);
+        else {
+            if (document.onkeydown != null) {
+                var oldOnkeydown = document.onkeydown;
+                document.onkeydown = function (e) {
+                    oldOnkeydown(e);
+                    killBackSpace(e);
+                };
+            }
+
+            else
+                document.onkeydown = killBackSpace;
+        }
+    </script>
+
+    <%--================ END - DISABLE ENTER KEY AND BACKSPACE KEY ================--%>
+
+
+    <script type="text/javascript"> 
+
+        //javascript:window.history.forward(1);
+        //Modified StartProgressBar
+        function StartProgressBar1() {
+        // Perform validation for the 'saveS' validation group
+            if (typeof(Page_ClientValidate) == 'function' && Page_ClientValidate('saveS')) {
+                // If the page is valid, show the progress bar extender
+                var myExtender = $find('ProgressBarModalPopupExtender');
+                if (myExtender) {
+                    myExtender.show();
+                }
+                return true; // Allow the postback to proceed
+            } else {
+                // If the page is not valid, prevent the postback
+                return false;
+            }
+        }
+
+
+        function StartProgressBar() {
+            var myExtender = $find('ProgressBarModalPopupExtender');
+            myExtender.show();
+            return true;
+        }
+
+        function checkDate(sender, args) {
+            if (sender._selectedDate < new Date()) {
+                alert("You cannot select a day earlier than today!");
+                sender._selectedDate = new Date();
+                // set the date back to the current date
+                sender._textbox.set_Value(sender._selectedDate.format(sender._format))
+            }
+        }
+
+        function dateselect(ev) {
+            var calendarBehavior1 = $find("Calendar1");
+            var d = calendarBehavior1._selectedDate;
+            var now = new Date();
+            calendarBehavior1.get_element().value = d.format("MM/dd/yyyy") + " " + now.format("HH:mm:ss")
+        }
+
+    </script>
+
+    <script language="javascript" type="text/javascript">
+        // <!CDATA[
+
+        function IMG1_onclick() {
+        }
+
+        function StartProgressBar() {
+            var myExtender = $find('ProgressBarModalPopupExtender');
+            myExtender.show();
+
+            return true;
+        }
+
+    </script>
+
+    <script language ="javascript" type ="text/javascript">
+
+
+        function SetMessage() {
+            var traps;
+             
+            if (window.confirm("You have unsave changes, Do you really want to go?")) 
+            { 
+               traps = "Yes";
+            }
+            else
+            {
+               traps = "No";
+            }
+
+            document.getElementById("ctl00_ContentPlaceHolder1_txtTraps").value = traps;
+        }
+            
+    </script>
+   <%-- <script language ="javascript" type ="text/javascript">
+        var test = true;
+
+function otherTest() {
+  return true;
+}
+
+addEventListener('beforeunload', function(event) {
+if(!test || !otherTest()) {
+  event.returnValue = 'You have unsaved changes.';
+}
+  
+});
+
+document.getElementById('theButton').addEventListener('click', function(event) {
+  test = !test;
+  this.innerHTML = test.toString();
+});
+        </script>--%>
+    <meta http-equiv="X-UA-Compatible" content="IE=8" />
+    <meta http-equiv="Page-Enter" content="revealtrans(duration=0.0)" />
+    <meta http-equiv="Page-Exit" content="revealtrans(duration=0.0)" />
+
+    <meta http-equiv="Page-Enter" content="blendTrans(Duration=0.2)" />
+    <meta http-equiv="Page-Exit" content="progid:DXImageTransform.Microsoft.Fade(duration=.5)" />
+
+
+</head>
+
+<body class="div_M">
+
+     <asp:Button runat="server" Visible="false" value="True" id="theButton" /></asp:Button>
+    <form id="form1" runat="server" style="text-align: center">
+        <div align="center">
+
+            <table border="0" cellpadding="0" cellspacing="0" class="MasterPage_Align" frame="box" style="border-right: royalblue 2px solid; border-top: royalblue 2px solid; border-left: royalblue 2px solid; width: 1020px; border-bottom: royalblue 2px solid">
+                <tr>
+                    <td colspan="7" style="width: 100%; height: 80px">
+                        <asp:Image ID="Image1" runat="server" ImageUrl="~/images/SMSS_BANNER.png" Width="100%" Height="100%" /></td>
+                </tr>
+                <asp:HiddenField ID="txtTraps" runat="server" />
+                <tr runat="server" id="MasterRowModules">
+                    <%-- <td style="width:0%;height:0px">
+                        <asp:ImageButton ID="ImageButton1"
+                            OnClick="ImageButton1_Click"
+                            runat="server"
+                            Width="100%"
+                            Height="100%"
+                            Visible="false"
+                            ImageUrl="~/images/Default2/b-records.jpg" CausesValidation="False"  ></asp:ImageButton></td>--%>
+                     <%--Planning Button--%>       
+                    <td style="width:11.5%;height:40px">
+                        <asp:ImageButton ID="ImageButton2"
+                            OnClick="ImageButton2_Click"
+                            runat="server"
+                            Width="100%"
+                            Height="100%"
+                            ImageUrl="~/images/Default2/b-planning.jpg"  CausesValidation="False" ></asp:ImageButton></td>
+                    <%--Procurement Button--%>
+                    <td style="width:12.5%;height:40px">
+                        <asp:ImageButton ID="ImageButton3"
+                            OnClick="ImageButton3_Click"
+                            runat="server"
+                            Width="100%"
+                            Height="100%"
+                            ImageUrl="~/images/Default2/b-procurement.jpg" CausesValidation="False"></asp:ImageButton></td>
+                    <%--Bidding Button--%>
+                    <td style="width:12.5%;height:40px">
+                        <asp:ImageButton ID="ImageButton6"
+                            OnClick="ImageButton6_Click"
+                            runat="server"
+                            Width="100%"
+                            Height="100%"
+                            ImageUrl="~/images/Default2/b-inventory.jpg" CausesValidation="False"></asp:ImageButton></td>
+                    <%--Inventory Button--%>
+                    <td style="width:12.5%;height:40px">
+                        <asp:ImageButton ID="ImageButton4"
+                            OnClick="ImageButton4_Click"
+                            runat="server"
+                            Width="100%"
+                            Height="100%"
+                            ImageUrl="~/images/Default2/b-Reports.jpg" CausesValidation="False"></asp:ImageButton></td>
+                   <%-- Report & Queries Button--%>
+                    <td style="width:12.5%;height:40px">
+                        <asp:ImageButton ID="ImageButton5"
+                            OnClick="ImageButton5_Click"
+                            runat="server"
+                            Width="100%"
+                            Height="100%"
+                            ImageUrl="~/images/Default2/b-bidding.jpg" CausesValidation="False"></asp:ImageButton></td>
+                   <%-- File Maintenance Button--%>
+                    <td style="width:12.5%;height:40px">
+                        <asp:ImageButton ID="ImageButton7"
+                            OnClick="ImageButton7_Click"
+                            runat="server"
+                            Width="100%"
+                            Height="100%"
+                            ImageUrl="~/images/Default2/b-fm.jpg" CausesValidation="False"></asp:ImageButton></td>
+                   <%-- System Manager Button--%>
+                    <td style="width:12.5%;height:40px">
+                        <asp:ImageButton ID="ImageButton8"
+                            OnClick="ImageButton8_Click"
+                            runat="server"
+                            Width="100%"
+                            Height="100%"
+                            ImageUrl="~/images/Default2/b-sm.jpg" CausesValidation="False"></asp:ImageButton></td>
+                </tr>
+                <tr style="border-width: 2px; border-color: black; border-style: solid">
+                    <td colspan="7" style=" font-family: Arial; background-color: #f9bc24; text-align: left; vertical-align: middle; border-bottom: gray 1px solid; height: 25px;">
+                        <asp:Menu ID="Menu1" runat="server"  DynamicHorizontalOffset="2" Font-Names="Verdana" Font-Size="9pt"  ForeColor="#124297" Orientation="Horizontal"
+                             StaticEnableDefaultPopOutImage ="true" 
+                            StaticDisplayLevels="1" StaticSubMenuIndent="10px" Font-Bold="true" OnMenuItemClick="Menu1_MenuItemClick" OnClientClick="StartProgressBar(); return SetMessage(this.value);" > 
+                          
+                            <StaticSelectedStyle BackColor="#88d823" forecolor="#0029a1" />
+                            <StaticMenuItemStyle   BackColor="#f9bc24" Height ="30" CssClass="vertical-line" HorizontalPadding="10" />
+                            <DynamicHoverStyle BackColor="#a0e437" Font-Bold="True" ForeColor="#0c3598" />
+                            <DynamicMenuStyle BackColor="#306300" />
+                            <DynamicSelectedStyle BackColor="Black" />
+                            <DynamicMenuItemStyle  BorderColor="#67c30b" BorderStyle="Solid" BorderWidth="1px" ForeColor="White" />
+                            <DynamicItemTemplate >
+                                 <table onclick="Write()" >
+                        <tr>
+                        <td onclick="Write()" >
+                           <%# Eval("Text")  %>
+                            </td>
+                            </tr>
+                            </table>
+                        
+                            </DynamicItemTemplate>
+                            <DataBindings>
+                                <asp:MenuItemBinding DataMember="MenuItem" NavigateUrlField="NavigateUrl" TextField="Text"
+                                    ToolTipField="ToolTip" />
+                            </DataBindings>
+                            <StaticHoverStyle BackColor="#FFFFCC" Font-Bold="True" ForeColor="Black" />
+                            
+                            
+                        </asp:Menu>
+                    </td>
+                </tr>
+                <tr runat="server" id="UserRow">
+                
+                    <td colspan="7" style="font-weight: bold; font-size: 10pt; width: 1020px; font-family: Tahoma; text-align: Right; vertical-align: middle; border-bottom: black 1px solid; height: 25px; background-color: #9DCCFA;">
+                      <table width="100%">
+                          <tr>
+                               <td style="width:60%">
+                                 <marquee>
+                                    <asp:Label ID="Label3" runat="server" Text=""></asp:Label>
+                                 </marquee>
+                               </td>
+
+                               <td style="width:5%">Welcome,</td>
+                               <td style="width:10%"><asp:Label ID="lblUser" runat="server" ForeColor="Black" Font-Bold="True" Font-Names="Tahoma" Font-Size="10pt"></asp:Label> |</td>
+                               <td style="width:5%"> <asp:LinkButton ID="LinkButton3" runat="server" Font-Bold="True" ForeColor="Black"
+                        Style="font-weight: bold; font-size: 9pt; font-family: Tahoma; text-decoration: underline">Home</asp:LinkButton>
+                            |</td>
+                               <td style="width:10%"><asp:Button ID="btnNotifications" runat="server" Text="Notifications" OnClick="btnNotifications_Click" />
+                            <asp:Panel ID="pnlNotifications" runat="server" CssClass="notification-dropdown-panel" Visible="False">
+                                <asp:Repeater ID="rptNotifications" runat="server">
+                                    <ItemTemplate>
+                                        <asp:LinkButton ID="lnkNotification" runat="server" Text='<%# Eval("Description") %>' PostBackUrl='<%# Eval("HomeUrl") %>' />
+                                        <br />
+                                    </ItemTemplate>
+                                </asp:Repeater>
+                            </asp:Panel>
+                            |</td>
+                               <td style="width:5%"> <asp:LinkButton ID="LinkButton1" runat="server" Font-Bold="True" ForeColor="Black"
+                        Style="font-weight: bold; font-size: 9pt; font-family: Tahoma; text-decoration: underline">Logout</asp:LinkButton></td>
+                          </tr>
+                      </table>
+                        
+                          
+
+                            
+                           
+                   
+
+                   <%-- <asp:LinkButton ID="lnkbtnnotification" runat="server" Font-Bold="False" ForeColor="Black"
+                        Style="font-weight: bold; font-size: 9pt; font-family: Tahoma; text-decoration: underline">Notification 
+                                    <a href="#" onclick="return floatingMenu.hide()">
+
+                    </asp:LinkButton>--%>
+                            
+                   
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="7" style="width: 1020px;" align="center">
+                        <div class="div_M2">
+                            <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server">
+                            </asp:ContentPlaceHolder>
+
+                        </div>
+                        <asp:UpdatePanel ID="UpdatePanel1" runat="server">
+                            <ContentTemplate>
+<%--                                <cc1:AlwaysVisibleControlExtender ID="AlwaysVisibleControlExtender1" runat="server"
+                                    Enabled="False" HorizontalOffset="25" HorizontalSide="Right" TargetControlID="Panel4"
+                                    VerticalSide="Bottom">
+                                </cc1:AlwaysVisibleControlExtender>--%>
+                                <div id="message_box" dir="ltr" runat="server" style="background-position: left top;    position: fixed;    bottom: 0px;    width: 250px;    height: 150px;    -webkit-border-radius: 3px;    -moz-border-radius: 3px;    background-repeat: no-repeat;    /* background-image: url('images/Background/noti.png'); */    padding-top: 10px;    padding-left: 15px;    right: 0px;" >
+
+                                    <asp:Panel ID="Panel4" runat="server" BackColor="White"   Height="150px" Width="250px" position ="relative">
+                                        <table style="width: 100%">
+                                            <tr>
+                                                <div id="Alert">
+                                                <td id="alert" align="center" style="width: 100%; background-color: royalblue">
+                                                    <table style="width: 100%">
+                                                        <tr>
+                                                            <td align="center" style="width: 80%" >
+                                                                <asp:Label ID="Label1" runat="server" Font-Bold="True" Font-Names="Calibri"
+                                                                   valign="top"  Font-Size="11pt" ForeColor="White" Text="  NOTIFICATION ALERT !"></asp:Label></td>
+                                                            <td align="right" style="width: 20%">
+                                                                <asp:Button ID="btnClose" runat="server" Font-Bold="True" Font-Names="Calibri" OnClick="btnClose_Click"
+                                                                    Text="Hide" Width="40px" Font-Italic="False" Font-Size="9pt" Font-Underline="True" /></td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                           
+                                            <tr>
+                                                <td align="center" style="width: 100%">
+                                                    <table id="tbNoti" style="width: 100%" runat="server">
+                                                        <tr>
+                                                            <td align="center" class="auto-style1">
+                                                                <asp:Label ID="lblNote" runat="server" Font-Bold="True" Font-Names="Calibri" Font-Size="10pt"
+                                                                    Text="Notification"></asp:Label></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td align="center" class="auto-style2"></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td align="center" style="width: 100%">
+                                                                <asp:Label ID="Label2" runat="server" Font-Bold="True" Font-Names="Calibri" Font-Size="10pt"
+                                                                    Text="Click here to encode the PPMP : "></asp:Label></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td align="center" style="width: 100%">
+                                                                <asp:LinkButton ID="lnkPPMP" runat="server" Font-Bold="True" Font-Italic="True" Font-Names="Calibri"
+                                                                    Font-Size="10pt" OnClick="lnkPPMP_Click" OnClientClick="StartProgressBar();">Create PPMP</asp:LinkButton></td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                               
+                                        </table>
+                                    </asp:Panel>
+                                </div>
+                            </ContentTemplate>
+                        </asp:UpdatePanel>
+                        <asp:XmlDataSource ID="xmlDataSource" runat="server" TransformFile="~/TransformXSLT.xsl"
+                            XPath="MenuItems/MenuItem" EnableCaching="False"></asp:XmlDataSource>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+
+        <div align="center">
+            <span style="font-size: 10pt; font-family: Calibri">&copy; Geodata Solutions Inc. All Rights Reserved.
+            hts Reserved.
+            ts Reserved.
+            </span>
+        </div>
+
+
+    </form>
+</body>
+</html>

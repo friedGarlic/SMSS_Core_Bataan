@@ -1,0 +1,119 @@
+﻿body {
+}
+
+* .StaticMenuStyle
+{
+    padding:8px 6px 8px 6px;
+    text-align:left;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    color: #FFFFFF;
+    text-decoration: none;
+    margin: 0px;
+ 
+
+}
+
+.modalBackground 
+{
+background-color:Gray;
+filter:alpha(opacity=70);
+opacity:0.7;
+}
+
+
+
+* .StaticMenuStyle a
+{
+    padding:8px 6px 8px 6px;
+    text-align:left;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    color: #FFFFFF;
+    text-decoration: none;
+    margin: 0px;
+ 
+
+}
+* .StaticMenuStyle a:hover, .StaticMenuStyle a:active
+{
+    padding:8px 6px 5px 6px;
+    text-align:left;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    color: #FFFFFF;
+    text-decoration:none;
+    margin: 0px;
+    background-color:#345dd4;
+ 
+
+}
+ 
+* .StaticMenuStyle img
+{
+    display:none;
+ 
+}
+ 
+* .StaticMenuSelectedStyle, StaticMenuSelectedStyle a, StaticMenuSelectedStyle a:hover, StaticMenuSelectedStyle a:active
+{
+    padding:8px 6px 5px 6px;
+    text-align:left;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    color: #FFFFFF;
+    text-decoration:none;
+    margin: 0px;
+    background-color: Red;
+}
+ 
+* .DynamicMenuStyle
+{
+    background-color:#69A100;
+    z-index:100;
+    font-family:  Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    color: #FFFFFF;
+    text-decoration:none;
+    padding: 0px;
+    margin-left:5px;
+    margin-right:0px;
+    text-align:left;
+    border:none;
+    border-bottom:1px solid #fff;
+ 
+}
+ 
+* .DynamicMenuStyle a
+{
+    background-color:#69A100;
+    font-family:  Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    font-weight: normal;
+    color: #FFFFFF;
+    text-decoration:none;
+    padding:5px 5px 5px 6px;
+    text-align:left;
+    display:block;
+}
+ 
+
+* .DynamicMenuStyle a:hover
+{
+ 
+    font-family:  Arial, Helvetica, sans-serif;
+    background-color:#345dd4;
+    font-size: 13px;
+    font-weight:normal;
+    color: #fff;
+    text-decoration:none;
+    padding:5px 5px 5px 6px;
+    text-align:left;
+    display:block;
+}
+

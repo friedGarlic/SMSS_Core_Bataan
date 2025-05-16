@@ -1,0 +1,139 @@
+<%@ Master Language="VB" CodeFile="MasterPage1.master.vb" Inherits="MasterPage1" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+  <script type="text/javascript"> 
+    
+       javascript:window.history.forward(1);
+  
+</script>
+    <meta http-equiv="Page-Enter" content="revealtrans(duration=0.0)">
+    <meta http-equiv="Page-Exit" content="revealtrans(duration=0.0)">
+    <link href="Styles.css" rel="stylesheet" type="text/css" />
+    <link href="~/Styles/SMSS_StyleSheet.css" rel="stylesheet" type="text/css" />
+</head>
+
+
+<body align = "center">
+              
+        <form id="form1" runat="server" style="text-align: ">
+            <br />
+        
+        <div align = "center">
+            <table border="0" cellpadding="0" cellspacing="0" style="border-right: royalblue 2px solid;
+                border-top: royalblue 2px solid; border-left: royalblue 2px solid; width: 1000px;
+                border-bottom: royalblue 2px solid">
+                <tr>
+                    <td align="center" style="width: 1000px; height: 80px;">
+                        <asp:Image ID="Image1" runat="server" Height="80px" ImageUrl="~/images/SMSS_BANNER.jpg"
+                            Width="1015px" /></td>
+                </tr>
+                <tr>
+                    <td align="left" style="border-right: royalblue 1px dashed; border-top: royalblue 1px dashed;
+                        border-left: royalblue 1px dashed; width: 1000px; border-bottom: royalblue 1px dashed">
+                        &nbsp;<asp:Label ID="Label1" runat="server" Font-Bold="True" Font-Names="Arial" Font-Size="18pt"
+                            ForeColor="Black" Text="SMSS System Manager"></asp:Label></td>
+                </tr>
+                <tr>
+                    <td align="center" style="width: 1000px">
+                <asp:ScriptManager ID="ScriptManager1" runat="server">
+                </asp:ScriptManager>
+                        &nbsp;</td>
+                </tr>
+                <tr>
+                    <td align="center" style="width: 1000px">
+                        <table style="width: 99%">
+                            <tr>
+                                <td align="left" style="width: 25%">
+                                    &nbsp;<asp:Label ID="Label2" runat="server" Font-Bold="True" Font-Names="Arial" Font-Size="10pt"
+                                        ForeColor="Black" Text="Welcome Back :"></asp:Label>
+                                    <asp:Label ID="lblUser" runat="server" Font-Bold="True" Font-Names="Calibri" Font-Size="11pt" ForeColor="Red"></asp:Label></td>
+                                <td align="left" style="width: 75%">
+                                    <asp:Label ID="Label3" runat="server" Font-Bold="True" Font-Names="Arial" Font-Size="10pt"
+                                        ForeColor="Black" Text="Logged Date and Time :"></asp:Label>
+                                    <asp:Label ID="lblDate" runat="server" Font-Bold="True" Font-Italic="True" Font-Names="Calibri" Font-Size="11pt"></asp:Label>
+                                    <strong>
+                                |</strong>
+                                    <asp:LinkButton ID="LinkButton1" runat="server" Font-Bold="True" Font-Names="Calibri" Font-Size="11pt">Logout</asp:LinkButton></td>
+                            </tr>
+                            <tr>
+                                <td align="left" style="width: 25%">
+                                    &nbsp;</td>
+                                <td align="left" style="width: 75%">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="left" style="vertical-align: top; width: 25%">
+            
+            <div id="navigation" style="left: 7.96em; top: 14.05em">
+                <ul>
+                    <li>
+                        <asp:HyperLink runat="server" ID="lnkHome" NavigateUrl="~/body.aspx">Home</asp:HyperLink>
+                        <asp:Repeater runat="server" ID="menu" DataSourceID="SiteMapDataSource1">
+                        <ItemTemplate>
+                            <li>
+                                <asp:HyperLink ID="lnkMenuItem" runat="server" NavigateUrl='<%# Eval("Url") %>'><%# Eval("Title") %></asp:HyperLink>
+                                
+                                <asp:Repeater ID="submenu" runat="server" DataSource="<%# CType(Container.DataItem, SiteMapNode).ChildNodes %>">
+                                    <HeaderTemplate>
+                                        <ul>
+                                    </HeaderTemplate>
+                                    <ItemTemplate>
+                                        <li>
+                                            <asp:HyperLink ID="lnkMenuItem" runat="server" NavigateUrl='<%# Eval("Url") %>'><%# Eval("Title") %></asp:HyperLink>
+                                        </li>
+                                    </ItemTemplate>
+                                    <FooterTemplate>
+                                        </ul>
+                                    </FooterTemplate>
+                                </asp:Repeater>
+                            </li>
+                        </ItemTemplate>
+                    </asp:Repeater>
+                    </li>  
+                </ul>
+
+                <asp:SiteMapDataSource ID="SiteMapDataSource1" runat="server" ShowStartingNode="false" />
+            </div>
+                                </td>
+                                <td align="left" style="vertical-align: top; width: 25%">
+                                <div class = "div_Master2">
+                            <asp:contentplaceholder id="MainContent" runat="server">
+                              <!-- Page-specific content will go here... -->
+                            </asp:contentplaceholder>                           
+                                </div>
+                                
+                                   </td>
+                            </tr>
+                            <tr>
+                                <td align="left" style="width: 25%">
+                                </td>
+                                <td align="left" style="width: 75%">
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="center" style="width: 1000px">
+                    </td>
+                </tr>
+            </table>
+            </div>
+            
+            
+            
+       
+<div align = center >
+    <span style="font-family: Calibri"><span style="font-size: 11pt">
+
+<font size = "3pt">&copy; Geodata Solutions Inc. All Rights Reserved.</font><strong>
+    </strong></span></span>
+
+</div>       
+</form>
+   
+</body>
+</html>

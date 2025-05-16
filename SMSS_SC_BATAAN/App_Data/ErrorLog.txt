@@ -1,0 +1,2 @@
+Error: Invalid column name 'Hdr_ID'., StackTrace:    at BaseDLL.BaseDAL.GetValue(String strCmd, CommandType cmdType) in D:\Geodata\SMSS_PREMIUM_CORE\SC\SMSS_SC_BATAAN\App_Code\BaseDAL.vb:line 292
+   at MainReports_Canvass_Reports.MainReports_Canvass_Reports_Load(Object sender, EventArgs e) in D:\Geodata\SMSS_PREMIUM_CORE\SC\SMSS_SC_BATAAN\MainReports\Canvass_Reports.aspx.vb:line 61

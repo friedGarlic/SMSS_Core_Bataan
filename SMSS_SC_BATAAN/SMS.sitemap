@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<siteMap xmlns="http://schemas.microsoft.com/AspNet/SiteMap-File-1.0" >
+  
+  <siteMapNode  url="~/etc/body.aspx" title="HOME">
+    <siteMapNode url="" title="Requisition"  description="">
+      
+      <siteMapNode url="~/Requisition/frmAPPQUARTER.aspx" title="Procurement Planning Management Plan"  description="" />
+      <siteMapNode url="~/Requisition/frm_Purchaserequest.aspx" title="Purchase Request"  description="" />
+      <siteMapNode url="~/Requisition/frmAP_PR.aspx" title="Purchase Request  for Annual  Procurement Plan"  description="" />
+      <siteMapNode url="~/Requisition/frmDBM.aspx" title="Agency Procurement Request"  description="" />
+    </siteMapNode>
+    <siteMapNode url="" title="Procurement"  description="">
+
+      <siteMapNode url="~/Procurement/frmCanvas.aspx"  title="Canvass"  description="" />
+      <siteMapNode url="~/Procurement/frmAbstractBids.aspx" title="Abstract of Canvass"  description="" />
+      <siteMapNode url="~/Procurement/frm_PurchaseOrder.aspx" title="Purchase Order"  description="" />
+      <siteMapNode url="~/Procurement/frmInspection.aspx" title="Inspection"  description="" />
+      <!--<siteMapNode url="~/Procurement/frmDisbursementVoucher.aspx" title="Disbursement Voucher"  description="" />-->
+    </siteMapNode>
+    <siteMapNode url="" title="Inventory"  description="">
+
+     
+      <siteMapNode url="~/Inventory/frm_Stock.aspx" title="Stocks"  description="" />
+      <siteMapNode url="~/Inventory/frmProperty.aspx" title="Property"  description="" />
+      <siteMapNode url="~/Inventory/frm_SuppliesAvailabilityInquiry.aspx" title="Supplies Availability Inquiry"  description="" />
+      <siteMapNode url="~/Inventory/frm_RequisitionIssueSlip.aspx" title="Requisition and Issues Slip"  description="" />
+      <siteMapNode url="~/Inventory/frmInventoryCustodianSlip.aspx" title="Inventory Custodian Slip"  description="" />
+      <siteMapNode url="~/Inventory/frmMRE.aspx" title="Acknowledgement Receipt For Equipment"  description="" />
+		<!-- <siteMapNode url="~/Inventory/frmCIP.aspx" title="Construction in Progress"  description="" />-->
+    </siteMapNode>
+    <siteMapNode url="" title="Reports and Queries"  description="">
+      <siteMapNode url="~/Reports and Query/PropertyInfo.aspx"  title="Property Information"  description="" />
+      <siteMapNode url="~/Reports and Query/APPrpt.aspx"  title="Annual Procurement Plan"  description="" />
+      <siteMapNode url="~/Reports and Query/Physical Count of PPE.aspx" title="Physical Count of Property, Plant and Equipment"  description="" />
+      <siteMapNode url="~/Reports and Query/Physical Count of Inventories.aspx"  title="Physical Count of Inventories"  description="" />
+      <!--<siteMapNode url="~/Reports and Query/Summary of Supplies and Materials Issued.aspx"  title="Summary of Supplies and Materials Issued"  description="" />-->
+      <siteMapNode url="~/Reports and Query/frmlistMRE.aspx" title="List of ARE"  description="" />
+      <siteMapNode url="" title="  Price List "  description="" />
+      <siteMapNode url="~/Reports and Query/frmIIRUP.aspx" title="Inventory and Inspection Report for Unserviceable Property"  description="" />
+    </siteMapNode>
+    <siteMapNode url="" title="Disposal"  description="">
+
+      <siteMapNode url="~/Disposal/frmInspectionandAppraisal.aspx"  title="Inspection and Appriasal"  description="" />
+      <siteMapNode url="~/Disposal/frmNoticeofAuction.aspx" title="Notice of Auction"  description="" />
+      <siteMapNode url="~/Disposal/frmAbstractofBids.aspx" title="Disposal Abstract of bids"  description="" />
+      <siteMapNode url="~/Disposal/frmPreRepair.aspx" title="Repair"  description="" />
+    </siteMapNode>
+    <siteMapNode url="" title="File Maintenance"  description="">
+      <siteMapNode url="~/File Maintenance/frmFilemaintenanceItemsupplies.aspx"  title="Supplies"  description="" />
+      <siteMapNode url="~/File Maintenance/frmFilemaintenanceItemCapitaloutlay.aspx"  title="Capital Outlay"  description="" />
+      <siteMapNode url="~/File Maintenance/frmFileMaintenanceSuppliers.aspx"  title="Supplier"  description="" />
+      <siteMapNode url="~/File Maintenance/frmSignatories.aspx"  title="Signatories"  description="" />
+      <siteMapNode url="~/File Maintenance/frmFileMaintenanceBidder.aspx"  title="Bidder"  description="" />
+      <siteMapNode url="~/File Maintenance/frmFilemaitenanceAccountCodes.aspx"  title="Account Code"  description="" />
+    </siteMapNode>
+   
+    <!--<siteMapNode url="~/Membership/CreatingUserAccounts.aspx" title="Systems Manager"  description="">-->
+   
+    <siteMapNode url="" title="Systems Manager"  description="">
+      <siteMapNode url="~/Default.aspx"  title="Administrator's Page"  description="" />
+      <siteMapNode url="~/etc/ChangePassword.aspx"  title="Change Password"  description="" />
+    </siteMapNode>
+      <!--<siteMapNode url="~/Default.aspx" title="Systems Manager"  description="">
+    </siteMapNode>-->
+  </siteMapNode>
+
+</siteMap>

@@ -1,0 +1,15 @@
+[
+  {
+    "outputFileName": "Styles.min.css",
+    "inputFiles": [
+      "Styles.css",
+      "StylesSheet.css",
+      "StylesSheet3.css"
+    ],
+    "minify": {
+      "enabled": true,
+      "renameLocals": true
+    }
+
+  }
+]

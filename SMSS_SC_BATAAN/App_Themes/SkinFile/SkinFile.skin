@@ -1,0 +1,168 @@
+
+
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="cc1" %>
+
+
+<asp:GridView SkinID="GridViewAA" runat="server" AutoGenerateColumns="False" CellPadding="4" CssClass="text"
+        Font-Names="Arial" Font-Bold="False" ForeColor="#333333" BorderStyle="Solid" BorderWidth="1px" BorderColor="#91b9ed"
+        Style="color: #333333" Width="1000px" ShowFooter="False" GridLines="Both" Font-Size="8pt">
+        <FooterStyle BackColor="#5c85d6" Font-Bold="False" ForeColor="#ffffff"/> 
+        <PagerStyle BackColor="#5c85d6" ForeColor="White" HorizontalAlign="Center" /> 
+        <SelectedRowStyle BackColor=" #ffcc33" Font-Bold="True" ForeColor="#333333"/>
+        <HeaderStyle BackColor="#5c85d6" HorizontalAlign="Center" Font-Bold="False" ForeColor="#ffffff"/>
+        <EditRowStyle BackColor="#ffcc33" />
+        <PagerSettings FirstPageText="First" LastPageText="Last" Mode="NextPreviousFirstLast" NextPageText="Next" PreviousPageText="Previous" />
+        <EmptyDataRowStyle Font-Bold="False" BackColor="#ffffff" ForeColor="Red"/>                       
+</asp:GridView>
+
+        
+            <asp:Label SkinID="Label" runat="server" CssClass="L1" ></asp:Label>
+            <asp:TextBox skinID="tb" runat="server" CssClass="text" BorderWidth="1px" BorderColor="maroon"></asp:TextBox>
+            <asp:RadioButtonList SkinID="RadioButtonList" CssClass="L1" runat="server"></asp:RadioButtonList>
+
+            <asp:Panel SkinID="popUpMsgs" runat="server" BackColor="White" Width="300px" BorderColor="#FFA016" BorderWidth="2px"></asp:Panel>
+           
+            <asp:TextBox SkinID="txtAmount" runat="server" BackColor="OldLace" Font-Size="Small" BorderStyle="Solid" BorderWidth="1px" BorderColor="SteelBlue" style="text-align:right" />
+
+            <asp:TextBox SkinID="txtAmount2"  runat="server" BackColor="OldLace" Font-Size="Small" BorderStyle="Solid" BorderWidth="1px" BorderColor="SteelBlue" style="text-align:left" />
+
+            <asp:Label SkinID="LabelHeader" runat="server" Font-Bold="True" Font-Names="Verdana" Font-Size="14pt"
+            ForeColor="Black"></asp:Label>
+    
+<asp:DropDownList skinID="DropDownList" runat="server" BackColor="White" Font-Size="11pt" style="text-align: center">
+<asp:ListItem>---select---</asp:ListItem>
+</asp:DropDownList>
+ 
+<asp:DropDownList SkinID="DropDownListBos" runat="server" Font-Names="Tahoma" Font-Size="10pt">
+ </asp:DropDownList>
+ 
+ 
+<asp:Panel skinID="PanelHeader" runat="server" Width="800px" style="text-align: left" BackColor="WhiteSmoke">
+</asp:Panel>
+<asp:Panel skinID="PanelFooter" runat="server" Width="800px" BackColor="WhiteSmoke" Height="30px">
+</asp:Panel>
+<asp:Panel skinID="PanelButtons" runat="server" BackColor="DimGray" Style="text-align: center" Width="800px">
+</asp:Panel>
+
+                      
+<asp:DropDownList SkinID="DropDownList2" runat="server" Width="88px"></asp:DropDownList>
+<asp:RadioButtonList SkinID="RadioButtonState" runat="server" Font-Bold="True" Font-Names="Tahoma" Font-Size="Smaller" Height="8px"></asp:RadioButtonList> 
+<asp:Label skinID="lblHeader" runat="server" BackColor="#E6E4BD" Font-Bold="True"
+Font-Italic="False" Font-Names="tahoma" Font-Size="12pt" Font-Underline="False"
+Style="text-align: left"  Width="800px" ForeColor="Maroon"></asp:Label>
+
+<%-- BorderColor="#64a4f8"; BorderWidth=1px --%>
+<asp:Label skinID="LabelBorder" runat="server" Style="text-align: left" BorderStyle="NotSet"   ></asp:Label>                       
+<asp:Panel SkinID="MainPanel" runat="server" BackColor="transparent"    Width="790px"/>
+<cc1:RoundedCornersExtender SkinID="REAll" runat="server"  Radius="10"  Bordercolor = "BLACK" />
+
+	
+
+<asp:Menu SkinID="MainMenu" runat="server" Font-Names="Tahoma"
+   ForeColor="#FFCC00" StaticSubMenuIndent="5px"
+   Orientation="Horizontal" Font-Size="12px" Font-Bold="false"
+   DynamicEnableDefaultPopOutImage="False"  StaticEnableDefaultPopOutImage="False" BackColor="Transparent"   Width="900px" >                                      
+   <StaticMenuItemStyle HorizontalPadding="5px" VerticalPadding="2px"   BorderColor="Gray"/>
+   <DynamicMenuItemStyle HorizontalPadding="5px" VerticalPadding="3px" BackColor="Gray" BorderColor="Gray"/>
+   <DynamicMenuStyle BorderWidth ="2px"  BorderColor="Gray" />
+   <DynamicHoverStyle   Font-Bold="false" ForeColor="White" Font-Size="12px" />
+   <StaticHoverStyle  Font-Bold="false" ForeColor ="White" BackColor="Transparent" />
+   <StaticSelectedStyle ForeColor="WhiteSmoke" />
+   <DynamicSelectedStyle BackColor="gray" Font-Size="12px" ForeColor="White" />
+</asp:Menu>
+
+
+<asp:Menu SkinID="FooterMenu" runat="server" Font-Names="Tahoma" CssClass="Link1"
+       ForeColor="WhiteSmoke" StaticSubMenuIndent="5px"
+       Orientation="Horizontal" Font-Size="12px" Font-Bold="true" 
+       DynamicEnableDefaultPopOutImage="False"  StaticEnableDefaultPopOutImage="False" BackColor="Transparent"  StaticBottomSeparatorImageUrl="~/images/grey-spacer.jpg" Width="728px" >                                      
+       <StaticMenuItemStyle HorizontalPadding="5px" VerticalPadding="2px" />
+       <DynamicMenuItemStyle HorizontalPadding="6px" VerticalPadding="3px" />
+       <DynamicMenuStyle BorderWidth ="2px"  BorderColor="Transparent" />
+       <DynamicHoverStyle   Font-Bold="true" ForeColor="Navy" BorderWidth ="2px"  BorderColor =MidnightBlue Font-Size="12px" />
+       <StaticHoverStyle  Font-Bold="true" ForeColor ="#FFCC00" BackColor="Transparent" />
+       <StaticSelectedStyle  />
+       <DynamicSelectedStyle BackColor="Gainsboro" Font-Size="12px" ForeColor="MidnightBlue" />
+</asp:Menu>
+
+
+<asp:TextBox SkinID="text" runat="server"></asp:TextBox>
+<asp:Button SkinID="ButtonImage" runat="server" Width="100px" />
+<asp:Button SkinID="Button"  runat="server"  Width="100px" />
+
+
+<asp:GridView SkinID="GridView" runat="server" AutoGenerateColumns="False" CellPadding="4" CssClass="grid-view" 
+    Font-Names="Tahoma" ForeColor="#333333" BorderStyle="Solid" BorderWidth="1px" BorderColor="DeepSkyBlue"
+    Style="color: #000000" Width="1008px" ShowFooter="False" GridLines="Both">
+    <FooterStyle BackColor="#2977dc" Font-Bold="False" ForeColor="White"/>
+    <PagerStyle BackColor="#2977dc" ForeColor="White" HorizontalAlign="Center" />
+    <SelectedRowStyle BackColor=" #f7c02f" Font-Bold="False" ForeColor="333333"/>
+    <HeaderStyle BackColor="#2977dc" HorizontalAlign="Center" Font-Bold="False" ForeColor="White" />
+    <EditRowStyle BackColor="#2461BF" />
+    <EmptyDataRowStyle Font-Bold="False" ForeColor="Red"  />                 
+</asp:GridView>
+
+
+<asp:GridView SkinID="GridViewGL" runat="server" AutoGenerateColumns="False" CellPadding="4" CssClass="grid-viewGL" 
+    Font-Names="Tahoma" ForeColor="#333333" BorderStyle="Solid" BorderWidth="1px" BorderColor="DeepSkyBlue"
+    Style="color: #000000" Width="1008px" ShowFooter="False" GridLines="Both">
+    <FooterStyle BackColor="#2977dc" Font-Bold="False" ForeColor="White"/>
+    <PagerStyle BackColor="#2977dc" ForeColor="White" HorizontalAlign="Center" />
+    <SelectedRowStyle BackColor=" #f7c02f" Font-Bold="False" ForeColor="333333"/>
+    <HeaderStyle BackColor="#2977dc" HorizontalAlign="Center" Font-Bold="False" ForeColor="White" />
+    <EditRowStyle BackColor="#2461BF" />
+    <EmptyDataRowStyle Font-Bold="False" BackColor="White" ForeColor="Red"  />                  
+</asp:GridView>
+
+
+<%--Additional for Dual View In Gridview--%>
+<asp:GridView SkinID="gvpopup" runat="server" AutoGenerateColumns="False"  BackColor="White" BorderColor="Silver" BorderStyle="Solid"    
+            BorderWidth="1px" CellPadding="4" CssClass="text" GridLines="Vertical" AllowPaging="True" ShowHeader="False" style="text-align: justify">
+            <FooterStyle BackColor="#2977DC"  ForeColor="White" />
+            <HeaderStyle BackColor="#2977DC" Font-Bold="True" ForeColor="White" />              
+            <RowStyle ForeColor="#333333" />
+            <SelectedRowStyle BackColor="#FFCC66" Font-Bold="True" ForeColor="Navy" />
+            <PagerStyle BackColor="#FFE0C0" ForeColor="#333333" HorizontalAlign="Center" Font-Underline="False" />
+            <AlternatingRowStyle BackColor="White" />
+            <EmptyDataRowStyle BackColor="White" BorderColor="#C00000" ForeColor="#404040" />
+            <PagerSettings FirstPageText="First" LastPageText="Last" Mode="NextPreviousFirstLast" NextPageText="Next" PreviousPageText="Previous" />
+</asp:GridView>
+
+<asp:Label skinID="pageheader2" runat="server" BackColor="Transparent" Font-Bold="True"
+Font-Names="Verdana" Font-Size="14pt" ForeColor="Gray" Height="23px" Style="text-align: left"
+Width="800px"></asp:Label>
+
+<asp:Label skinID="pageheader" runat="server" Height="23px" Style="font-weight: bold; font-size: 14pt"
+Width="863px" CssClass="text"></asp:Label>
+
+                     
+<asp:GridView skinID="gvnew" runat="server" AutoGenerateColumns="False"
+        Style="text-align: justify" Width="800px" EmptyDataText="NO DATA FOUND" CssClass="text" CellPadding="4" ForeColor="#333333" GridLines="None" AllowPaging="false" 
+        Font-Names="Tahoma" BorderStyle="Solid" BorderWidth="1px" BorderColor="DeepSkyBlue">
+        <PagerStyle BackColor="#2461BF" ForeColor="White" HorizontalAlign="Center" />
+        <SelectedRowStyle BackColor="#D1DDF1" Font-Bold="false" ForeColor="#333333" />
+        <FooterStyle BackColor="#2977DC"  ForeColor="White" />
+        <HeaderStyle BackColor="#2977DC" Font-Bold="True" ForeColor="White" />           
+        <RowStyle BackColor="#EFF3FB" />
+        <EditRowStyle BackColor="#2461BF" />
+        <AlternatingRowStyle BackColor="White" />
+        <PagerSettings FirstPageText="First" LastPageText="Last" Mode="NextPreviousFirstLast"
+        NextPageText="Next" PreviousPageText="Previous" />
+        <EmptyDataRowStyle Font-Bold="False" BackColor="White" ForeColor="Red"  />
+</asp:GridView>
+
+
+
+
+<asp:GridView SkinID="FMIS-grid" runat="server" AutoGenerateColumns="False" CellPadding="4"
+        Font-Names="Tahoma" ForeColor="#333333" GridLines="None"
+        Style="color: #000000" Width="1008px" ShowFooter="True">
+        <FooterStyle BackColor="#2977dc" Font-Bold="True" ForeColor="White" />
+        <PagerStyle BackColor="#2977dc" ForeColor="White" HorizontalAlign="Center" />
+        <SelectedRowStyle BackColor="#2977dc" Font-Bold="False" ForeColor="#333333" />
+        <HeaderStyle BackColor="#2977dc" Font-Bold="True" ForeColor="White" />
+        <AlternatingRowStyle BackColor="White" />
+        <RowStyle BackColor="#EFF3FB" />
+        <EditRowStyle BackColor="#2461BF" />
+</asp:GridView>
+

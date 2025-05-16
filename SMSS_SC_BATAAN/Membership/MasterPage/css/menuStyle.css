@@ -1,0 +1,25 @@
+﻿.dynamicmenustyle
+{
+	padding-bottom: 2px;
+	padding-top: 2px;
+	padding-left: 5px;
+	padding-right: 7px;
+	border-top: #ffffff 1px solid;
+	font-family: Verdana;
+	font-size: 8.5pt;
+}
+
+.selectedmenustyle
+{
+	background-image: url(MasterPage/images/current.png);
+	background-repeat: no-repeat;
+	background-position: center bottom;
+}
+
+.menuborder
+{
+	border-right: #E77225 7px solid;
+	border-left: #E77225 7px solid;
+	border-top: #E77225 4px solid;
+	border-bottom: #E77225 4px solid;
+}
