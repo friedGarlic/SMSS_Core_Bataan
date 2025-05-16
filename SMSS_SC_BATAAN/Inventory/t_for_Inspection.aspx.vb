@@ -1479,6 +1479,8 @@ Partial Class Inventory_t_for_Inspection
         Session("AcceptedDate") = ""
         Session("IsPartial") = ""
         Session("AcceptingPerson") = ""
+        Session("AcceptingPosition") = ""
+        Session("IsComplete") = ""
 
 
         ' If a valid ID is stored, open the report page using that ID.
@@ -1588,8 +1590,6 @@ Partial Class Inventory_t_for_Inspection
                         objDerived.Execute(updateHdrSQL, CommandType.Text)
                     End If
 
-                    ' 5. Inform the user and refresh the inspection display.
-                    MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "The selected PO has been returned successfully.")
                 End If
             Next
         End If
@@ -1613,6 +1613,7 @@ Partial Class Inventory_t_for_Inspection
         grdInspection.DataBind()
 
         LoadrbALL() 'TODO fix header, doesnt load the deaders id
+        MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "The selected PO has been returned successfully.")
 
     End Sub
 End Class
