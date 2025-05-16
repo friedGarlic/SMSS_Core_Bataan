@@ -708,7 +708,7 @@ Partial Class t_purchase_request_v2
 
                 rbTrustFund.SelectedItem.Value = 1
                 RadioButtonList1.SelectedIndex = 0
-                    
+
                 ddRC.Enabled = True
                 lblreq1.Visible = False
                 lblreq2.Visible = False
@@ -887,6 +887,7 @@ Partial Class t_purchase_request_v2
 
     Protected Sub LoadPRList_PerRC()
         If RadioButtonList1.SelectedIndex = 0 Then
+            AddTrace(rbTrustFund.SelectedValue)
             If rbTrustFund.SelectedValue = 3 Then
                 pPRlist = objDerived.GetDataTable("SELECT * FROM [dbo].[View_PR_ForEditingList] WHERE RC_ID = '" & ddRC.SelectedItem.Value & "' and Function_id = '" & ddFunction.SelectedItem.Value & "' AND isContinuing = 0 AND isTrustFund = 1", CommandType.Text)
             Else
@@ -1946,11 +1947,16 @@ Partial Class t_purchase_request_v2
                                 "isPerLot = '" & isPerLotValue & "' " &
                                 "WHERE prhdr_id='" & gvListPR.SelectedDataKey(0) & "'"
 
+                Dim updateQueryBOSS As String = "UPDATE LnkdSrvrBOSS.GEOBOS.BOS.T_CAA_Hdr SET OBR_Title = '" & replaceapostrophe(txtOBRpurpose.Text) & "' " &
+                                "WHERE PRHdr_ID = '" & gvListPR.SelectedDataKey(0) & "'"
+
+
                 ' Tracing the update query string
                 AddTrace("Generated Update Query: " & updateQuery)
 
                 ' Executing the update query
                 objDerived.GetRecords(updateQuery, CommandType.Text)
+                objDerived.GetRecords(updateQueryBOSS, CommandType.Text)
 
                 ' Tracing successful execution
                 AddTrace("Executed: UPDATE ams.pr_hdr in edit mode with isPerLot = " & isPerLotValue)
@@ -2073,6 +2079,10 @@ Partial Class t_purchase_request_v2
             prhdr.isPerLot = chkPurchasePerLot.Checked
             prhdr.NonPPMPJustification = If(chkNonPPMP.Checked, txtNonPPMPJustification.Text.Trim(), String.Empty)
 
+
+
+
+
             ' Retrieve F_ID, CityTreasurer, and Address values
             Dim F_ID As Integer = rbTrustFund.SelectedItem.Value
             Dim CTO As Integer = objDerived.GetValue("SELECT empid FROM HRMS.view_signatory WHERE deptid = 10 AND division_key = 86 AND isDeptHead = 'Yes'", CommandType.Text)
@@ -2081,6 +2091,16 @@ Partial Class t_purchase_request_v2
             ' Save PR Header for Non-PPMP PR and return prhdrID
             Dim prhdrID As Long = prhdr.save ' Declare prhdrID here
             AddTrace("Saved Non-PPMP PR Header. prhdrID: " & prhdrID)
+
+            If rbTrustFund.SelectedValue = 3 Then
+                objDerived.GetRecords("UPDATE AMS.PR_Hdr SET F_ID = 3, isFinal = 0,CityTreasurer = '" & CTO & "', Userid ='" & Session("@UserName") & "', isTrustFund = 1, GA_ID = '" & Session("GA_ID") & "', comment = '" & replaceapostrophe(txtNote.Text) & "' WHERE prhdr_id = '" & prhdrID & "'", CommandType.Text)
+
+            Else
+                objDerived.GetRecords("UPDATE AMS.PR_Hdr SET F_ID = '" & rbTrustFund.SelectedItem.Value & "', CityTreasurer = '" & CTO & "', comment = '" & replaceapostrophe(txtNote.Text) & "', Address = '" & txtaddpeyee.Text & "' WHERE prhdr_id = '" & prhdrID & "'", CommandType.Text)
+                AddTrace("Executed: UPDATE AMS.PR_Hdr ... (F_ID, CityTreasurer, comment, Address)")
+
+            End If
+
 
             ' Update PR Header with F_ID, CityTreasurer, and Address
             objDerived.GetRecords("UPDATE AMS.PR_Hdr SET F_ID = '" & F_ID & "', CityTreasurer = '" & CTO & "', Address = '" & Address & "' WHERE prhdr_id = '" & prhdrID & "'", CommandType.Text)
@@ -2731,43 +2751,43 @@ Partial Class t_purchase_request_v2
 
             'Try
             If Lbtn = "PR" Then
-                    AddTrace("Lbtn is PR. Opening Procurement_Reports.aspx in a new tab.")
-                    Session("Page") = "PR"
-                    Session("Report") = "PR"
-                    Session("prhdr_id") = gvListPR.SelectedDataKey("prhdr_id")
+                AddTrace("Lbtn is PR. Opening Procurement_Reports.aspx in a new tab.")
+                Session("Page") = "PR"
+                Session("Report") = "PR"
+                Session("prhdr_id") = gvListPR.SelectedDataKey("prhdr_id")
 
-                    ' Open PR report in a new tab
-                    Dim url As String = "/MainReports/Procurement_Reports.aspx"
-                    Dim fullURL As String = "var win=window.open('" & url & "', '_blank');"
-                    ScriptManager.RegisterStartupScript(Me, GetType(String), "OPEN_PR_WINDOW", fullURL, True)
+                ' Open PR report in a new tab
+                Dim url As String = "/MainReports/Procurement_Reports.aspx"
+                Dim fullURL As String = "var win=window.open('" & url & "', '_blank');"
+                ScriptManager.RegisterStartupScript(Me, GetType(String), "OPEN_PR_WINDOW", fullURL, True)
 
-                ElseIf Lbtn = "ObR" Then
-                    AddTrace("Lbtn is ObR. Opening Procurement_Reports.aspx in a new tab.")
-                    Session("Page") = "ObR"
-                    Session("Report") = "ObR"
-                    Session("prhdr_id") = gvListPR.SelectedDataKey("prhdr_id")
+            ElseIf Lbtn = "ObR" Then
+                AddTrace("Lbtn is ObR. Opening Procurement_Reports.aspx in a new tab.")
+                Session("Page") = "ObR"
+                Session("Report") = "ObR"
+                Session("prhdr_id") = gvListPR.SelectedDataKey("prhdr_id")
 
-                    ' Open ObR report in a new tab
-                    Dim url As String = "/MainReports/Procurement_Reports.aspx"
-                    Dim fullURL As String = "var win=window.open('" & url & "', '_blank');"
-                    ScriptManager.RegisterStartupScript(Me, GetType(String), "OPEN_OBR_WINDOW", fullURL, True)
+                ' Open ObR report in a new tab
+                Dim url As String = "/MainReports/Procurement_Reports.aspx"
+                Dim fullURL As String = "var win=window.open('" & url & "', '_blank');"
+                ScriptManager.RegisterStartupScript(Me, GetType(String), "OPEN_OBR_WINDOW", fullURL, True)
 
-                ElseIf Lbtn = "cancel" Then
-                    AddTrace("Lbtn is cancel. Skipping this block.")
+            ElseIf Lbtn = "cancel" Then
+                AddTrace("Lbtn is cancel. Skipping this block.")
 
 
                 'Editing function:
-                ElseIf Lbtn = "edit" Then
+            ElseIf Lbtn = "edit" Then
 
-                    LoaditemsEdit()
-                End If
+                LoaditemsEdit()
+            End If
 
 
-                ' Fetch and bind attached documents to the purchase request
-                grdDocuments.DataSource = objDerived.GetDataTable("SELECT * FROM AMS.Document_PR_Attachment where prhdr_id = '" & gvListPR.SelectedDataKey("prhdr_id") & "'", CommandType.Text)
-                grdDocuments.DataBind()
-                UploadButton.Enabled = True
-                FileUpload1.Enabled = True
+            ' Fetch and bind attached documents to the purchase request
+            grdDocuments.DataSource = objDerived.GetDataTable("SELECT * FROM AMS.Document_PR_Attachment where prhdr_id = '" & gvListPR.SelectedDataKey("prhdr_id") & "'", CommandType.Text)
+            grdDocuments.DataBind()
+            UploadButton.Enabled = True
+            FileUpload1.Enabled = True
 
             'Catch ex As Exception
             '    AddTrace("Error in gvListPR_SelectedIndexChanged: " & ex.Message)
@@ -2875,6 +2895,7 @@ Partial Class t_purchase_request_v2
 
         txtOBRpurpose.ReadOnly = False
         txtpeyee.Enabled = True
+        txtpurpose.Enabled = True
         txtaddpeyee.Enabled = True
 
         ' Fetch Program/Activity/Project data
@@ -3175,7 +3196,7 @@ Partial Class t_purchase_request_v2
 
     Protected Sub grdDocuments_PageIndexChanging(sender As Object, e As GridViewPageEventArgs)
         grdDocuments.PageIndex = e.NewPageIndex
-        grdDocuments.DataSource = objDerived.GetDataTable("SELECT * FROM AMS.Document_PR_Attachment where prhdr_id = '" & gvListPR.SelectedDataKey("prhdr_id") & "'", commandtype.text)
+        grdDocuments.DataSource = objDerived.GetDataTable("SELECT * FROM AMS.Document_PR_Attachment where prhdr_id = '" & gvListPR.SelectedDataKey("prhdr_id") & "'", CommandType.Text)
         grdDocuments.DataBind()
     End Sub
 
@@ -3217,9 +3238,9 @@ Partial Class t_purchase_request_v2
         End If
         grdDocuments.DataSource = objDerived.GetDataTable("SELECT * FROM AMS.Document_PR_Attachment where prhdr_id = '" & gvListPR.SelectedDataKey("prhdr_id") & "'", CommandType.Text)
         grdDocuments.DataBind()
-        txtDocName.text = ""
-        txtDocNumb.text = ""
-        txtRemarks.text = ""
+        txtDocName.Text = ""
+        txtDocNumb.Text = ""
+        txtRemarks.Text = ""
     End Sub
 
     Public Sub CreateFile(ByVal UniqueID As String, ByVal file_name As String, ByVal cmdstr As String)
@@ -3272,8 +3293,8 @@ Partial Class t_purchase_request_v2
         Else
 
 
-            Dim img As System.Web.ui.AttributeCollection = myFrame.Attributes
-            img.add("src", "..\obj\temp\downloads\" & "\" & file_name)
+            Dim img As System.Web.UI.AttributeCollection = myFrame.Attributes
+            img.Add("src", "..\obj\temp\downloads\" & "\" & file_name)
         End If
 
     End Sub
