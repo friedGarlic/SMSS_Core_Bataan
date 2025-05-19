@@ -1437,11 +1437,9 @@ Partial Class Inventory_t_for_Inspection
 
                     Dim dt2 As DataTable = objDerived.GetDataTable("EXEC [AMS].[sp_ReceivedItems_Inspection] '" & grdAIR.SelectedDataKey("POHdr_ID") & "','" & stck1 & "','" & AllotmentClass_ID & "'", CommandType.Text)
 
-                    'TODO only transfer header by changing status when qty_inspected = [PO_Qty(should never change its the base qty)] column
-                    If dt2.Rows.Count = 0 Then
-                        objDerived.GetRecords("UPDATE AMS.Tb_Receiving SET Status = 2 WHERE Received_ID = '" & rcvID & "'", CommandType.Text)
-                        objDerived.GetRecords("UPDATE AMS.Tb_Receiving SET inspection_date='" & txtDate.Text & "' WHERE Received_ID = '" & rcvID & "'", CommandType.Text)
-                    End If
+                    objDerived.GetRecords("UPDATE AMS.Tb_Receiving SET Status = 2 WHERE Received_ID = '" & rcvID & "'", CommandType.Text)
+
+                    objDerived.GetRecords("UPDATE AMS.Tb_Receiving SET inspection_date='" & txtDate.Text & "' WHERE Received_ID = '" & rcvID & "'", CommandType.Text)
 
                     ' If you also need to capture the header ID here, add the same block as above:
                     Dim newPOHdrID As Long = CLng(grdAIR.SelectedDataKey("POHdr_ID"))

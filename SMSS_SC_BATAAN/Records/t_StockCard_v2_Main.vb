@@ -41,7 +41,7 @@ Partial Class Records_t_StockCard_v2
         'End If
 
         If Not Page.IsPostBack Then
-            txtDate.text = Date.Now.ToString("MM-dd-yyyy")
+            txtDate.Text = Date.Now.ToString("MM-dd-yyyy")
 
             txtSearchStock.Text = ""
             Dim dt As New DataTable
@@ -50,6 +50,10 @@ Partial Class Records_t_StockCard_v2
             ddClassification.DataTextField = ("ClassificationName")
             ddClassification.DataValueField = ("ClassificationId")
             ddClassification.DataBind()
+
+            'try defaultvalue
+            ddClassification.Items.Insert(0, New ListItem("-- Please select --", ""))
+            ddClassification.SelectedIndex = 0
 
             'drpDepartment.DataSource = objDerived.GetDataTable("[AMS].[sp_VIEW_Departments] '" & Session("@UserID") & "'", CommandType.Text)
             'drpDepartment.DataTextField = ("RC_Name")
@@ -74,25 +78,28 @@ Partial Class Records_t_StockCard_v2
         Dim dt As New DataTable
         Dim glaccount As Integer
 
-        If ddGlAccount.text = "" Then
+        If ddGlAccount.Text = "" Then
             glaccount = 0
         Else
-            glaccount = ddGlAccount.selecteditem.value
+            glaccount = ddGlAccount.SelectedItem.Value
         End If
 
         Dim classification As Integer
-
-        If ddClassification.SelectedItem.Value = 0 Then
-            classification = 0
+        'Added default index as 1 for intial page load
+        'If ddClassification.SelectedItem.Value = 0 Then
+        If ddClassification.SelectedIndex = 0 Then
+            classification = 1
+            ddClassification.SelectedIndex = 1
         Else
-            classification = ddClassification.SelectedItem.Value
+            classification = ddClassification.SelectedIndex
         End If
 
         Dim sub_classification As Integer
-        If drpSubClass.SelectedItem.Value = 0 Then
-            sub_classification = 0
+        If drpSubClass.SelectedIndex = 0 Then
+            sub_classification = 1
+            drpSubClass.SelectedIndex = 1
         Else
-            sub_classification = drpSubClass.SelectedItem.Value
+            sub_classification = drpSubClass.SelectedIndex
         End If
 
 
@@ -123,52 +130,52 @@ Partial Class Records_t_StockCard_v2
         MultiviewSupplier()
     End Sub
     Public Sub loadwarehouse()
-        Dim dt As New datatable
-        dt = obj.getdatatable("Select warehouse_id, wname From ams.loc_warehouse", commandtype.text)
+        Dim dt As New DataTable
+        dt = obj.GetDataTable("Select warehouse_id, wname From ams.loc_warehouse", CommandType.Text)
         drpWarehouse.DataTextField = ("wname")
         drpWarehouse.DataValueField = ("warehouse_id")
-        drpWarehouse.datasource = dt
-        drpWarehouse.databind()
+        drpWarehouse.DataSource = dt
+        drpWarehouse.DataBind()
 
         drpMROsuppliesWarehouse.DataTextField = ("wname")
         drpMROsuppliesWarehouse.DataValueField = ("warehouse_id")
-        drpMROsuppliesWarehouse.datasource = dt
-        drpMROsuppliesWarehouse.databind()
+        drpMROsuppliesWarehouse.DataSource = dt
+        drpMROsuppliesWarehouse.DataBind()
 
         drpMedicineWarehouse.DataTextField = ("wname")
         drpMedicineWarehouse.DataValueField = ("warehouse_id")
-        drpMedicineWarehouse.datasource = dt
-        drpMedicineWarehouse.databind()
+        drpMedicineWarehouse.DataSource = dt
+        drpMedicineWarehouse.DataBind()
 
         drpFoodWarehouse.DataTextField = ("wname")
         drpFoodWarehouse.DataValueField = ("warehouse_id")
-        drpFoodWarehouse.datasource = dt
-        drpFoodWarehouse.databind()
+        drpFoodWarehouse.DataSource = dt
+        drpFoodWarehouse.DataBind()
 
 
         drpMROConsOthersWarehouse.DataTextField = ("wname")
         drpMROConsOthersWarehouse.DataValueField = ("warehouse_id")
-        drpMROConsOthersWarehouse.datasource = dt
-        drpMROConsOthersWarehouse.databind()
+        drpMROConsOthersWarehouse.DataSource = dt
+        drpMROConsOthersWarehouse.DataBind()
 
 
     End Sub
 
 
     Public Sub MultiviewSupplier()
-        lblCategory.text = ""
+        lblCategory.Text = ""
         Dim glaccount As Integer
-        If ddGlAccount.text = "" Then
+        If ddGlAccount.Text = "" Then
             glaccount = 0
         Else
-            glaccount = ddGlAccount.selecteditem.value
+            glaccount = ddGlAccount.SelectedItem.Value
         End If
 
         If glaccount = 1432 Then
             ''0329
             Dim category As String
-            category = objDerived.GetValue("Select description from ams.item_particular  where item_particular_id =" & ddCategory.selectedvalue(), CommandType.Text)
-            lblCategory.text = " - " & category
+            category = objDerived.GetValue("Select description from ams.item_particular  where item_particular_id =" & ddCategory.SelectedValue(), CommandType.Text)
+            lblCategory.Text = " - " & category
             ' Drugs and Medicines
             'lblDetails.Text = "DRUGS & MEDICINE DETAILS"
             txtSearchStock.Text = ""
@@ -233,7 +240,7 @@ Partial Class Records_t_StockCard_v2
             txtSearchStock.Text = ""
             lblHistoryDetails.Text = "DETAILS"
             'lblHistoryDetails.Text = "NON-FOOD DETAILS"
-            Dim classification As String = objDerived.GetValue("select ClassificationName from dbo.tbl_Classification where ClassificationId = " & ddClassification.SelectedValue(), CommandType.Text)
+            Dim classification As String = objDerived.GetValue("select ClassificationName from dbo.tbl_Classification where ClassificationId = " & ddClassification.SelectedIndex, CommandType.Text)
             LoadSupplies()
             If classification.Contains("Consumables") Then
                 Me.MultiView1.SetActiveView(Me.View6)
@@ -258,23 +265,23 @@ Partial Class Records_t_StockCard_v2
     End Sub
     Public Function replaceapostrophe(ByVal str As String) As String
         Return Replace(str, "'", "")
-        End Function
+    End Function
     Protected Sub loadSearch()
 
 
         Dim subcategory As String
-        If ddSubCategory.text = "" Then
+        If ddSubCategory.Text = "" Then
             subcategory = "0"
         Else
-            subcategory = ddSubCategory.selectedvalue()
+            subcategory = ddSubCategory.SelectedValue()
         End If
-        Dim CY As String = "CY" & Year(txtDate.text)
+        Dim CY As String = "CY" & Year(txtDate.Text)
 
         Dim dtStock As New DataTable
         'Try
 
         ' dtStock = objDerived.GetDataTable("EXEC [dbo].[sp_SMSSStockSupplies_Search] '" & ddGlAccount.SelectedItem.Value & "', '%" & replaceapostrophe(txtSearchStock.Text) & "%'", CommandType.Text)
-        dtStock = objDerived.GetDataTable("EXEC [dbo].[sp_SMSSStockSupplies_Search_v1_02092022] '" & ddGlAccount.SelectedItem.Value & "', 0,'" & CY & "','" & ddCategory.selecteditem.value & "','" & subcategory & "','%" & replaceapostrophe(txtSearchStock.Text) & "%'", CommandType.Text)
+        dtStock = objDerived.GetDataTable("EXEC [dbo].[sp_SMSSStockSupplies_Search_v1_02092022] '" & ddGlAccount.SelectedItem.Value & "', 0,'" & CY & "','" & ddCategory.SelectedItem.Value & "','" & subcategory & "','%" & replaceapostrophe(txtSearchStock.Text) & "%'", CommandType.Text)
 
         If dtStock.Rows.Count < 10 Then
             dtStock.Merge(createdatatable1B(9 - dtStock.Rows.Count))
@@ -349,7 +356,7 @@ Partial Class Records_t_StockCard_v2
             ModalPopupExtender3.Show()
         End If
 
-        pTempPPQ = objDerived.getDataTable("Select * from ams.tbl_Price_per_qty where item_id ='" & grdStockList.SelectedDatakey(0) & "'", CommandType.text)
+        pTempPPQ = objDerived.GetDataTable("Select * from ams.tbl_Price_per_qty where item_id ='" & grdStockList.SelectedDataKey(0) & "'", CommandType.Text)
         GridPPQ.DataSource = pTempPPQ
         GridPPQ.DataBind()
 
@@ -402,7 +409,7 @@ Partial Class Records_t_StockCard_v2
 
         Else 'If ddGlAccount.SelectedItem.Value = 927 Or ddGlAccount.SelectedItem.Value = 790 Or ddGlAccount.SelectedItem.Value = 795 Then
             'Non-Food Items
-            Dim classification As String = objDerived.GetValue("select ClassificationName from dbo.tbl_Classification where ClassificationId = " & ddClassification.selectedvalue(), CommandType.Text)
+            Dim classification As String = objDerived.GetValue("select ClassificationName from dbo.tbl_Classification where ClassificationId = " & ddClassification.SelectedValue(), CommandType.Text)
 
             If classification.Contains("Consumables") Then
                 Me.MultiView1.SetActiveView(Me.View6)
@@ -414,11 +421,11 @@ Partial Class Records_t_StockCard_v2
 
 
             LoadStockGridBatches()
-                'loadStockDetails()
+            'loadStockDetails()
 
-                ledger()
+            ledger()
 
-            End If
+        End If
     End Sub
     Protected Sub grdStockList_PageIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewPageEventArgs)
         'Dim Stocktable As New DataTable
@@ -427,7 +434,7 @@ Partial Class Records_t_StockCard_v2
 
         Dim dtStock As New DataTable
         '  dtStock = objDerived.GetDataTable("EXEC [dbo].[sp_SMSSStockSupplies] '" & ddGlAccount.SelectedValue() & "'", CommandType.Text)
-        Dim CY As String = "CY" & Year(txtDate.text)
+        Dim CY As String = "CY" & Year(txtDate.Text)
 
         dtStock = objDerived.GetDataTable("Exec [AMS].[sp_SuppliesList_wPrice_v1_02092022_Stockcardmain] '" & ddGlAccount.SelectedValue() & "','0','" & CY & "','" & 0 & "','" & 0 & "'", CommandType.Text)
 
@@ -441,17 +448,17 @@ Partial Class Records_t_StockCard_v2
 
     Protected Sub loadStockOfficeSupplies()
         Dim subcategory As String
-        If ddSubCategory.text = "" Then
+        If ddSubCategory.Text = "" Then
             subcategory = "0"
         Else
-            subcategory = ddSubCategory.selectedvalue()
+            subcategory = ddSubCategory.SelectedValue()
         End If
-        Dim CY As String = "CY" & Year(txtDate.text)
+        Dim CY As String = "CY" & Year(txtDate.Text)
         Dim SubCatID As Integer
-        If ddSubCategory.selectedItem.text = "All" Then
+        If ddSubCategory.SelectedItem.Text = "All" Then
             SubCatID = 0
         Else
-            SubCatID = ddSubCategory.SelectedItem.value
+            SubCatID = ddSubCategory.SelectedItem.Value
         End If
 
         If ddCategory.SelectedIndex = 0 Then
@@ -527,10 +534,10 @@ Partial Class Records_t_StockCard_v2
     ' ==== Medical Supplies =====    
     Protected Sub loadStockMedSupplies()
         Dim subcategory As String
-        If ddSubCategory.text = "" Then
+        If ddSubCategory.Text = "" Then
             subcategory = "0"
         Else
-            subcategory = ddSubCategory.selectedvalue()
+            subcategory = ddSubCategory.SelectedValue()
         End If
 
         Dim dtStock As New DataTable
@@ -584,7 +591,7 @@ Partial Class Records_t_StockCard_v2
         drpUnit.DataValueField = ("Unit_ID")
         drpUnit.DataBind()
 
-        drpMROEquipmentUnit.datasource = dt
+        drpMROEquipmentUnit.DataSource = dt
         drpMROEquipmentUnit.DataTextField = ("Description")
         drpMROEquipmentUnit.DataValueField = ("Unit_ID")
         drpMROEquipmentUnit.DataBind()
@@ -707,55 +714,55 @@ Partial Class Records_t_StockCard_v2
         dt = obj.GetDataTable("EXEC [dbo].[usp_GetSuppliesInfo] " & grdStockList.SelectedDataKey("Item_ID") & "", CommandType.Text)
         'txtItemDesc1.text = obj.GetValue("select Item_Desc From dbo.m_item where Item_ID =" & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
         If dt.Rows.Count > 0 Then
-            lblItemDesc1.text = grdStockList.SelectedRow.Cells(2).Text
-            txtItemDesc1.text = grdStockList.SelectedRow.Cells(2).Text
+            lblItemDesc1.Text = grdStockList.SelectedRow.Cells(2).Text
+            txtItemDesc1.Text = grdStockList.SelectedRow.Cells(2).Text
             txtItemDesc1.ReadOnly = True
 
-            lblBrandName1.text = dt.Rows(0).Item(1)
-            txtBrandName1.text = dt.Rows(0).Item(1)
+            lblBrandName1.Text = dt.Rows(0).Item(1)
+            txtBrandName1.Text = dt.Rows(0).Item(1)
             txtBrandName1.ReadOnly = True
 
-            lblSize.text = dt.Rows(0).Item(2)
-            txtSize.text = dt.Rows(0).Item(2)
+            lblSize.Text = dt.Rows(0).Item(2)
+            txtSize.Text = dt.Rows(0).Item(2)
             txtSize.ReadOnly = True
 
-            lblColor.text = dt.Rows(0).Item(3)
-            txtColor.text = dt.Rows(0).Item(3)
+            lblColor.Text = dt.Rows(0).Item(3)
+            txtColor.Text = dt.Rows(0).Item(3)
             txtColor.ReadOnly = True
 
-            lblDepRate1.text = dt.Rows(0).Item(4)
-            txtDepRate1.text = dt.Rows(0).Item(4)
+            lblDepRate1.Text = dt.Rows(0).Item(4)
+            txtDepRate1.Text = dt.Rows(0).Item(4)
             txtDepRate1.ReadOnly = True
 
-            lblDepValue1.text = dt.Rows(0).Item(5)
-            txtDepValue1.text = dt.Rows(0).Item(5)
+            lblDepValue1.Text = dt.Rows(0).Item(5)
+            txtDepValue1.Text = dt.Rows(0).Item(5)
             txtDepValue1.ReadOnly = True
 
 
             txtCategory.ReadOnly = True
 
-            lblLenght.text = dt.Rows(0).Item(6)
-            txtLenght.text = dt.Rows(0).Item(6)
+            lblLenght.Text = dt.Rows(0).Item(6)
+            txtLenght.Text = dt.Rows(0).Item(6)
             txtLenght.ReadOnly = True
 
-            lblWidth.text = dt.Rows(0).Item(7)
-            txtWidth.text = dt.Rows(0).Item(7)
+            lblWidth.Text = dt.Rows(0).Item(7)
+            txtWidth.Text = dt.Rows(0).Item(7)
             txtWidth.ReadOnly = True
 
-            lblHeight.text = dt.Rows(0).Item(8)
-            txtHeight.text = dt.Rows(0).Item(8)
+            lblHeight.Text = dt.Rows(0).Item(8)
+            txtHeight.Text = dt.Rows(0).Item(8)
             txtHeight.ReadOnly = True
 
-            lblWeight.text = dt.Rows(0).Item(9)
-            txtWeight.text = dt.Rows(0).Item(9)
+            lblWeight.Text = dt.Rows(0).Item(9)
+            txtWeight.Text = dt.Rows(0).Item(9)
             txtWeight.ReadOnly = True
 
-            lblUnitPrice.text = dt.Rows(0).Item(10)
-            txtUnitPrice.text = dt.Rows(0).Item(10)
+            lblUnitPrice.Text = dt.Rows(0).Item(10)
+            txtUnitPrice.Text = dt.Rows(0).Item(10)
             txtUnitPrice.ReadOnly = True
 
-            lblQuantity.text = dt.Rows(0).Item(11)
-            txtQuantity.text = dt.Rows(0).Item(11)
+            lblQuantity.Text = dt.Rows(0).Item(11)
+            txtQuantity.Text = dt.Rows(0).Item(11)
             txtQuantity.ReadOnly = True
 
 
@@ -858,28 +865,28 @@ Partial Class Records_t_StockCard_v2
 
             Dim warehouse As String
             warehouse = dt.Rows(0).Item(13)
-            drpWarehouse.selectedvalue = warehouse
-            btnSave.enabled = False
-            btnCancel.enabled = False
+            drpWarehouse.SelectedValue = warehouse
+            btnSave.Enabled = False
+            btnCancel.Enabled = False
 
         Else
-            lblItemDesc1.text = obj.GetValue("select Item_Desc From dbo.m_item where Item_ID =" & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
-            txtItemDesc1.text = obj.GetValue("select Item_Desc From dbo.m_item where Item_ID =" & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
+            lblItemDesc1.Text = obj.GetValue("select Item_Desc From dbo.m_item where Item_ID =" & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
+            txtItemDesc1.Text = obj.GetValue("select Item_Desc From dbo.m_item where Item_ID =" & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
 
 
-            lblBrandName1.text = obj.GetValue("select Brand From dbo.m_item where Item_ID =" & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
-            txtBrandName1.text = obj.GetValue("select Brand From dbo.m_item where Item_ID =" & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
+            lblBrandName1.Text = obj.GetValue("select Brand From dbo.m_item where Item_ID =" & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
+            txtBrandName1.Text = obj.GetValue("select Brand From dbo.m_item where Item_ID =" & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
 
-            txtSize.text = obj.GetValue("select size From dbo.m_item where Item_ID =" & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
+            txtSize.Text = obj.GetValue("select size From dbo.m_item where Item_ID =" & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
 
-            txtColor.text = obj.GetValue("select color From dbo.m_item where Item_ID =" & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
+            txtColor.Text = obj.GetValue("select color From dbo.m_item where Item_ID =" & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
 
             txtBrandName1.ReadOnly = False
-            Dim CY As String = "CY" & Year(txtDate.text)
+            Dim CY As String = "CY" & Year(txtDate.Text)
 
-            lblUnitPrice.text = obj.GetValue("select " & CY & " From dbo.m_item_detail where Item_ID =" & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
+            lblUnitPrice.Text = obj.GetValue("select " & CY & " From dbo.m_item_detail where Item_ID =" & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
 
-            lblQuantity.text = obj.GetValue("select sum(Qty) From ams.Stock where Item_ID =" & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
+            lblQuantity.Text = obj.GetValue("select sum(Qty) From ams.Stock where Item_ID =" & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
             'txtQuantity.ReadOnly = False
             'txtUnitPrice.ReadOnly = False
             'txtColor.ReadOnly = False
@@ -896,8 +903,8 @@ Partial Class Records_t_StockCard_v2
                 textBox.ReadOnly = False
             Next
 
-            btnSave.enabled = True
-            btnCancel.enabled = True
+            btnSave.Enabled = True
+            btnCancel.Enabled = True
 
             Dim itemlocation As New DataTable
             itemlocation = obj.GetDataTable("select Location,warehouse_ID From ams.Stock where Item_ID =" & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
@@ -998,55 +1005,55 @@ Partial Class Records_t_StockCard_v2
 
 
 
-            lblFoodName.text = grdStockList.SelectedRow.Cells(2).Text
+            lblFoodName.Text = grdStockList.SelectedRow.Cells(2).Text
             txtFoodName.ReadOnly = False
 
-            lblFoodUnit.text = objDerived.GetValue("select Description from ams.m_Unit as a inner join dbo.m_item as b on a.Unit_ID = b.Unit_ID where Item_ID = " & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
+            lblFoodUnit.Text = objDerived.GetValue("select Description from ams.m_Unit as a inner join dbo.m_item as b on a.Unit_ID = b.Unit_ID where Item_ID = " & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
 
-            lblFoodBrandName.text = dt.Rows(0).Item(1)
+            lblFoodBrandName.Text = dt.Rows(0).Item(1)
             txtFoodBrandName.ReadOnly = False
 
-            lblFoodUnitprice.text = dt.Rows(0).Item(2)
+            lblFoodUnitprice.Text = dt.Rows(0).Item(2)
             txtFoodUnitprice.ReadOnly = False
 
 
-            lblFoodQuantity.text = dt.Rows(0).Item(3)
+            lblFoodQuantity.Text = dt.Rows(0).Item(3)
             txtFoodQuantity.ReadOnly = False
 
 
-            lblFoodDepRate.text = dt.Rows(0).Item(4)
+            lblFoodDepRate.Text = dt.Rows(0).Item(4)
             txtFoodDepRate.ReadOnly = False
 
 
-            lblFoodDepValue.text = dt.Rows(0).Item(5)
+            lblFoodDepValue.Text = dt.Rows(0).Item(5)
             txtFoodDepValue.ReadOnly = False
 
 
-            lblFoodForm.text = dt.Rows(0).Item(6)
+            lblFoodForm.Text = dt.Rows(0).Item(6)
             txtFoodForm.ReadOnly = False
 
 
-            lblFoodBatch1.text = dt.Rows(0).Item(7)
+            lblFoodBatch1.Text = dt.Rows(0).Item(7)
             txtFoodBatch1.ReadOnly = False
 
 
-            lblFoodBatch.text = dt.Rows(0).Item(7)
+            lblFoodBatch.Text = dt.Rows(0).Item(7)
             txtFoodBatch.ReadOnly = False
 
 
-            lblFoodLot.text = dt.Rows(0).Item(8)
+            lblFoodLot.Text = dt.Rows(0).Item(8)
             txtFoodLot.ReadOnly = False
 
 
-            lblFoodMdate.text = dt.Rows(0).Item(9)
+            lblFoodMdate.Text = dt.Rows(0).Item(9)
             txtFoodMdate.ReadOnly = False
 
 
-            lblFoodEdate.text = dt.Rows(0).Item(10)
+            lblFoodEdate.Text = dt.Rows(0).Item(10)
             txtFoodEdate.ReadOnly = False
 
 
-            lblFoodAlert.text = dt.Rows(0).Item(11)
+            lblFoodAlert.Text = dt.Rows(0).Item(11)
             txtFoodAlert.ReadOnly = False
 
 
@@ -1057,34 +1064,34 @@ Partial Class Records_t_StockCard_v2
             location = itemlocation.Rows(0).Item(0)
             Dim locationsplit As String() = location.Split("-")
             If location.Contains("Bay") Then
-                txtFoodBay.text = locationsplit(1)
+                txtFoodBay.Text = locationsplit(1)
             ElseIf location.Contains("Column") Then
-                txtFoodColumn.text = locationsplit(1)
+                txtFoodColumn.Text = locationsplit(1)
             ElseIf location.Contains("Floor") Then
-                txtFoodFloor.text = locationsplit(1)
+                txtFoodFloor.Text = locationsplit(1)
             ElseIf location.Contains("Room") Then
-                txtFoodRoom.text = locationsplit(1)
+                txtFoodRoom.Text = locationsplit(1)
             ElseIf location.Contains("Shelves") Then
-                txtFoodShelves.text = locationsplit(1)
+                txtFoodShelves.Text = locationsplit(1)
             ElseIf location.Contains("Rack") Then
-                txtFoodRack.text = locationsplit(1)
+                txtFoodRack.Text = locationsplit(1)
             ElseIf location.Contains("Bin") Then
-                txtFoodBin.text = locationsplit(1)
+                txtFoodBin.Text = locationsplit(1)
             End If
 
             Dim warehouse As String
             warehouse = itemlocation.Rows(0).Item(1)
-            drpFoodWarehouse.selectedvalue = warehouse
+            drpFoodWarehouse.SelectedValue = warehouse
         Else
-            lblFoodName.text = obj.GetValue("select Item_Desc From dbo.m_item where Item_ID =" & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
-            lblFoodBrandName.text = obj.GetValue("select brand From dbo.m_item where Item_ID =" & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
-            lblFoodQuantity.text = obj.GetValue("select sum(Qty) From ams.Stock where Item_ID =" & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
-            Dim CY As String = "CY" & Year(txtDate.text)
+            lblFoodName.Text = obj.GetValue("select Item_Desc From dbo.m_item where Item_ID =" & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
+            lblFoodBrandName.Text = obj.GetValue("select brand From dbo.m_item where Item_ID =" & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
+            lblFoodQuantity.Text = obj.GetValue("select sum(Qty) From ams.Stock where Item_ID =" & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
+            Dim CY As String = "CY" & Year(txtDate.Text)
 
-            lblFoodUnitPrice.text = obj.GetValue("select " & CY & " From dbo.m_item_detail where Item_ID =" & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
-            lblFoodForm.text = obj.GetValue("select form From ams.TbFood where Item_ID =" & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
-            lblFoodbatch.text = obj.GetValue("select batch From ams.TbFood where Item_ID =" & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
-            lblFoodLot.text = obj.GetValue("select lot From ams.TbFood where Item_ID =" & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
+            lblFoodUnitprice.Text = obj.GetValue("select " & CY & " From dbo.m_item_detail where Item_ID =" & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
+            lblFoodForm.Text = obj.GetValue("select form From ams.TbFood where Item_ID =" & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
+            lblFoodBatch.Text = obj.GetValue("select batch From ams.TbFood where Item_ID =" & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
+            lblFoodLot.Text = obj.GetValue("select lot From ams.TbFood where Item_ID =" & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
             Dim itemlocation As New DataTable
             itemlocation = obj.GetDataTable("select Location,warehouse_ID From ams.Stock where Item_ID =" & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
 
@@ -1092,24 +1099,24 @@ Partial Class Records_t_StockCard_v2
             location = itemlocation.Rows(0).Item(0)
             Dim locationsplit As String() = location.Split("-")
             If location.Contains("Bay") Then
-                txtFoodBay.text = locationsplit(1)
+                txtFoodBay.Text = locationsplit(1)
             ElseIf location.Contains("Column") Then
-                txtFoodColumn.text = locationsplit(1)
+                txtFoodColumn.Text = locationsplit(1)
             ElseIf location.Contains("Floor") Then
-                txtFoodFloor.text = locationsplit(1)
+                txtFoodFloor.Text = locationsplit(1)
             ElseIf location.Contains("Room") Then
-                txtFoodRoom.text = locationsplit(1)
+                txtFoodRoom.Text = locationsplit(1)
             ElseIf location.Contains("Shelves") Then
-                txtFoodShelves.text = locationsplit(1)
+                txtFoodShelves.Text = locationsplit(1)
             ElseIf location.Contains("Rack") Then
-                txtFoodRack.text = locationsplit(1)
+                txtFoodRack.Text = locationsplit(1)
             ElseIf location.Contains("Bin") Then
-                txtFoodBin.text = locationsplit(1)
+                txtFoodBin.Text = locationsplit(1)
             End If
 
             Dim warehouse As String
             warehouse = itemlocation.Rows(0).Item(1)
-            drpFoodWarehouse.selectedvalue = warehouse
+            drpFoodWarehouse.SelectedValue = warehouse
 
         End If
 
@@ -1119,59 +1126,59 @@ Partial Class Records_t_StockCard_v2
         Dim dt As New DataTable
 
         dt = objDerived.GetDataTable("select a.Description,a.BrandName,a.Dose,c.ActualPrice,convert(int,b.Qty) ,a.Depreciatedrate,a.Depreciatedvalue,c.Form,c.OTCRx,c.Batch, c.Lot ,c.Mftgdate, c.EpiryDate,c.Alert,isnull(b.Location,' - '),isnull(b.warehouse_id,1),a.bfadno,a.itemcode,a.reorderpt,c.sellingprice  From ams.TBMedicine_Info as a inner join ams.TBMedicine_DTl as c on a.MedicineId = c.MedicineID inner join ams.Stock as b on a.StockID = b.StockID  where a.Item_ID =" & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
-        lblMedicineName.text = dt.Rows(0).Item(0)
+        lblMedicineName.Text = dt.Rows(0).Item(0)
         txtMedicineName.ReadOnly = False
 
-        lblunit.text = objDerived.getvalue("select Description from ams.m_Unit as a inner join dbo.m_item as b on a.Unit_ID = b.Unit_ID where Item_ID =" & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
-        lblGenericName.text = objDerived.getvalue("select GenericName From dbo.m_item where Item_ID = " & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
+        lblunit.Text = objDerived.GetValue("select Description from ams.m_Unit as a inner join dbo.m_item as b on a.Unit_ID = b.Unit_ID where Item_ID =" & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
+        lblGenericName.Text = objDerived.GetValue("select GenericName From dbo.m_item where Item_ID = " & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
 
-        lblMedicineBrandName.text = dt.Rows(0).Item(1)
+        lblMedicineBrandName.Text = dt.Rows(0).Item(1)
         txtMedicineBrandName.ReadOnly = False
 
 
-        lblMedicineDose.text = dt.Rows(0).Item(2)
+        lblMedicineDose.Text = dt.Rows(0).Item(2)
         txtMedicineDose.ReadOnly = False
 
-        lblMedicineUnitprice.text = dt.Rows(0).Item(3)
+        lblMedicineUnitprice.Text = dt.Rows(0).Item(3)
         txtMedicineUnitprice.ReadOnly = False
 
 
-        lblMedicineQuantity.text = dt.Rows(0).Item(4)
+        lblMedicineQuantity.Text = dt.Rows(0).Item(4)
         txtMedicineQuantity.ReadOnly = False
 
 
-        lblMedicineDepRate.text = dt.Rows(0).Item(5)
+        lblMedicineDepRate.Text = dt.Rows(0).Item(5)
         txtMedicineDepRate.ReadOnly = False
 
 
-        lblMedicineDepValue.text = dt.Rows(0).Item(6)
+        lblMedicineDepValue.Text = dt.Rows(0).Item(6)
         txtMedicineDepValue.ReadOnly = False
 
 
-        lblMedicineForm.text = dt.Rows(0).Item(7)
+        lblMedicineForm.Text = dt.Rows(0).Item(7)
         txtMedicineForm.ReadOnly = False
 
 
-        lblMedicineOTXRX.text = dt.Rows(0).Item(8)
+        lblMedicineOTXRX.Text = dt.Rows(0).Item(8)
         txtMedicineOTXRX.ReadOnly = False
 
-        lblMedicineBatch1.text = dt.Rows(0).Item(9)
+        lblMedicineBatch1.Text = dt.Rows(0).Item(9)
         txtMedicineBatch1.ReadOnly = False
 
 
-        lblMedicineLot.text = dt.Rows(0).Item(10)
+        lblMedicineLot.Text = dt.Rows(0).Item(10)
         txtMedicineLot.ReadOnly = False
 
 
-        lblMedicineMdate.text = dt.Rows(0).Item(11)
+        lblMedicineMdate.Text = dt.Rows(0).Item(11)
         txtMedicineMdate.ReadOnly = False
 
 
-        lblMedicineEdate.text = dt.Rows(0).Item(12)
+        lblMedicineEdate.Text = dt.Rows(0).Item(12)
         txtMedicineEdate.ReadOnly = False
 
 
-        lblMedicineAlert.text = dt.Rows(0).Item(13)
+        lblMedicineAlert.Text = dt.Rows(0).Item(13)
         txtMedicineAlert.ReadOnly = False
 
 
@@ -1182,35 +1189,35 @@ Partial Class Records_t_StockCard_v2
         location = dt.Rows(0).Item(14)
         Dim locationsplit As String() = location.Split("-")
         If location.Contains("Bay") Then
-            txtMedicineBay.text = locationsplit(1)
+            txtMedicineBay.Text = locationsplit(1)
         ElseIf location.Contains("Column") Then
-            txtMedicineColumn.text = locationsplit(1)
+            txtMedicineColumn.Text = locationsplit(1)
         ElseIf location.Contains("Floor") Then
-            txtMedicineFloor.text = locationsplit(1)
+            txtMedicineFloor.Text = locationsplit(1)
         ElseIf location.Contains("Room") Then
-            txtMedicineRoom.text = locationsplit(1)
+            txtMedicineRoom.Text = locationsplit(1)
         ElseIf location.Contains("Shelves") Then
-            txtMedicineShelves.text = locationsplit(1)
+            txtMedicineShelves.Text = locationsplit(1)
         ElseIf location.Contains("Rack") Then
-            txtMedicineRack.text = locationsplit(1)
+            txtMedicineRack.Text = locationsplit(1)
         ElseIf location.Contains("Bin") Then
-            txtMedicineBin.text = locationsplit(1)
+            txtMedicineBin.Text = locationsplit(1)
         End If
 
         Dim warehouse As String
         warehouse = dt.Rows(0).Item(15)
-        drpMedicineWarehouse.selectedvalue = warehouse
+        drpMedicineWarehouse.SelectedValue = warehouse
 
-        lblBFADNo.text = dt.Rows(0).Item(16)
-        txtBFADNo.readonly = True
+        lblBfadNo.Text = dt.Rows(0).Item(16)
+        txtBfadNo.ReadOnly = True
 
-        lblItemCode.text = dt.Rows(0).Item(17)
-        txtItemCode.readonly = True
+        lblItemCode.Text = dt.Rows(0).Item(17)
+        txtItemCode.ReadOnly = True
 
-        lblReOrderPt.text = dt.Rows(0).Item(18)
-        txtReOrderPt.readonly = True
+        lblReorderPt.Text = dt.Rows(0).Item(18)
+        txtReorderPt.ReadOnly = True
 
-        lblSellingPrice.text = dt.Rows(0).Item(19)
+        lblSellingPrice.Text = dt.Rows(0).Item(19)
         ' txtSellPrice.ReadOnly = True
 
 
@@ -1218,7 +1225,7 @@ Partial Class Records_t_StockCard_v2
     Public Sub loadMROEquipment()
 
         Dim dt As New DataTable
-        dt = objDerived.GetDataTable("select  a.ItemDesc,a.BrandName,b.Cost,convert(int,b.Qty),isnull(PowerInput,''),isnull(Model,''),isnull(Dimension,''),isnull(AreaCapacity,0.00),isnull(Warranty,0.00) ,isnull(DeliveryDate, ''),isnull(MarketValue, 0),isnull(SalvageValue, 0),isnull(NoYears, 0),isnull(UsefulLife, 0),specs,isnull(b.Location,' - '),isnull(b.warehouse_id,1)   From [AMS].TbNonFood as a inner join ams.Stock as b on a.StockID = b.StockID  where a.Item_ID =" & HDnItemNo.value, CommandType.Text)
+        dt = objDerived.GetDataTable("select  a.ItemDesc,a.BrandName,b.Cost,convert(int,b.Qty),isnull(PowerInput,''),isnull(Model,''),isnull(Dimension,''),isnull(AreaCapacity,0.00),isnull(Warranty,0.00) ,isnull(DeliveryDate, ''),isnull(MarketValue, 0),isnull(SalvageValue, 0),isnull(NoYears, 0),isnull(UsefulLife, 0),specs,isnull(b.Location,' - '),isnull(b.warehouse_id,1)   From [AMS].TbNonFood as a inner join ams.Stock as b on a.StockID = b.StockID  where a.Item_ID =" & hdnItemNo.Value, CommandType.Text)
         If dt.Rows.Count > 0 Then
             On Error Resume Next
             lblequipmentname.Text = dt.Rows(0).Item(0)
@@ -1386,7 +1393,7 @@ Partial Class Records_t_StockCard_v2
     End Sub
 
     Protected Sub LoadStockGridBatches()
-        Dim CY As String = "CY" & Year(txtDate.text)
+        Dim CY As String = "CY" & Year(txtDate.Text)
         Dim dtStock As New DataTable
         'dtStock = objDerived.GetDataTable("select *  from [dbo].[View_StockSupplyBatches] where  Item_ID = '" & grdStockList.SelectedDataKey("Item_ID") & "'", CommandType.Text)
         dtStock = objDerived.GetDataTable("EXEC [AMS].[sp_StockSupplies_Batches] '" & grdStockList.SelectedDataKey("GA_ID") & "','" & grdStockList.SelectedDataKey("Item_ID") & "'", CommandType.Text)
@@ -1404,18 +1411,18 @@ Partial Class Records_t_StockCard_v2
 
             btnEditMROSupplies.Enabled = False
             btnUploadMROSupplies.Enabled = False
-            btnConsOthersEdit.enabled = False
-            btnConsOthersCancel.enabled = False
+            btnConsOthersEdit.Enabled = False
+            btnConsOthersCancel.Enabled = False
 
         Else
             loadCleartext()
             loadwarehouse()
 
-            hdnItemNo.value = grdStockList.SelectedDataKey("Item_ID")
-            hdnGAId.value = grdStockList.SelectedDataKey("GA_ID")
+            hdnItemNo.Value = grdStockList.SelectedDataKey("Item_ID")
+            hdnGAId.Value = grdStockList.SelectedDataKey("GA_ID")
             Dim a As Integer
 
-            Dim classification As String = obj.GetValue("select ClassificationName From dbo.tbl_Classification where ClassificationId =" & ddClassification.text, CommandType.Text)
+            Dim classification As String = obj.GetValue("select ClassificationName From dbo.tbl_Classification where ClassificationId =" & ddClassification.Text, CommandType.Text)
             If classification = "Supplies" Then
                 loadofficesuppliesInfo()
             ElseIf classification.Contains("MRO Supplies") Then
@@ -1429,16 +1436,16 @@ Partial Class Records_t_StockCard_v2
                 loadmedicineinfo()
             ElseIf classification.Contains("MRO Consumables") Then
                 loadMROConsothers()
-                btnConsOthersEdit.enabled = True
+                btnConsOthersEdit.Enabled = True
             Else
                 loadMROEquipment()
             End If
 
-            txtItemDesc1.text = obj.GetValue("select Item_Desc From dbo.m_item where Item_ID =" & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
+            txtItemDesc1.Text = obj.GetValue("select Item_Desc From dbo.m_item where Item_ID =" & grdStockList.SelectedDataKey("Item_ID"), CommandType.Text)
 
         End If
 
-        dtStock = objDerived.GetDataTable("EXEC [AMS].[sp_StockSupplies_Batches] '" & ddGlAccount.SelectedValue() & "','" & hdnItemNo.value & "'", CommandType.Text)
+        dtStock = objDerived.GetDataTable("EXEC [AMS].[sp_StockSupplies_Batches] '" & ddGlAccount.SelectedValue() & "','" & hdnItemNo.Value & "'", CommandType.Text)
         If dtStock.Rows.Count < 4 Then
             dtStock.Merge(createdatatable2(3 - dtStock.Rows.Count))
         End If
@@ -1615,10 +1622,10 @@ Partial Class Records_t_StockCard_v2
     End Sub
 
     Protected Sub ledger()
-        If hdnItemNo.value = "" Then
+        If hdnItemNo.Value = "" Then
             dtStock = objDerived.GetDataTable("Exec [AMS].[sp_SuppliesLedger] null", CommandType.Text)
         Else
-            dtStock = objDerived.GetDataTable("Exec [AMS].[sp_SuppliesLedger] '" & hdnItemNo.value & "'", CommandType.Text)
+            dtStock = objDerived.GetDataTable("Exec [AMS].[sp_SuppliesLedger] '" & hdnItemNo.Value & "'", CommandType.Text)
 
         End If
         If dtStock.Rows.Count < 4 Then
@@ -1682,7 +1689,7 @@ Partial Class Records_t_StockCard_v2
     End Sub
     Protected Sub LoadSupplies()
         Dim cy As String
-        cy = "CY" & Year(txtdate.text)
+        cy = "CY" & Year(txtDate.Text)
 
         loadCleartext()
 
@@ -1693,7 +1700,7 @@ Partial Class Records_t_StockCard_v2
             dtStock = objDerived.GetDataTable("Exec [AMS].[sp_SuppliesList_wPrice_v1_02092022_Stockcardmain] '" & ddGlAccount.SelectedValue() & "','0','" & cy & "','" & ddCategory.SelectedValue() & "','" & 0 & "'", CommandType.Text)
         Else
 
-            dtStock = objDerived.GetDataTable("Exec [AMS].[sp_SuppliesList_wPrice_v1_02092022_Stockcardmain] '" & ddGlAccount.SelectedValue() & "','0','" & cy & "','" & ddCategory.SelectedValue() & "','" & ddSubCategory.selectedvalue() & "'", CommandType.Text)
+            dtStock = objDerived.GetDataTable("Exec [AMS].[sp_SuppliesList_wPrice_v1_02092022_Stockcardmain] '" & ddGlAccount.SelectedValue() & "','0','" & cy & "','" & ddCategory.SelectedValue() & "','" & ddSubCategory.SelectedValue() & "'", CommandType.Text)
         End If
 
         If dtStock.Rows.Count = 0 Then
@@ -2410,54 +2417,54 @@ Partial Class Records_t_StockCard_v2
         Try
             If grdStockList.SelectedDataKey("GA_ID") = 1432 Or grdStockList.SelectedDataKey("GA_ID") = 1433 Then
                 'MEDICINES
-                objDerived.GetRecords("UPDATE [AMS].[TBMedicine_DTl] " + _
-                                        " SET [Form] = '" & txtForm.Text & "' " + _
-                                        " ,[OTCRx] = '" & txtOTC.Text & "' " + _
-                                        " ,[Mftgdate] = '" & txtMDate.Text & "'  " + _
-                                        " ,[Batch] = '" & txtBatch.Text & "' " + _
-                                        " ,[Lot] = '" & txtLot.Text & "' " + _
-                                        " ,[EpiryDate] = '" & txtEDate.Text & "' " + _
-                                        " ,[Alert] = '" & txtAlert.Text & "' " + _
+                objDerived.GetRecords("UPDATE [AMS].[TBMedicine_DTl] " +
+                                        " SET [Form] = '" & txtForm.Text & "' " +
+                                        " ,[OTCRx] = '" & txtOTC.Text & "' " +
+                                        " ,[Mftgdate] = '" & txtMDate.Text & "'  " +
+                                        " ,[Batch] = '" & txtBatch.Text & "' " +
+                                        " ,[Lot] = '" & txtLot.Text & "' " +
+                                        " ,[EpiryDate] = '" & txtEDate.Text & "' " +
+                                        " ,[Alert] = '" & txtAlert.Text & "' " +
                                         " WHERE StockId = '" & Session("StockID") & "' AND Item_ID = '" & grdStockList.SelectedDataKey("Item_ID") & "'", CommandType.Text)
 
-                objDerived.GetRecords("UPDATE [AMS].[TBMedicine_Info]  " + _
-                                        " SET [Description] = '" & txtItemDesc2.Text & "' " + _
-                                        " ,[BrandName] = '" & txtBrandName2.Text & "' " + _
-                                        " ,[Dose] = '" & txtDose.Text & "' " + _
-                                        " ,[Depreciatedrate] = '" & txtDepRate.Text & "' " + _
-                                        " ,[Depreciatedvalue] = '" & txtDepValue.Text & "' " + _
+                objDerived.GetRecords("UPDATE [AMS].[TBMedicine_Info]  " +
+                                        " SET [Description] = '" & txtItemDesc2.Text & "' " +
+                                        " ,[BrandName] = '" & txtBrandName2.Text & "' " +
+                                        " ,[Dose] = '" & txtDose.Text & "' " +
+                                        " ,[Depreciatedrate] = '" & txtDepRate.Text & "' " +
+                                        " ,[Depreciatedvalue] = '" & txtDepValue.Text & "' " +
                                         " WHERE StockID = '" & Session("StockID") & "' AND Item_ID = '" & grdStockList.SelectedDataKey("Item_ID") & "'", CommandType.Text)
 
             ElseIf grdStockList.SelectedDataKey("GA_ID") = 1430 Then
                 'FOOD
-                objDerived.GetRecords("UPDATE [AMS].[TbFood] " + _
-                                        " SET [Form] = '" & txtForm.Text & "' " + _
-                                        " ,[OTCRx] = '" & txtOTC.Text & "' " + _
-                                        " ,[Mftgdate] = '" & txtMDate.Text & "' " + _
-                                        " ,[Batch] = '" & txtBatch.Text & "' " + _
-                                        " ,[Lot] = '" & txtLot.Text & "' " + _
-                                        " ,[EpiryDate] = '" & txtEDate.Text & "' " + _
-                                        " ,[Alert] = '" & txtAlert.Text & "' " + _
-                                        " ,[ItemDesc] = '" & txtItemDesc2.Text & "' " + _
-                                        " ,[BrandName] = '" & txtBrandName2.Text & "' " + _
-                                        " ,[DepreciationRate] = '" & txtDepRate.Text & "' " + _
-                                        " ,[DepreciationValue] = '" & txtDepValue.Text & "' " + _
+                objDerived.GetRecords("UPDATE [AMS].[TbFood] " +
+                                        " SET [Form] = '" & txtForm.Text & "' " +
+                                        " ,[OTCRx] = '" & txtOTC.Text & "' " +
+                                        " ,[Mftgdate] = '" & txtMDate.Text & "' " +
+                                        " ,[Batch] = '" & txtBatch.Text & "' " +
+                                        " ,[Lot] = '" & txtLot.Text & "' " +
+                                        " ,[EpiryDate] = '" & txtEDate.Text & "' " +
+                                        " ,[Alert] = '" & txtAlert.Text & "' " +
+                                        " ,[ItemDesc] = '" & txtItemDesc2.Text & "' " +
+                                        " ,[BrandName] = '" & txtBrandName2.Text & "' " +
+                                        " ,[DepreciationRate] = '" & txtDepRate.Text & "' " +
+                                        " ,[DepreciationValue] = '" & txtDepValue.Text & "' " +
                                         " WHERE StockId = '" & Session("StockID") & "' AND Item_ID = '" & grdStockList.SelectedDataKey("Item_ID") & "'", CommandType.Text)
 
 
             Else
-                objDerived.GetRecords("UPDATE [AMS].[TbNonFood] " + _
-                                        " SET [Form] = '" & txtForm.Text & "' " + _
-                                        " ,[OTCRx] = '" & txtOTC.Text & "' " + _
-                                        " ,[Mftgdate] = '" & txtMDate.Text & "' " + _
-                                        " ,[Batch] = '" & txtBatch.Text & "' " + _
-                                        " ,[Lot] = '" & txtLot.Text & "' " + _
-                                        " ,[EpiryDate] = '" & txtEDate.Text & "' " + _
-                                        " ,[Alert] = '" & txtAlert.Text & "' " + _
-                                        " ,[ItemDesc] = '" & txtItemDesc2.Text & "' " + _
-                                        " ,[BrandName] = '" & txtBrandName2.Text & "' " + _
-                                        " ,[DepreciationRate] = '" & txtDepRate.Text & "' " + _
-                                        " ,[DepreciationValue] = '" & txtDepValue.Text & "' " + _
+                objDerived.GetRecords("UPDATE [AMS].[TbNonFood] " +
+                                        " SET [Form] = '" & txtForm.Text & "' " +
+                                        " ,[OTCRx] = '" & txtOTC.Text & "' " +
+                                        " ,[Mftgdate] = '" & txtMDate.Text & "' " +
+                                        " ,[Batch] = '" & txtBatch.Text & "' " +
+                                        " ,[Lot] = '" & txtLot.Text & "' " +
+                                        " ,[EpiryDate] = '" & txtEDate.Text & "' " +
+                                        " ,[Alert] = '" & txtAlert.Text & "' " +
+                                        " ,[ItemDesc] = '" & txtItemDesc2.Text & "' " +
+                                        " ,[BrandName] = '" & txtBrandName2.Text & "' " +
+                                        " ,[DepreciationRate] = '" & txtDepRate.Text & "' " +
+                                        " ,[DepreciationValue] = '" & txtDepValue.Text & "' " +
                                         " WHERE StockId = '" & Session("StockID") & "' AND Item_ID = '" & grdStockList.SelectedDataKey("Item_ID") & "'", CommandType.Text)
 
             End If
@@ -2516,18 +2523,18 @@ Partial Class Records_t_StockCard_v2
 
     Protected Sub btnUpdate1_Click(ByVal sender As Object, ByVal e As System.EventArgs)
         Try
-            objDerived.GetRecords("UPDATE [AMS].[TBSupplies_Info] " + _
-                                    " SET [Description] = '" & txtItemDesc1.Text & "' " + _
-                                    " ,[BrandName] = '" & txtBrandName1.Text & "' " + _
-                                    " ,[Size] = '" & txtSize.Text & "' " + _
-                                    " ,[Color] = '" & txtColor.Text & "' " + _
-                                    " ,[Category] = '" & txtCategory.Text & "' " + _
-                                    " ,[Length] = '" & txtLenght.Text & "' " + _
-                                    " ,[Width] = '" & txtWidth.Text & "' " + _
-                                    " ,[Height] = '" & txtHeight.Text & "' " + _
-                                    " ,[Weight] = '" & txtWeight.Text & "' " + _
-                                    " ,[DepreciatedValue] = '" & txtDepValue1.Text & "' " + _
-                                    " ,[DepreciatedRate] = '" & txtDepRate1.Text & "' " + _
+            objDerived.GetRecords("UPDATE [AMS].[TBSupplies_Info] " +
+                                    " SET [Description] = '" & txtItemDesc1.Text & "' " +
+                                    " ,[BrandName] = '" & txtBrandName1.Text & "' " +
+                                    " ,[Size] = '" & txtSize.Text & "' " +
+                                    " ,[Color] = '" & txtColor.Text & "' " +
+                                    " ,[Category] = '" & txtCategory.Text & "' " +
+                                    " ,[Length] = '" & txtLenght.Text & "' " +
+                                    " ,[Width] = '" & txtWidth.Text & "' " +
+                                    " ,[Height] = '" & txtHeight.Text & "' " +
+                                    " ,[Weight] = '" & txtWeight.Text & "' " +
+                                    " ,[DepreciatedValue] = '" & txtDepValue1.Text & "' " +
+                                    " ,[DepreciatedRate] = '" & txtDepRate1.Text & "' " +
                                     " WHERE StockID = '" & Session("StockID") & "' AND ItemId = '" & grdStockList.SelectedDataKey("Item_ID") & "'", CommandType.Text)
 
             ' MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Transaction has been successfully saved.")
@@ -2564,7 +2571,7 @@ Partial Class Records_t_StockCard_v2
         End If
 
 
-        txtQuantity.text = True
+        txtQuantity.Text = True
     End Sub
 
     Dim rcv As New Receiving.t_receiving
@@ -2573,7 +2580,7 @@ Partial Class Records_t_StockCard_v2
 
     Protected Sub btnSave_Click(sender As Object, e As EventArgs)
 
-        If txtItemDesc1.text = "" Or txtBrandName1.text = "" Or txtUnitPrice.text = "" Or txtQuantity.text = "" Then
+        If txtItemDesc1.Text = "" Or txtBrandName1.Text = "" Or txtUnitPrice.Text = "" Or txtQuantity.Text = "" Then
             MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Please Fill up the required Fields: Name / Brand Name / Unit Cost / Quantity")
         Else
             With rcv
@@ -2582,7 +2589,7 @@ Partial Class Records_t_StockCard_v2
                 .POHdr_ID = 0
                 .PO_No = ""
                 .Supplier_ID = 0
-                .GA_ID = hdnGAId.value
+                .GA_ID = hdnGAId.Value
                 .isAccepted = False
                 .UserID = Session("@UserName")
             End With
@@ -2601,7 +2608,7 @@ Partial Class Records_t_StockCard_v2
                 '=-= SAVE AMS.Tb_Receiving_Dtl
                 With rcv_dtl
                     .Received_ID = rcvID
-                    .Item_ID = hdnItemNo.value
+                    .Item_ID = hdnItemNo.Value
                     .PO_Qty = txtqty.Text
                     .Qty_Received = txtqty.Text
                     .Cost = txtPrice.Text
@@ -2656,11 +2663,11 @@ Partial Class Records_t_StockCard_v2
             Dim txtPriceair As TextBox = CType(txtUnitPrice, TextBox)
             Dim txtqtyair As TextBox = CType(txtQuantity, TextBox)
 
-            objdtl.Item_ID = hdnItemNo.value
+            objdtl.Item_ID = hdnItemNo.Value
             objdtl.Qty = txtqtyair.Text
             objdtl.Cost = CType(txtPriceair.Text, Decimal)
             objdtl.AIRHdr_ID = Session("AIRHDR_ID")
-            objdtl.GA_ID = hdnGAId.value
+            objdtl.GA_ID = hdnGAId.Value
             Dim iaDtl_ID As Integer = objdtl.save()
 
             Session("AIRDtl_ID") = iaDtl_ID
@@ -2670,25 +2677,25 @@ Partial Class Records_t_StockCard_v2
             With objStock
                 '.StockID = StockID
                 .StockDate = DateTime.Parse(txtDate.Text)
-                .Item_ID = hdnItemNo.value
+                .Item_ID = hdnItemNo.Value
                 .Qty = txtqtyair.Text
                 .Balance = txtqtyair.Text
                 Dim location As String
 
                 If String.IsNullOrEmpty(txtColumn.Text) And String.IsNullOrEmpty(txtFloor.Text) And String.IsNullOrEmpty(txtRoom.Text) And String.IsNullOrEmpty(txtShelves.Text) And String.IsNullOrEmpty(txtRack.Text) And String.IsNullOrEmpty(txtBin.Text) Then
-                    location = "Bay-" & txtBay.text
+                    location = "Bay-" & txtBay.Text
                 ElseIf String.IsNullOrEmpty(txtBay.Text) And String.IsNullOrEmpty(txtFloor.Text) And String.IsNullOrEmpty(txtRoom.Text) And String.IsNullOrEmpty(txtShelves.Text) And String.IsNullOrEmpty(txtRack.Text) And String.IsNullOrEmpty(txtBin.Text) Then
-                    location = "Column-" & txtColumn.text
+                    location = "Column-" & txtColumn.Text
                 ElseIf String.IsNullOrEmpty(txtBay.Text) And String.IsNullOrEmpty(txtColumn.Text) And String.IsNullOrEmpty(txtRoom.Text) And String.IsNullOrEmpty(txtShelves.Text) And String.IsNullOrEmpty(txtRack.Text) And String.IsNullOrEmpty(txtBin.Text) Then
-                    location = "Floor-" & txtFloor.text
+                    location = "Floor-" & txtFloor.Text
                 ElseIf String.IsNullOrEmpty(txtBay.Text) And String.IsNullOrEmpty(txtColumn.Text) And String.IsNullOrEmpty(txtFloor.Text) And String.IsNullOrEmpty(txtShelves.Text) And String.IsNullOrEmpty(txtRack.Text) And String.IsNullOrEmpty(txtBin.Text) Then
-                    location = "Room-" & txtRoom.text
+                    location = "Room-" & txtRoom.Text
                 ElseIf String.IsNullOrEmpty(txtBay.Text) And String.IsNullOrEmpty(txtColumn.Text) And String.IsNullOrEmpty(txtFloor.Text) And String.IsNullOrEmpty(txtRoom.Text) And String.IsNullOrEmpty(txtRack.Text) And String.IsNullOrEmpty(txtBin.Text) Then
-                    location = "Shelves-" & txtShelves.text
+                    location = "Shelves-" & txtShelves.Text
                 ElseIf String.IsNullOrEmpty(txtBay.Text) And String.IsNullOrEmpty(txtColumn.Text) And String.IsNullOrEmpty(txtFloor.Text) And String.IsNullOrEmpty(txtRoom.Text) And String.IsNullOrEmpty(txtShelves.Text) And String.IsNullOrEmpty(txtBin.Text) Then
-                    location = "Rack-" & txtRack.text
+                    location = "Rack-" & txtRack.Text
                 ElseIf String.IsNullOrEmpty(txtBay.Text) And String.IsNullOrEmpty(txtColumn.Text) And String.IsNullOrEmpty(txtFloor.Text) And String.IsNullOrEmpty(txtRoom.Text) And String.IsNullOrEmpty(txtShelves.Text) And String.IsNullOrEmpty(txtRack.Text) Then
-                    location = "Bin-" & txtBin.text
+                    location = "Bin-" & txtBin.Text
                 End If
 
 
@@ -2702,8 +2709,8 @@ Partial Class Records_t_StockCard_v2
                 .Program_id = 0
                 .F_ID = 4
                 .AIRDtl_ID = Session("AIRDtl_ID")
-                .GA_ID = hdnGAId.value
-                .Warehouseid = drpWarehouse.selectedvalue()
+                .GA_ID = hdnGAId.Value
+                .Warehouseid = drpWarehouse.SelectedValue()
             End With
 
             Dim StockID As Long = objStock.save
@@ -2729,36 +2736,36 @@ Partial Class Records_t_StockCard_v2
                 .CreditUnit = "-"
                 .CreditCost = "0.00"
                 .dDate = DateTime.Parse(txtDate.Text)
-                .Item_ID = hdnItemNo.value
+                .Item_ID = hdnItemNo.Value
                 .DebitQty = txtqtyair.Text
                 .DebitCost = FormatNumber(CType(txtPriceair.Text, Decimal) * txtqtyair.Text, 2)
-                .DebitUnit = objDerived.GetValue("SELECT AMS.m_Unit.Description FROM AMS.m_Unit INNER JOIN dbo.m_item ON AMS.m_Unit.Unit_ID = dbo.m_item.Unit_ID WHERE dbo.m_item.Item_ID = '" & hdnItemNo.value & "'", CommandType.Text)
-                .BalanceUnit = objDerived.GetValue("SELECT AMS.m_Unit.Description FROM AMS.m_Unit INNER JOIN dbo.m_item ON AMS.m_Unit.Unit_ID = dbo.m_item.Unit_ID WHERE dbo.m_item.Item_ID = '" & hdnItemNo.value & "'", CommandType.Text)
+                .DebitUnit = objDerived.GetValue("SELECT AMS.m_Unit.Description FROM AMS.m_Unit INNER JOIN dbo.m_item ON AMS.m_Unit.Unit_ID = dbo.m_item.Unit_ID WHERE dbo.m_item.Item_ID = '" & hdnItemNo.Value & "'", CommandType.Text)
+                .BalanceUnit = objDerived.GetValue("SELECT AMS.m_Unit.Description FROM AMS.m_Unit INNER JOIN dbo.m_item ON AMS.m_Unit.Unit_ID = dbo.m_item.Unit_ID WHERE dbo.m_item.Item_ID = '" & hdnItemNo.Value & "'", CommandType.Text)
                 .BalanceQty = 0
                 .BalanceCost = 0
                 .save()
             End With
             Dim objOfficeSup As New SupplieINFO
 
-            If hdnGAId.value = 1427 Then
+            If hdnGAId.Value = 1427 Then
                 'Office Supplies
                 With objOfficeSup
                     '.SuppliesId = SuppliesId
                     .StockID = StockID
                     .AIRDtl_ID = Session("AIRDtl_ID")
-                    .ItemId = hdnItemNo.value
-                    .Description = txtItemDesc1.text
-                    .BrandName = txtBrandName1.text
+                    .ItemId = hdnItemNo.Value
+                    .Description = txtItemDesc1.Text
+                    .BrandName = txtBrandName1.Text
                     .SupplierId = 0
-                    .Size = txtSize.text
-                    .Color = txtColor.text
-                    .Category = txtCategory.text
-                    .Length = txtLenght.text
-                    .Width = txtWidth.text
-                    .Height = txtHeight.text
-                    .Weight = txtWeight.text
-                    .DepreciatedValue = txtDepRate1.text
-                    .DepreciatedRate = txtDepValue1.text
+                    .Size = txtSize.Text
+                    .Color = txtColor.Text
+                    .Category = txtCategory.Text
+                    .Length = txtLenght.Text
+                    .Width = txtWidth.Text
+                    .Height = txtHeight.Text
+                    .Weight = txtWeight.Text
+                    .DepreciatedValue = txtDepRate1.Text
+                    .DepreciatedRate = txtDepValue1.Text
                     .Status = "Accepted"
 
                 End With
@@ -2767,7 +2774,7 @@ Partial Class Records_t_StockCard_v2
                 objDerived.GetRecords("UPDATE AMS.TBSupplies_Info SET Received_ID = '" & rcvID & "' WHERE SuppliesId = '" & Supp_ID & "'", CommandType.Text)
             End If
 
-            dtStock = objDerived.GetDataTable("Exec [AMS].[sp_SuppliesLedger.] '" & hdnItemNo.value & "'", CommandType.Text)
+            dtStock = objDerived.GetDataTable("Exec [AMS].[sp_SuppliesLedger.] '" & hdnItemNo.Value & "'", CommandType.Text)
             If dtStock.Rows.Count < 4 Then
                 dtStock.Merge(createdatatableledger(3 - dtStock.Rows.Count))
             End If
@@ -2787,25 +2794,25 @@ Partial Class Records_t_StockCard_v2
 
     Public Sub SelectCategory()
         Dim category As String
-        If ddCategory.text = "" Then
+        If ddCategory.Text = "" Then
             category = 0
         Else
-            category = ddCategory.selectedvalue()
+            category = ddCategory.SelectedValue()
         End If
         If category = 0 Then
             MultiviewSupplier()
             ddSubCategory.Enabled = True
         Else
             Dim subcategory As New DataTable
-            ddSubCategory.items.clear()
+            ddSubCategory.Items.Clear()
             '
             subcategory = obj.GetDataTable("select [SubCategoryID],[SubCat_Desc]  From [dbo].[tbl_SubCategory] where item_particular_id = " & category & "", CommandType.Text)
-            ddSubCategory.datasource = subcategory
+            ddSubCategory.DataSource = subcategory
             ddSubCategory.DataTextField = ("SubCat_Desc")
             ddSubCategory.DataValueField = ("SubCategoryID")
             ddSubCategory.DataBind()
-            ddSubCategory.items.insert(0, "All")
-            ddSubCategory.enabled = True
+            ddSubCategory.Items.Insert(0, "All")
+            ddSubCategory.Enabled = True
             MultiviewSupplier()
         End If
 
@@ -2830,7 +2837,7 @@ Partial Class Records_t_StockCard_v2
     End Sub
 
     Public Sub SelectSubClassification()
-        PListofGL = objDerived.GetDataTable("Exec dbo.sp_Accounts_Category_v1_02152022 '" & 2 & "','" & ddClassification.selectedvalue() & "'", CommandType.Text)
+        PListofGL = objDerived.GetDataTable("Exec dbo.sp_Accounts_Category_v1_02152022 '" & 2 & "','" & ddClassification.SelectedValue() & "'", CommandType.Text)
         ddGlAccount.DataSource = CType(PListofGL, DataTable)
         ddGlAccount.DataTextField = ("GA_Title")
         ddGlAccount.DataValueField = ("GA_ID")
@@ -2842,7 +2849,7 @@ Partial Class Records_t_StockCard_v2
 
 
     Public Sub SelectClassification()
-        PListofGL = objDerived.GetDataTable("select distinct b.SubClassificationName ,b.SubClassificationID  From tblclassmatrix as a inner join dbo.tbl_SubClassification as b on  b.ClassificationID = a.ClassificationID and b.SubClassificationID = a.SubClassificationID where a.classificationid = '" & ddClassification.selectedvalue() & "'", CommandType.Text)
+        PListofGL = objDerived.GetDataTable("select distinct b.SubClassificationName ,b.SubClassificationID  From tblclassmatrix as a inner join dbo.tbl_SubClassification as b on  b.ClassificationID = a.ClassificationID and b.SubClassificationID = a.SubClassificationID where a.classificationid = '" & ddClassification.SelectedValue() & "'", CommandType.Text)
         drpSubClass.DataSource = CType(PListofGL, DataTable)
         drpSubClass.DataTextField = ("SubClassificationName")
         drpSubClass.DataValueField = ("SubClassificationID")
@@ -2858,25 +2865,25 @@ Partial Class Records_t_StockCard_v2
     End Sub
 
     Protected Sub btnEditMROSupplies_Click(ByVal sender As Object, ByVal e As System.EventArgs)
-        If btnEditMROSupplies.text = "SAVE" Then
+        If btnEditMROSupplies.Text = "SAVE" Then
 
             Try
                 Dim location As String
 
                 If String.IsNullOrEmpty(txtMROsuppliesColumn.Text) And String.IsNullOrEmpty(txtMROsuppliesFloor.Text) And String.IsNullOrEmpty(txtMROsuppliesRoom.Text) And String.IsNullOrEmpty(txtMROsuppliesShelves.Text) And String.IsNullOrEmpty(txtMROsuppliesRack.Text) And String.IsNullOrEmpty(txtMROsuppliesBin.Text) Then
-                    location = "Bay-" & txtMROsuppliesBay.text
+                    location = "Bay-" & txtMROsuppliesBay.Text
                 ElseIf String.IsNullOrEmpty(txtMROsuppliesBay.Text) And String.IsNullOrEmpty(txtMROsuppliesFloor.Text) And String.IsNullOrEmpty(txtMROsuppliesRoom.Text) And String.IsNullOrEmpty(txtMROsuppliesShelves.Text) And String.IsNullOrEmpty(txtMROsuppliesRack.Text) And String.IsNullOrEmpty(txtMROsuppliesBin.Text) Then
-                    location = "Column-" & txtMROsuppliesColumn.text
+                    location = "Column-" & txtMROsuppliesColumn.Text
                 ElseIf String.IsNullOrEmpty(txtMROsuppliesBay.Text) And String.IsNullOrEmpty(txtMROsuppliesColumn.Text) And String.IsNullOrEmpty(txtMROsuppliesRoom.Text) And String.IsNullOrEmpty(txtMROsuppliesShelves.Text) And String.IsNullOrEmpty(txtMROsuppliesRack.Text) And String.IsNullOrEmpty(txtMROsuppliesBin.Text) Then
-                    location = "Floor-" & txtMROsuppliesFloor.text
+                    location = "Floor-" & txtMROsuppliesFloor.Text
                 ElseIf String.IsNullOrEmpty(txtMROsuppliesBay.Text) And String.IsNullOrEmpty(txtMROsuppliesColumn.Text) And String.IsNullOrEmpty(txtMROsuppliesFloor.Text) And String.IsNullOrEmpty(txtMROsuppliesShelves.Text) And String.IsNullOrEmpty(txtMROsuppliesRack.Text) And String.IsNullOrEmpty(txtMROsuppliesBin.Text) Then
-                    location = "Room-" & txtMROsuppliesRoom.text
+                    location = "Room-" & txtMROsuppliesRoom.Text
                 ElseIf String.IsNullOrEmpty(txtMROsuppliesBay.Text) And String.IsNullOrEmpty(txtMROsuppliesColumn.Text) And String.IsNullOrEmpty(txtMROsuppliesFloor.Text) And String.IsNullOrEmpty(txtMROsuppliesRoom.Text) And String.IsNullOrEmpty(txtMROsuppliesRack.Text) And String.IsNullOrEmpty(txtMROsuppliesBin.Text) Then
-                    location = "Shelves-" & txtMROsuppliesShelves.text
+                    location = "Shelves-" & txtMROsuppliesShelves.Text
                 ElseIf String.IsNullOrEmpty(txtMROsuppliesBay.Text) And String.IsNullOrEmpty(txtMROsuppliesColumn.Text) And String.IsNullOrEmpty(txtMROsuppliesFloor.Text) And String.IsNullOrEmpty(txtMROsuppliesRoom.Text) And String.IsNullOrEmpty(txtMROsuppliesShelves.Text) And String.IsNullOrEmpty(txtMROsuppliesBin.Text) Then
-                    location = "Rack-" & txtMROsuppliesRack.text
+                    location = "Rack-" & txtMROsuppliesRack.Text
                 ElseIf String.IsNullOrEmpty(txtMROsuppliesBay.Text) And String.IsNullOrEmpty(txtMROsuppliesColumn.Text) And String.IsNullOrEmpty(txtMROsuppliesFloor.Text) And String.IsNullOrEmpty(txtMROsuppliesRoom.Text) And String.IsNullOrEmpty(txtMROsuppliesShelves.Text) And String.IsNullOrEmpty(txtMROsuppliesRack.Text) Then
-                    location = "Bin-" & txtMROsuppliesBin.text
+                    location = "Bin-" & txtMROsuppliesBin.Text
                 End If
 
                 '----Update Receiving
@@ -2885,7 +2892,7 @@ Partial Class Records_t_StockCard_v2
                                     " ,[Qty_Received] = '" & txtMROsuppliesQuantity.Text & "' " +
                                     " ,[Cost] = '" & txtMROsuppliesUnitPrice.Text & "' " +
                                     " ,[Location] = '" & location & "' " +
-                                    " WHERE Item_ID = '" & hdnItemNo.value & "'", CommandType.Text)
+                                    " WHERE Item_ID = '" & hdnItemNo.Value & "'", CommandType.Text)
                 Dim t1 As Decimal
                 Dim total As Decimal = 0
 
@@ -2897,14 +2904,14 @@ Partial Class Records_t_StockCard_v2
                 objDerived.GetRecords("UPDATE [AMS].[PO_Dtl] " +
                                     " SET [qty] = '" & txtMROsuppliesQuantity.Text & "' " +
                                     " ,[cost] = '" & txtMROsuppliesUnitPrice.Text & "' " +
-                                    " WHERE Item_ID = '" & hdnItemNo.value & "'", CommandType.Text)
+                                    " WHERE Item_ID = '" & hdnItemNo.Value & "'", CommandType.Text)
 
 
                 '----Update AIR_Dtl
                 objDerived.GetRecords("UPDATE [AMS].[AIR_Dtl] " +
                                     " SET [Qty] = '" & txtMROsuppliesQuantity.Text & "' " +
                                     " ,[Cost] = '" & txtMROsuppliesUnitPrice.Text & "' " +
-                                    " WHERE Item_ID = '" & hdnItemNo.value & "'", CommandType.Text)
+                                    " WHERE Item_ID = '" & hdnItemNo.Value & "'", CommandType.Text)
 
                 '----Update STOCK
                 objDerived.GetRecords("UPDATE [AMS].[stock] " +
@@ -2912,14 +2919,14 @@ Partial Class Records_t_StockCard_v2
                                     " ,[Balance] = '" & txtMROsuppliesQuantity.Text & "' " +
                                     " ,[Cost] = '" & txtMROsuppliesUnitPrice.Text & "' " +
                                     " ,[Location] = '" & location & "' " +
-                                    " ,[warehouse_ID] = '" & drpMROsuppliesWarehouse.selectedvalue() & "' " +
-                                    " WHERE Item_ID = '" & hdnItemNo.value & "'", CommandType.Text)
+                                    " ,[warehouse_ID] = '" & drpMROsuppliesWarehouse.SelectedValue() & "' " +
+                                    " WHERE Item_ID = '" & hdnItemNo.Value & "'", CommandType.Text)
 
                 '----Update stockledger
                 objDerived.GetRecords("UPDATE [AMS].[TbStock_Ledger] " +
                                     " SET [DebitQty] = '" & txtMROsuppliesQuantity.Text & "' " +
                                     " ,[DebitCost] = '" & CType(txtMROsuppliesQuantity.Text * txtMROsuppliesUnitPrice.Text, Decimal) & "' " +
-                                     " WHERE Item_ID = '" & hdnItemNo.value & "'and Trans_Type like 'Starting Balance'", CommandType.Text)
+                                     " WHERE Item_ID = '" & hdnItemNo.Value & "'and Trans_Type like 'Starting Balance'", CommandType.Text)
 
                 '----Update suppliesinfo
                 objDerived.GetRecords("UPDATE [AMS].[TBSupplies_Info] " +
@@ -2932,7 +2939,7 @@ Partial Class Records_t_StockCard_v2
                                     " ,[Componentof] = '" & txtMROsuppliesComponentof.Text & "' " +
                                     " ,[Height] = '" & txtMROsuppliesheight.Text & "' " +
                                     " ,[Weight] = '" & txtMROsuppliesWeight.Text & "' " +
-                                    " WHERE ItemId = '" & hdnItemNo.value & "'", CommandType.Text)
+                                    " WHERE ItemId = '" & hdnItemNo.Value & "'", CommandType.Text)
 
 
 
@@ -3018,21 +3025,21 @@ Partial Class Records_t_StockCard_v2
 
         Else
 
-            btnEditMROSupplies.text = "SAVE"
-            lblMROsuppliesName.visible = False
-            lblMROsuppliesUnit.visible = False
-            lblMROsuppliesBrandName.visible = False
-            lblMROsuppliesLength.visible = False
-            lblMROsuppliesSize.visible = False
+            btnEditMROSupplies.Text = "SAVE"
+            lblMROsuppliesName.Visible = False
+            lblMROsuppliesUnit.Visible = False
+            lblMROsuppliesBrandName.Visible = False
+            lblMROsuppliesLength.Visible = False
+            lblMROsuppliesSize.Visible = False
 
-            lblMROsuppliesWidth.visible = False
-            lblMROsuppliesColor.visible = False
-            lblMROsuppliesWeight.visible = False
-            lblMROsuppliesComponentof.visible = False
-            lblMROsuppliesheight.visible = False
-            lblMROsuppliesUnitPrice.visible = False
-            lblMROsuppliesQuantity.visible = False
-            txtMROsuppliesName.visible = True
+            lblMROsuppliesWidth.Visible = False
+            lblMROsuppliesColor.Visible = False
+            lblMROsuppliesWeight.Visible = False
+            lblMROsuppliesComponentof.Visible = False
+            lblMROsuppliesheight.Visible = False
+            lblMROsuppliesUnitPrice.Visible = False
+            lblMROsuppliesQuantity.Visible = False
+            txtMROsuppliesName.Visible = True
             txtMROsuppliesBrandName.Visible = True
 
 
@@ -3145,10 +3152,10 @@ Partial Class Records_t_StockCard_v2
 
     End Sub
     Protected Sub btnConsOthersEdit_Click(ByVal sender As Object, ByVal e As System.EventArgs)
-        If btnConsOthersEdit.text = "EDIT" Then
+        If btnConsOthersEdit.Text = "EDIT" Then
 
 
-            btnConsOthersEdit.text = "SAVE"
+            btnConsOthersEdit.Text = "SAVE"
             'btnConsOthersCancel.enabled = True
             'txtConsOthersName.Visible = True
             'txtConsOthersBrandName.Visible = True
@@ -3218,7 +3225,7 @@ Partial Class Records_t_StockCard_v2
                                         " ,[Alert] = '" & txtAlertConsOthers.Text & "' " +
                                         " ,[ItemDesc] = '" & txtConsOthersName.Text & "' " +
                                         " ,[BrandName] = '" & txtConsOthersBrandName.Text & "' " +
-                                        " WHERE Item_ID = '" & hdnItemNo.value & "'", CommandType.Text)
+                                        " WHERE Item_ID = '" & hdnItemNo.Value & "'", CommandType.Text)
 
 
                 MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Transaction has been successfully saved.")
@@ -3229,7 +3236,7 @@ Partial Class Records_t_StockCard_v2
                 MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Error occured, pls contact administrator.")
             End Try
 
-            btnConsOthersEdit.text = "EDIT"
+            btnConsOthersEdit.Text = "EDIT"
             'btnConsOthersCancel.enabled = False
             'lblConsOthersBrandName.Visible = True
             'lblConsOthersQuantity.Visible = True
@@ -3278,8 +3285,8 @@ Partial Class Records_t_StockCard_v2
 
     End Sub
     Protected Sub btnConsOthersCancel_Click(ByVal sender As Object, ByVal e As System.EventArgs)
-        btnConsOthersEdit.text = "EDIT"
-        btnConsOthersCancel.enabled = False
+        btnConsOthersEdit.Text = "EDIT"
+        btnConsOthersCancel.Enabled = False
 
         'lblConsOthersName.Visible = True
         'lblConsOthersBrandName.Visible = True
@@ -3324,10 +3331,10 @@ Partial Class Records_t_StockCard_v2
 
 
     Protected Sub txtMROsuppliesQuantity_TextChanged(sender As Object, e As EventArgs)
-        Dim creditqty As Integer = objDerived.GetValue("select sum(CreditQty) from ams.TbStock_Ledger  where Item_ID =" & hdnItemNo.value, CommandType.Text)
-        If creditqty >= txtMROsuppliesQuantity.text Then
+        Dim creditqty As Integer = objDerived.GetValue("select sum(CreditQty) from ams.TbStock_Ledger  where Item_ID =" & hdnItemNo.Value, CommandType.Text)
+        If creditqty >= txtMROsuppliesQuantity.Text Then
             MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Quantity must not be less than the Credit Quantity")
-            txtMROsuppliesQuantity.text = objDerived.GetValue("Select cast(balance As int) from ams.Stock where Item_ID =" & hdnItemNo.value, CommandType.Text)
+            txtMROsuppliesQuantity.Text = objDerived.GetValue("Select cast(balance As int) from ams.Stock where Item_ID =" & hdnItemNo.Value, CommandType.Text)
 
         End If
 
@@ -3350,7 +3357,7 @@ Partial Class Records_t_StockCard_v2
 
 
     Protected Sub btnViewSIR_Click(sender As Object, e As EventArgs)
-        Dim CY As String = "CY" & Year(txtDate.text)
+        Dim CY As String = "CY" & Year(txtDate.Text)
         Session("cyear") = CY
         Me.Page.Response.Redirect("~/Records/rpt_stockcardinventory.aspx")
 
@@ -3359,7 +3366,7 @@ Partial Class Records_t_StockCard_v2
     End Sub
     Protected Sub BtnList_Click(sender As Object, e As EventArgs)
         ' Try
-        Dim dt As New datatable
+        Dim dt As New DataTable
         dt = objDerived.GetDataTable("select sum(a.ReorderPt) as ReorderPt ,sum(a.Balance) as Balance,e.Description,isnull(b.Item_Code,'') as Item_Code,                                              " &
                     "  b.itemCompletedesc as Item_Desc from ams.Stock as a " &
                     " inner join dbo.m_item as b on a.Item_ID = b.Item_ID                                                                                    " &
@@ -3368,9 +3375,9 @@ Partial Class Records_t_StockCard_v2
                     "group by e.Description,Item_Code,c.description,b.Brand,b.Color,b.Size,b.item_desc,b.itemCompletedesc" &
                     " HAVING sum(a.ReorderPt) > sum(a.Balance)", CommandType.Text)
         grdItemROP.DataSource = dt
-            grdItemROP.DataBind()
+        grdItemROP.DataBind()
 
-            ModalPopupExtender5.Show()
+        ModalPopupExtender5.Show()
         'Catch ex As Exception
         '    MsgeBox.CreateMessageAlertInUpdatePanel(Me.updatepanel1, "something went wrong, please contact system admin.")
         'End Try
@@ -3380,7 +3387,7 @@ Partial Class Records_t_StockCard_v2
 
     Protected Sub grdItemROP_PageIndexChanging(sender As Object, e As GridViewPageEventArgs)
         Try
-            Dim dt As New datatable
+            Dim dt As New DataTable
             dt = objDerived.GetDataTable("select sum(a.ReorderPt) as ReorderPt ,sum(a.Balance) as Balance,e.Description,isnull(b.Item_Code,'') as Item_Code,                                              " &
                     " c.description + ',' + isnull(b.Brand, '') + ',' + isnull(b.Color,'') + ',' + isnull(b.Size,'') + ',' + b.item_desc as Item_Desc from ams.Stock as a " &
                     " inner join dbo.m_item as b on a.Item_ID = b.Item_ID                                                                                    " &
@@ -3393,7 +3400,7 @@ Partial Class Records_t_StockCard_v2
             grdItemROP.DataBind()
             ModalPopupExtender5.Show()
         Catch ex As Exception
-            MsgeBox.CreateMessageAlertInUpdatePanel(Me.updatepanel1, "something went wrong, please contact system admin.")
+            MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "something went wrong, please contact system admin.")
         End Try
 
     End Sub
