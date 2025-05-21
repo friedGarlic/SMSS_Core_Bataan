@@ -584,38 +584,34 @@ Partial Class Inventory_t_for_Receiving
             Dim cb1 As CheckBox
 
             If dt.Rows.Count > 0 Then
+                Dim isReceiveDtlCreation As Boolean = False
 
                 For xa As Integer = 0 To grdItems.Rows.Count - 1
                     cb1 = CType(Me.grdItems.Rows(xa).Cells(0).FindControl("CheckBox1"), CheckBox)
                     Dim txtQty As TextBox = CType(grdItems.Rows(xa).Cells(0).FindControl("txtQty"), TextBox)
 
-
                     If cb1.Visible AndAlso cb1.Checked Then
-                        'System.Diagnostics.Debug.WriteLine(dt.Rows(xa).Item("Item_ID").ToString())
-                        Dim num As String = dt.Rows(xa).Item("Item_ID").ToString() '160
-                        Dim rcvID As String = dt.Rows(xa).Item("Received_ID").ToString() '40100
+                        ' Extract values
+                        Dim num As String = dt.Rows(xa).Item("Item_ID").ToString()
+                        Dim rcvID As String = dt.Rows(xa).Item("Received_ID").ToString()
                         Dim qty As String = dt.Rows(xa).Item("qty").ToString()
 
-                        'Split the headers from returning items, to proceeding items that goes to acceptance.
-
-                        Dim RcvDtl_ID As Long = objDerived.GetValue("SELECT Received_Dtl_ID FROM AMS.Tb_Receiving_Dtl WHERE Received_ID = '" & rcvID & "' AND Item_ID = '" & num & "'", CommandType.Text)
-
                         Dim receivedQtyTextValue As Decimal
+                        If Not Decimal.TryParse(txtQty.Text, receivedQtyTextValue) Then receivedQtyTextValue = 0
 
-                        If Not Decimal.TryParse(txtQty.Text, receivedQtyTextValue) Then
-                            receivedQtyTextValue = 0 ' Default to 0 if parsing fails
-                        End If
+                        Dim Cndtion As String = CType(grdItems.Rows(xa).FindControl("txtCondition"), TextBox).Text
+                        Dim Lction As String = CType(grdItems.Rows(xa).FindControl("txtLocation"), TextBox).Text
+                        Dim MarketValue As Decimal = CType(grdItems.Rows(xa).FindControl("txtMarketValue"), TextBox).Text
 
-                        Dim Cndtion As String = CType(CType(grdItems.Rows(xa).FindControl("txtCondition"), TextBox).Text, String)
-                        Dim Lction As String = CType(CType(grdItems.Rows(xa).FindControl("txtLocation"), TextBox).Text, String)
-                        Dim MarketValue As Decimal = CType(CType(grdItems.Rows(xa).FindControl("txtMarketValue"), TextBox).Text, Decimal)
+                        ' Check for existing Received_Dtl_ID
+                        Dim RcvDtl_ID As Object = objDerived.GetValue("SELECT Received_Dtl_ID FROM AMS.Tb_Receiving_Dtl WHERE Received_ID = '" & rcvID & "' AND Item_ID = '" & num & "'", CommandType.Text)
 
-                        'items needs to be created to receive_dtl table, items fresh from po approval.
                         If IsDBNull(RcvDtl_ID) OrElse Convert.ToInt64(RcvDtl_ID) = 0 Then
+                            ' === CREATE NEW ===
                             With rcv_dtl
                                 .Received_ID = rcvID
                                 .Item_ID = pPurchase_Order_detail.Rows(xa)("Item_ID")
-                                .PO_Qty = pPurchase_Order_detail.Rows(xa)("qty") 'objDerived.GetValue("SELECT qty FROM [dbo].[View_PO_ItemQty] WHERE POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "' AND Item_ID = '" & pPurchase_Order_detail.Rows(x)("Item_ID") & "'", CommandType.Text)
+                                .PO_Qty = pPurchase_Order_detail.Rows(xa)("qty")
                                 .Qty_Received = Math.Abs(receivedQtyTextValue - qty)
                                 .Cost = pPurchase_Order_detail.Rows(xa)("cost")
                                 .Condition = Cndtion
@@ -625,85 +621,51 @@ Partial Class Inventory_t_for_Receiving
                             End With
 
                             RcvDtl_ID = rcv_dtl.save
-                            objDerived.GetRecords("UPDATE AMS.Tb_Receiving_Dtl SET OtherSpecs = '" & pPurchase_Order_detail.Rows(xa)("PO_Remarks") & "' ,MarketValue = '" & MarketValue & "' WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'", CommandType.Text)
 
-                        End If
+                            objDerived.Execute("UPDATE AMS.Tb_Receiving_Dtl SET OtherSpecs = '" & pPurchase_Order_detail.Rows(xa)("PO_Remarks") & "', MarketValue = '" & MarketValue & "' WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'", CommandType.Text)
 
-
-                        'where AMS.Tb_Receiving_Dtl.Received_ID = 50151 and AMS.Tb_Receiving_Dtl.Item_ID = 94
-
-                        Dim calResult As Decimal
-                        Dim calResultInspecting As Decimal
-
-                        Dim result As Object = objDerived.GetValue("select AMS.Tb_Receiving_Dtl.Qty_Receiving from AMS.Tb_Receiving_Dtl  WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'", CommandType.Text)
-                        Dim Qty_ReceivingValue As Decimal
-
-                        If result IsNot DBNull.Value Then
-                            ' Try parsing the result as Decimal
-                            If Decimal.TryParse(result.ToString(), Qty_ReceivingValue) Then
-                            End If
-                        End If
-
-                        If Qty_ReceivingValue = 0 Then
-                            Dim resultPOQty As Object = objDerived.GetValue("select AMS.Tb_Receiving_Dtl.PO_Qty from AMS.Tb_Receiving_Dtl  WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'", CommandType.Text)
-
-                            If resultPOQty IsNot DBNull.Value Then
-                                ' Try parsing the result as Decimal
-                                If Decimal.TryParse(resultPOQty.ToString(), Qty_ReceivingValue) Then
-                                End If
-                            End If
-                        End If
-
-                        Dim result2 As Object = objDerived.GetValue("select AMS.Tb_Receiving_Dtl.Qty_Inspecting from AMS.Tb_Receiving_Dtl  WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'", CommandType.Text)
-                        Dim Qty_InspectedValue As Decimal
-
-                        If result2 IsNot DBNull.Value Then
-                            ' Try parsing the result as Decimal
-                            If Decimal.TryParse(result2.ToString(), Qty_InspectedValue) Then
-                            End If
-                        End If
-
-                        If (receivedQtyTextValue <= Qty_ReceivingValue) Then
-                            calResult = Math.Abs(Qty_ReceivingValue - receivedQtyTextValue)
-                            calResultInspecting = Qty_InspectedValue + receivedQtyTextValue
+                            isReceiveDtlCreation = True
                         Else
-                            MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "The quantity desired to return is more that existing quantity, Reminder: Reload to see existing quantity.")
+                            ' === UPDATE EXISTING ===
+                            Dim Qty_ReceivingValue As Decimal = Convert.ToDecimal(objDerived.GetValue("SELECT ISNULL(Qty_Receiving, 0) FROM AMS.Tb_Receiving_Dtl WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'", CommandType.Text))
+                            Dim Qty_InspectingValue As Decimal = Convert.ToDecimal(objDerived.GetValue("SELECT ISNULL(Qty_Inspecting, 0) FROM AMS.Tb_Receiving_Dtl WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'", CommandType.Text))
 
-                            Exit Sub
+                            If receivedQtyTextValue > Qty_ReceivingValue Then
+                                MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "The quantity desired to return is more than existing quantity. Reminder: Reload to see existing quantity.")
+                                Exit Sub
+                            End If
+
+                            Dim calResult As Decimal = Math.Abs(Qty_ReceivingValue - receivedQtyTextValue)
+                            Dim calResultInspecting As Decimal = Qty_InspectingValue + receivedQtyTextValue
+
+                            objDerived.Execute("UPDATE AMS.Tb_Receiving_Dtl SET Qty_Receiving = '" & calResult & "', Qty_Inspecting = '" & calResultInspecting & "', MarketValue = '" & MarketValue & "' WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'", CommandType.Text)
                         End If
 
-                        'UPDATE QTY_Accepted VALUE
-                        Dim updateDtlSQL As String = "UPDATE AMS.Tb_Receiving_Dtl SET Qty_Receiving = '" & calResult & "' WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'"
-                        objDerived.Execute(updateDtlSQL, CommandType.Text)
+                        ' Common updates for both create and update
+                        objDerived.Execute("UPDATE AMS.Tb_Receiving_Dtl SET IsDisplayReport = 1, tempReportQuantity = '" & receivedQtyTextValue & "' WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'", CommandType.Text)
 
-                        'UPDATE QTY_Inspected VALUE
-                        Dim updateDtlReceived As String = "UPDATE AMS.Tb_Receiving_Dtl SET Qty_Inspecting = '" & calResultInspecting & "' WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'"
-                        objDerived.Execute(updateDtlReceived, CommandType.Text)
-
-                        Dim updateItemReportDisplay = "update AMS.Tb_Receiving_Dtl set AMS.Tb_Receiving_Dtl.IsDisplayReport = 1 where AMS.Tb_Receiving_Dtl.Received_Dtl_ID = '" & RcvDtl_ID & "' "
-                        objDerived.Execute(updateItemReportDisplay, CommandType.Text)
-
-                        Dim updateTempQuantity As String = "update AMS.Tb_Receiving_Dtl set AMS.Tb_Receiving_Dtl.tempReportQuantity = '" & receivedQtyTextValue & "' where AMS.Tb_Receiving_Dtl.Received_Dtl_ID = '" & RcvDtl_ID & "' "
-                        objDerived.Execute(updateTempQuantity, CommandType.Text)
-
+                        ' Check if all items handled
                         Dim dt2 As DataTable = objDerived.GetDataTable("EXEC [AMS].[sp_InspectionAcceptance_Items] '" & grdAIR.SelectedDataKey("POHdr_ID") & "','" & rcv1 & "','" & grdAIR.SelectedDataKey("Supplier_Id") & "'", CommandType.Text)
                         If dt2.Rows.Count = 0 Then
-                            Dim updateHdrSQL As String = "UPDATE AMS.Tb_Receiving SET Status = 1 WHERE Received_ID = " & rcvID
-                            objDerived.Execute(updateHdrSQL, CommandType.Text)
+                            objDerived.Execute("UPDATE AMS.Tb_Receiving SET Status = 1 WHERE Received_ID = " & rcvID, CommandType.Text)
                         End If
 
-                        Session("Received_ID") = rcvID 'mainly for report.
-
-                        'Inform the user and refresh the inspection display.
+                        Session("Received_ID") = rcvID
                     End If
                 Next
+
+                If isReceiveDtlCreation Then
+                    MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Transaction has been successfully saved.")
+                Else
+                    MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Updates successfully applied.")
+                End If
+
+                LoadAllItems()
+                LoadrbALL()
+                btnPreview.Enabled = True
+                btnSave.Enabled = False
             End If
 
-            MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Transaction has been successfully saved.")
-            LoadAllItems()
-            LoadrbALL()
-            btnPreview.Enabled = True
-            btnSave.Enabled = False
 
         Else
 
@@ -785,8 +747,7 @@ Partial Class Inventory_t_for_Receiving
                     End If
 
                     If (RcvQty > Qty) Then
-
-                        MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Input Quantity is greater than existing Quantity, Reload to see existing quantity first.")
+                        MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Row: '" & x + 1 & "' Input Quantity: '" & RcvQty & "' is greater than existing Quantity: '" & Qty & "', Reload to see existing quantity first.")
 
                         Exit Sub
                     End If

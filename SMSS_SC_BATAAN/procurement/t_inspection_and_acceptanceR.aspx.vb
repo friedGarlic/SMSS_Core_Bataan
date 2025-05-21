@@ -115,8 +115,8 @@ Partial Class Procurement_t_inspection_and_acceptance
         Session("Page") = "RQ"
         Session("AIRHdr_ID") = grdAIR.SelectedDataKey("AIRHdr_ID")
 
-        Try
-            If SelectedCommand = "Preview" Then
+        'Try
+        If SelectedCommand = "Preview" Then
                 Me.Page.Response.Redirect("~/MainReports/IAR_Reports.aspx")
                 'Me.Page.Response.Redirect("~/Procurement/rpt_inspection_and_acceptance.aspx")
 
@@ -165,9 +165,9 @@ Partial Class Procurement_t_inspection_and_acceptance
                 End If
 
             End If
-        Catch ex As Exception
-            MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Something went wrong, pls contact system admin.")
-        End Try
+        'Catch ex As Exception
+        '    MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Something went wrong, pls contact system admin.")
+        'End Try
     End Sub
 
     Protected Sub ddDepartment_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles ddDepartment.SelectedIndexChanged
