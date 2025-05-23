@@ -113,7 +113,12 @@ Partial Class Procurement_t_inspection_and_acceptance
 
     Protected Sub grdAIR_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles grdAIR.SelectedIndexChanged
         Session("Page") = "RQ"
-        Session("AIRHdr_ID") = grdAIR.SelectedDataKey("AIRHdr_ID")
+
+        Dim input As String = grdAIR.SelectedDataKey("AIRHdr_ID")
+
+        If Integer.TryParse(input, Session("AIRHdr_ID")) Then
+
+        End If
 
         'Try
         If SelectedCommand = "Preview" Then

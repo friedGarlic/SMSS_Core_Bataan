@@ -6,6 +6,9 @@ Partial Class Inventory_t_for_Inspection
     Private objDerived As New DerivedDal
     Dim obj As New AccessRule
     Dim strFinish As Integer = 0
+
+    Private supplies As New t_supplies_hdr
+
 #Region "property"
     Private Property Lbtn() As String
         Get
@@ -732,440 +735,151 @@ Partial Class Inventory_t_for_Inspection
     End Sub
 
     Protected Sub btnSave_Click(sender As Object, e As EventArgs)
-        Try
+        'Try
 
-            strFinish = 0
+        strFinish = 0
 
-            If ddInspection1.SelectedItem.Value = "Select" And ddInspection2.SelectedItem.Value = "Select" Then
-                MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Please select one or two Inspector.")
-                Exit Sub
+        If ddInspection1.SelectedItem.Value = "Select" And ddInspection2.SelectedItem.Value = "Select" Then
+            MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Please select one or two Inspector.")
+            Exit Sub
+        End If
+
+        Dim cb As CheckBox
+        Dim cb1 As CheckBox
+        Session("cb") = 0
+
+        For i As Integer = 0 To grdInspection.Rows.Count - 1
+            cb = CType(Me.grdInspection.Rows(i).Cells(0).FindControl("cbInspection"), CheckBox)
+            If cb.Checked = True Then
+                Session("cb") = 1
+                Exit For
             End If
+        Next
+        If Session("cb") = 0 Then
+            MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "No selected item.")
+            Exit Sub
+        End If
 
-            Dim cb As CheckBox
-            Dim cb1 As CheckBox
-            Session("cb") = 0
+        Dim AllotmentClass_ID As Long
+        AllotmentClass_ID = objDerived.GetValue("SELECT AllotmentClass_ID FROM AMS.View_AccountList WHERE GA_ID = '" & grdAIR.SelectedDataKey("GA_ID") & "'", CommandType.Text)
 
-            For i As Integer = 0 To grdInspection.Rows.Count - 1
-                cb = CType(Me.grdInspection.Rows(i).Cells(0).FindControl("cbInspection"), CheckBox)
-                If cb.Checked = True Then
-                    Session("cb") = 1
-                    Exit For
-                End If
-            Next
-            If Session("cb") = 0 Then
-                MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "No selected item.")
-                Exit Sub
+        '=-= SAVE ITEM DETAILS
+        Dim cnt As Integer = 0
+        For x As Integer = 0 To grdInspection.Rows.Count - 1
+            cb = CType(Me.grdInspection.Rows(x).Cells(0).FindControl("cbInspection"), CheckBox)
+            If cb.Checked = True Then
+                cnt = cnt + 1
             End If
+        Next
 
-            Dim AllotmentClass_ID As Long
-            AllotmentClass_ID = objDerived.GetValue("SELECT AllotmentClass_ID FROM AMS.View_AccountList WHERE GA_ID = '" & grdAIR.SelectedDataKey("GA_ID") & "'", CommandType.Text)
-
-            '=-= SAVE ITEM DETAILS
-            Dim cnt As Integer = 0
-            For x As Integer = 0 To grdInspection.Rows.Count - 1
-                cb = CType(Me.grdInspection.Rows(x).Cells(0).FindControl("cbInspection"), CheckBox)
-                If cb.Checked = True Then
-                    cnt = cnt + 1
+        If cnt > 0 Then
+            If AllotmentClass_ID = 2 Then '=-= MOOE ITEMS
+                If txtMOOE_MftgDate.Text = "" Then
+                    txtMOOE_MftgDate.Text = "1/1/1900"
                 End If
-            Next
-
-            If cnt > 0 Then
-                If AllotmentClass_ID = 2 Then '=-= MOOE ITEMS
-                    If txtMOOE_MftgDate.Text = "" Then
-                        txtMOOE_MftgDate.Text = "1/1/1900"
-                    End If
-                    If txtMOOE_ExpiryDate.Text = "" Then
-                        txtMOOE_ExpiryDate.Text = "1/1/1900"
-                    End If
-                    If txtMOOE_AlertDate.Text = "" Then
-                        txtMOOE_AlertDate.Text = "1/1/1900"
-                    End If
+                If txtMOOE_ExpiryDate.Text = "" Then
+                    txtMOOE_ExpiryDate.Text = "1/1/1900"
+                End If
+                If txtMOOE_AlertDate.Text = "" Then
+                    txtMOOE_AlertDate.Text = "1/1/1900"
+                End If
 
 
-                    Dim RR_No As String
-                    Dim InVoiceNo As String
-                    Dim dateReceive As String
+                Dim rcvID As Long = objDerived.GetValue("SELECT Received_ID FROM AMS.Tb_Receiving WHERE POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "'", CommandType.Text)
 
-                    Dim rcvID As Long = objDerived.GetValue("SELECT Received_ID FROM AMS.Tb_Receiving WHERE POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "'", CommandType.Text)
+                Dim invoiceNum As String = objDerived.GetValue("SELECT InvoiceNo FROM AMS.Tb_Receiving WHERE POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "'", CommandType.Text)
 
+                'reset flag for if displaying to report or not:
+                Dim resetIsDisplayReport = "update AMS.Tb_Receiving_Dtl set AMS.Tb_Receiving_Dtl.IsDisplayReport = 0 where AMS.Tb_Receiving_Dtl.Received_ID = '" & rcvID & "' "
+                objDerived.Execute(resetIsDisplayReport, CommandType.Text)
 
-                    'reset flag for if displaying to report or not:
-                    Dim resetIsDisplayReport = "update AMS.Tb_Receiving_Dtl set AMS.Tb_Receiving_Dtl.IsDisplayReport = 0 where AMS.Tb_Receiving_Dtl.Received_ID = '" & rcvID & "' "
-                    objDerived.Execute(resetIsDisplayReport, CommandType.Text)
+                Dim rcv_Date As String = objDerived.GetValue("SELECT Received_Date FROM AMS.Tb_Receiving WHERE POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "'", CommandType.Text)
 
-                    Dim rcv_Date As String = objDerived.GetValue("SELECT Received_Date FROM AMS.Tb_Receiving WHERE POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "'", CommandType.Text)
+                Session("Received_ID") = rcvID
 
-                    Session("Received_ID") = rcvID
+                'Check AIR----------------------------------
+                Dim xAIRHdr_ID As Long = SaveAIR(rcvID) 'see definition below
 
+                For MOOE As Integer = 0 To grdInspection.Rows.Count - 1
+                    cb = CType(Me.grdInspection.Rows(MOOE).Cells(0).FindControl("cbInspection"), CheckBox)
+                    Dim txtQty As TextBox = CType(grdInspection.Rows(MOOE).FindControl("txtActQty"), TextBox)
 
-                    For MOOE As Integer = 0 To grdInspection.Rows.Count - 1
-                        cb = CType(Me.grdInspection.Rows(MOOE).Cells(0).FindControl("cbInspection"), CheckBox)
-                        Dim txtQty As TextBox = CType(grdInspection.Rows(MOOE).FindControl("txtActQty"), TextBox)
+                    If cb.Checked = True Then
+                        strFinish += 1
 
-                        If cb.Checked = True Then
-                            strFinish += 1
-
-                            ' Ensure the quantity value is captured safely
-                            Dim receivedQty As Decimal
-                            If Not Decimal.TryParse(txtQty.Text, receivedQty) Then
-                                receivedQty = 0 ' Default to 0 if parsing fails
-                            End If
-
-                            ' Check if record exists for update
-                            Dim RcvDtl_ID As Long = objDerived.GetValue("SELECT Received_Dtl_ID FROM AMS.Tb_Receiving_Dtl WHERE Received_ID = '" & rcvID & "' AND Item_ID = '" & pInspection_detail.Rows(MOOE)("Item_ID") & "'", CommandType.Text)
-
-                            If RcvDtl_ID = 0 Then
-                                ' Insert new record if not existing
-                                objDerived.GetRecords("INSERT INTO AMS.Tb_Receiving_Dtl (Received_ID, Item_ID, Qty_Received, Status) VALUES ('" & rcvID & "', '" & pInspection_detail.Rows(MOOE)("Item_ID") & "', '" & receivedQty & "', 1)", CommandType.Text)
-                            Else
-
-                                'parse txtActQty
-                                Dim receivedQtyTextValue As Decimal
-
-                                If Not Decimal.TryParse(txtQty.Text, receivedQtyTextValue) Then
-                                    receivedQtyTextValue = 0 ' Default to 0 if parsing fails
-                                End If
-
-                                Dim calResult As Decimal
-                                Dim calResultReceived As Decimal
-
-                                Dim result As Object = objDerived.GetValue("SELECT AMS.Tb_Receiving_Dtl.Qty_Accepting FROM AMS.Tb_Receiving_Dtl WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'", CommandType.Text)
-                                Dim Qty_AcceptedValue As Decimal
-
-                                If result IsNot DBNull.Value Then
-                                    ' Try parsing the result as Decimal
-                                    If Decimal.TryParse(result.ToString(), Qty_AcceptedValue) Then
-                                    End If
-                                End If
-
-                                Dim result2 As Object = objDerived.GetValue("select AMS.Tb_Receiving_Dtl.Qty_Inspecting from AMS.Tb_Receiving_Dtl  WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'", CommandType.Text)
-                                Dim Qty_InspectedValue As Decimal
-
-                                If result2 IsNot DBNull.Value Then
-                                    ' Try parsing the result as Decimal
-                                    If Decimal.TryParse(result2.ToString(), Qty_InspectedValue) Then
-                                    End If
-                                End If
-
-
-                                If (receivedQtyTextValue <= Qty_InspectedValue) Then
-                                    calResult = Qty_AcceptedValue + receivedQtyTextValue
-                                    calResultReceived = Math.Abs(Qty_InspectedValue - receivedQtyTextValue)
-                                Else
-                                    MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "The quantity desired to return is more that existing quantity, Reminder: Reload to see existing quantity.")
-
-                                    Exit Sub
-                                End If
-
-                                'UPDATE QTY_Accepted VALUE
-                                Dim updateDtlSQL As String = "UPDATE AMS.Tb_Receiving_Dtl SET Qty_Accepting = '" & calResult & "' WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'"
-                                objDerived.Execute(updateDtlSQL, CommandType.Text)
-
-                                'UPDATE QTY_Inspected VALUE
-                                Dim updateDtlReceived As String = "UPDATE AMS.Tb_Receiving_Dtl SET Qty_Inspecting = '" & calResultReceived & "' WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'"
-                                objDerived.Execute(updateDtlReceived, CommandType.Text)
-
-                                'for report
-                                Dim updateItemReportDisplay = "update AMS.Tb_Receiving_Dtl set AMS.Tb_Receiving_Dtl.IsDisplayReport = 1 where AMS.Tb_Receiving_Dtl.Received_Dtl_ID = '" & RcvDtl_ID & "' "
-                                objDerived.Execute(updateItemReportDisplay, CommandType.Text)
-
-                                'for report
-                                Dim updateTempQuantity As String = "update AMS.Tb_Receiving_Dtl set AMS.Tb_Receiving_Dtl.tempReportQuantity = '" & receivedQtyTextValue & "' where AMS.Tb_Receiving_Dtl.Received_Dtl_ID = '" & RcvDtl_ID & "' "
-                                objDerived.Execute(updateTempQuantity, CommandType.Text)
-
-
-                                Dim Re_Qty_InspectedValue As Decimal = objDerived.GetValue("select AMS.Tb_Receiving_Dtl.Qty_Inspecting from AMS.Tb_Receiving_Dtl  WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'", CommandType.Text)
-                                'ONLY PASS TO Acceptance WHEN NO QTY IS Received, should be inspected (NOT DISPLAY)
-                                If Re_Qty_InspectedValue = 0 Then
-                                    Dim updateDtlStatus As String = "UPDATE AMS.Tb_Receiving_Dtl SET Status = 2  WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'"
-                                End If
-
-                            End If
-
-                            If grdAIR.SelectedDataKey("GA_ID") = 1427 Then '=== grdAIR.SelectedDataKey("GA_ID") = 788 Then
-                                '=-= OFFICE SUPPLIES 
-                                With OfficeSup
-                                    .StockID = 0
-                                    .AIRDtl_ID = 0
-                                    .ItemId = pInspection_detail.Rows(MOOE)("Item_ID")
-                                    .Description = txtOSDescription.Text
-                                    .BrandName = txtOSBrandName.Text
-                                    .SupplierId = grdAIR.SelectedDataKey("Supplier_Id")
-                                    .Size = txtOSSize.Text
-                                    .Color = txtOSColor.Text
-                                    .Category = txtOSCategory.Text
-                                    .Length = txtOSLength.Text
-                                    .Width = txtOSWidth.Text
-                                    .Height = txtOSHeight.Text
-                                    .Weight = txtOSWeight.Text
-                                    .DepreciatedRate = 0
-
-                                    .DepreciatedValue = 0
-
-                                    .Status = "Received"
-                                    .Received_ID = rcvID
-                                    .Componentof = ""
-                                End With
-                                'here fix
-                                Dim Supp_ID As Long = OfficeSup.save
-
-                            ElseIf grdAIR.SelectedDataKey("GA_ID") = 1432 Or grdAIR.SelectedDataKey("GA_ID") = 1433 Then '=== grdAIR.SelectedDataKey("GA_ID") = 792 Or grdAIR.SelectedDataKey("GA_ID") = 793 Then
-                                '=-= MEDICINES SUPPLIES AND MEDICAL SUPPLIES
-                                With MedInfo
-                                    .StockId = 0
-                                    .AIRDtl_ID = 0
-                                    .Item_ID = pInspection_detail.Rows(MOOE)("Item_ID")
-                                    .DeliveryDate = rcv_Date
-                                    .Description = txtMOOE_Description.Text
-                                    .DrugName = txtMOOE_Description.Text
-                                    .BrandName = txtMOOE_Brand.Text
-                                    .SupplierId = grdAIR.SelectedDataKey("Supplier_Id")
-                                    .Dose = txtDose.Text
-                                    .Location = ""
-                                    .Status = "Received"
-                                    .Received_ID = rcvID
-                                    .Depreciatedrate = txtMOOE_DepRate.Text
-                                    If txtMOOE_DepValue.Text = "" Then
-                                        .Depreciatedvalue = 0
-                                    Else
-                                        .Depreciatedvalue = txtMOOE_DepValue.Text
-                                    End If
-
-                                End With
-
-                                Dim MedID As Long = MedInfo.save
-
-                                With MedDtl
-                                    .MedicineID = MedID
-                                    .StockId = 0
-                                    .Item_ID = pInspection_detail.Rows(MOOE)("Item_ID")
-                                    .Form = txtMOOE_Form.Text
-                                    .OTCRx = txtMOOE_OTCRx.Text
-                                    .Batch = txtMOOE_Batch.Text
-                                    .Lot = txtMOOE_Lot.Text
-                                    .Mftgdate = txtMOOE_MftgDate.Text
-                                    .EpiryDate = txtMOOE_ExpiryDate.Text
-                                    .Alert = txtMOOE_AlertDate.Text
-                                    .save()
-                                End With
-
-
-                            ElseIf grdAIR.SelectedDataKey("GA_ID") = 1441 Then '=== grdAIR.SelectedDataKey("GA_ID") = 799 Then
-                                '=-= WATER SUPPLIES
-                                With Water
-                                    .StockId = 0
-                                    .AIRDtl_ID = 0
-                                    .Item_ID = pInspection_detail.Rows(MOOE)("Item_ID")
-                                    .DeliveryDate = rcv_Date
-                                    .Form = txtMOOE_Form.Text
-                                    .OTCRx = txtMOOE_OTCRx.Text
-                                    .Batch = txtMOOE_Batch.Text
-                                    .Lot = txtMOOE_Lot.Text
-                                    .Mftgdate = txtMOOE_MftgDate.Text
-                                    .EpiryDate = txtMOOE_ExpiryDate.Text
-                                    .Alert = txtMOOE_AlertDate.Text
-                                    .ItemDesc = txtMOOE_Description.Text
-                                    .BrandName = txtMOOE_Brand.Text
-                                    .Supplier_Id = grdAIR.SelectedDataKey("Supplier_Id")
-                                    .Storage = ""
-                                    .Depreciationrate = txtMOOE_DepRate.Text
-                                    If txtMOOE_DepValue.Text = "" Then
-                                        .Depreciationvalue = 0
-                                    Else
-                                        .Depreciationvalue = txtMOOE_DepValue.Text
-                                    End If
-
-                                    .Status = "Received"
-                                    .Received_ID = rcvID
-                                End With
-
-                                Dim WaterID As Long = Water.save
-
-                            ElseIf grdAIR.SelectedDataKey("GA_ID") = 1430 Then '=== grdAIR.SelectedDataKey("GA_ID") = 791 Then
-                                '=-= FOOD SUPPLIES
-                                With Food
-                                    .StockId = 0
-                                    .AIRDtl_ID = 0
-                                    .Item_ID = pInspection_detail.Rows(MOOE)("Item_ID")
-                                    .DeliveryDate = rcv_Date
-                                    .Form = txtMOOE_Form.Text
-                                    .OTCRx = txtMOOE_OTCRx.Text
-                                    .Batch = txtMOOE_Batch.Text
-                                    .Lot = txtMOOE_Lot.Text
-                                    .Mftgdate = txtMOOE_MftgDate.Text
-                                    .EpiryDate = txtMOOE_ExpiryDate.Text
-                                    .Alert = txtMOOE_AlertDate.Text
-                                    .ItemDesc = txtMOOE_Description.Text
-                                    .BrandName = txtMOOE_Brand.Text
-                                    .Supplier_Id = grdAIR.SelectedDataKey("Supplier_Id")
-                                    .Storage = ""
-                                    .Depreciationrate = txtMOOE_DepRate.Text
-                                    If txtMOOE_DepValue.Text = "" Then
-                                        .Depreciationvalue = 0
-                                    Else
-                                        .Depreciationvalue = txtMOOE_DepValue.Text
-                                    End If
-
-                                    .Status = "Received"
-                                    .Received_ID = rcvID
-                                End With
-
-                                Dim FoodID As Long = Food.save
-
-                            Else '=-= OTHER SUPPLIES 
-                                With NonFood
-                                    .StockId = 0
-                                    .AIRDtl_ID = 0
-                                    .Item_ID = pInspection_detail.Rows(MOOE)("Item_ID")
-                                    .DeliveryDate = rcv_Date
-                                    .Form = txtMOOE_Form.Text
-                                    .OTCRx = txtMOOE_OTCRx.Text
-                                    .Batch = txtMOOE_Batch.Text
-                                    .Lot = txtMOOE_Lot.Text
-                                    .Mftgdate = txtMOOE_MftgDate.Text
-                                    .EpiryDate = txtMOOE_ExpiryDate.Text
-                                    .Alert = txtMOOE_AlertDate.Text
-                                    .ItemDesc = txtMOOE_Description.Text
-                                    .BrandName = txtMOOE_Brand.Text
-                                    .Supplier_Id = grdAIR.SelectedDataKey("Supplier_Id")
-                                    .Storage = ""
-                                    .Depreciationrate = txtMOOE_DepRate.Text
-                                    If txtMOOE_DepValue.Text = "" Then
-                                        .Depreciationvalue = 0
-                                    Else
-                                        .Depreciationvalue = txtMOOE_DepValue.Text
-                                    End If
-
-                                    .Status = "Received"
-                                    .Received_ID = rcvID
-                                End With
-
-                                Dim NonFoodID As Long = NonFood.save
-
-                            End If
+                        ' Ensure the quantity value is captured safely
+                        Dim receivedQty As Decimal
+                        If Not Decimal.TryParse(txtQty.Text, receivedQty) Then
+                            receivedQty = 0 ' Default to 0 if parsing fails
                         End If
-                    Next
 
-                    If ddInspection1.SelectedItem.Value = "Select" Then
-                        objDerived.GetRecords("UPDATE AMS.Tb_Receiving SET InspectedBy = '" & 0 & "' ,InspectedBy3 = 0 WHERE Received_ID = '" & rcvID & "'", CommandType.Text)
-                    Else
-                        objDerived.GetRecords("UPDATE AMS.Tb_Receiving SET InspectedBy = '" & ddInspection1.SelectedItem.Value & "' ,InspectedBy3 = 0 WHERE Received_ID = '" & rcvID & "'", CommandType.Text)
-                    End If
+                        ' Check if record exists for update
+                        Dim RcvDtl_ID As Long = objDerived.GetValue("SELECT Received_Dtl_ID FROM AMS.Tb_Receiving_Dtl WHERE Received_ID = '" & rcvID & "' AND Item_ID = '" & pInspection_detail.Rows(MOOE)("Item_ID") & "'", CommandType.Text)
 
-                    If ddInspection2.SelectedItem.Value = "Select" Then
-                        objDerived.GetRecords("UPDATE AMS.Tb_Receiving SET InspectedBy2 = '" & 0 & "' ,InspectedBy3 = 0 WHERE Received_ID = '" & rcvID & "'", CommandType.Text)
-                    Else
-                        objDerived.GetRecords("UPDATE AMS.Tb_Receiving SET InspectedBy2 = '" & ddInspection2.SelectedItem.Value & "' ,InspectedBy3 = 0 WHERE Received_ID = '" & rcvID & "'", CommandType.Text)
-                    End If
+                        'save airdtl
+                        Dim AIRDtl_ID As Long
+                        With AIR_Dtl
+                            .AIRHdr_ID = xAIRHdr_ID
+                            .Item_ID = pInspection_detail.Rows(MOOE)("Item_ID")
+                            .Cost = pInspection_detail.Rows(MOOE)("Cost")
+                            .GA_ID = grdAIR.SelectedDataKey("GA_ID")
+                            .Warranty = 0
+                            .Date_Inspected = txtDate.Text
+                            .Qty_Inspected = receivedQty
+                        End With
 
+                        AIRDtl_ID = AIR_Dtl.save
+                        objDerived.GetRecords("UPDATE AMS.AIR_Dtl SET OtherSpecs = '" & pInspection_detail.Rows(MOOE)("OtherSpecs") & "', isAccepted = 1 WHERE AIRDtl_ID = '" & AIRDtl_ID & "' ", CommandType.Text)
 
-                    'objDerived.GetRecords("UPDATE AMS.Tb_Receiving SET InspectedBy = '" & ddInspection1.SelectedItem.Value & "',InspectedBy2 = '" & ddInspection2.SelectedItem.Value & "' ,InspectedBy3 = 0 WHERE Received_ID = '" & rcvID & "'", CommandType.Text)
+                        If RcvDtl_ID = 0 Then
+                            ' Insert new record if not existing
+                            objDerived.GetRecords("INSERT INTO AMS.Tb_Receiving_Dtl (Received_ID, Item_ID, Qty_Received, Status) VALUES ('" & rcvID & "', '" & pInspection_detail.Rows(MOOE)("Item_ID") & "', '" & receivedQty & "', 1)", CommandType.Text)
+                        Else
 
-                    objDerived.GetRecords("UPDATE AMS.Tb_Receiving SET inspection_date='" & txtDate.Text & "' WHERE Received_ID = '" & rcvID & "'", CommandType.Text)
+                            'parse txtActQty
+                            Dim receivedQtyTextValue As Decimal
 
-                    ''here 12355
-
-
-                    Dim stck1 As Long = 0
-                    'For allotment class 2
-                    stck1 = objDerived.GetValue("SELECT StockID FROM AMS.Stock WHERE POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "'", CommandType.Text)
-
-                    Dim dt2 As DataTable = objDerived.GetDataTable("EXEC [AMS].[sp_ReceivedItems_Inspection] '" & grdAIR.SelectedDataKey("POHdr_ID") & "','" & stck1 & "','" & AllotmentClass_ID & "'", CommandType.Text)
-
-                    If dt2.Rows.Count = 0 Then
-                        objDerived.GetRecords("UPDATE AMS.Tb_Receiving SET Status = 2 WHERE Received_ID = '" & rcvID & "'", CommandType.Text)
-                    End If
-
-                    ' Retrieve the newly saved POHdr_ID. (This example uses MAX; adjust as needed.)
-                    Dim newPOHdrID As Long = CLng(grdAIR.SelectedDataKey("POHdr_ID"))
-                    Session("POHdr_ID") = newPOHdrID
-                    btnPreview.Enabled = True
-
-
-                ElseIf AllotmentClass_ID = 3 Then
-                    Dim rcvID As Long = objDerived.GetValue("SELECT Received_ID FROM AMS.Tb_Receiving WHERE POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "'", CommandType.Text)
-
-                    Dim rcv_Date As String = objDerived.GetValue("SELECT Received_Date FROM AMS.Tb_Receiving WHERE POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "'", CommandType.Text)
-
-                    Session("Received_ID") = rcvID
-
-                    Dim updateQuery As String = "UPDATE AMS.Tb_Receiving SET "
-                    Dim conditions As New List(Of String)()
-
-                    If ddInspection1.SelectedIndex > 0 Then
-                        conditions.Add("InspectedBy = '" & ddInspection1.SelectedItem.Value & "'")
-                    End If
-                    If ddInspection2.SelectedIndex > 0 Then
-                        conditions.Add("InspectedBy2 = '" & ddInspection2.SelectedItem.Value & "'")
-                    End If
-                    If conditions.Count > 0 Then
-                        updateQuery &= String.Join(", ", conditions) & " WHERE Received_ID = '" & rcvID & "'"
-                        objDerived.GetRecords(updateQuery, CommandType.Text)
-                    End If
-
-
-                    For CO As Integer = 0 To grdInspection.Rows.Count - 1
-                        cb = CType(Me.grdInspection.Rows(CO).Cells(0).FindControl("cbInspection"), CheckBox)
-
-                        If cb.Checked = True Then
-                            Dim AcptQty As Decimal = CType(CType(grdInspection.Rows(CO).FindControl("txtActQty"), TextBox).Text, Decimal)
-
-                            strFinish += 1
-                            Dim Lction As String = ""
-                            Dim MrketValue As Decimal = 0
-                            Dim Cndtion As String = ""
-
-                            Dim a As Integer = pInspection_detail.Rows(CO)("Item_ID")
-
-
-                            Dim RcvDtl_ID As Long = objDerived.GetValue("SELECT Received_Dtl_ID FROM AMS.Tb_Receiving_Dtl WHERE Received_ID = '" & rcvID & "' AND Item_ID = '" & a & "'", CommandType.Text)
-
-                            Dim QtyTextValue As Decimal
-
-                            If Not Decimal.TryParse(CType(grdInspection.Rows(CO).FindControl("txtActQty"), TextBox).Text, QtyTextValue) Then
-                                QtyTextValue = 0 ' Default to 0 if parsing fails
+                            If Not Decimal.TryParse(txtQty.Text, receivedQtyTextValue) Then
+                                receivedQtyTextValue = 0 ' Default to 0 if parsing fails
                             End If
 
-                            'where AMS.Tb_Receiving_Dtl.Received_ID = 50151 and AMS.Tb_Receiving_Dtl.Item_ID = 94
+                            Dim calResult As Decimal
+                            Dim calResultReceived As Decimal
 
-                            Dim calResultAccepting As Decimal
-                            Dim calResultInspecting As Decimal
-
-                            'save Inspection > Acceptance
-                            Dim result As Object = objDerived.GetValue("select AMS.Tb_Receiving_Dtl.Qty_Inspecting from AMS.Tb_Receiving_Dtl  WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'", CommandType.Text)
-                            Dim Qty_InspectingValue As Decimal
+                            Dim result As Object = objDerived.GetValue("SELECT AMS.Tb_Receiving_Dtl.Qty_Accepting FROM AMS.Tb_Receiving_Dtl WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'", CommandType.Text)
+                            Dim Qty_AcceptedValue As Decimal
 
                             If result IsNot DBNull.Value Then
                                 ' Try parsing the result as Decimal
-                                If Decimal.TryParse(result.ToString(), Qty_InspectingValue) Then
+                                If Decimal.TryParse(result.ToString(), Qty_AcceptedValue) Then
                                 End If
                             End If
 
-
-                            Dim result2 As Object = objDerived.GetValue("select AMS.Tb_Receiving_Dtl.Qty_Accepting from AMS.Tb_Receiving_Dtl  WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'", CommandType.Text)
-                            Dim Qty_AcceptingValue As Decimal
+                            Dim result2 As Object = objDerived.GetValue("select AMS.Tb_Receiving_Dtl.Qty_Inspecting from AMS.Tb_Receiving_Dtl  WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'", CommandType.Text)
+                            Dim Qty_InspectedValue As Decimal
 
                             If result2 IsNot DBNull.Value Then
                                 ' Try parsing the result as Decimal
-                                If Decimal.TryParse(result2.ToString(), Qty_AcceptingValue) Then
+                                If Decimal.TryParse(result2.ToString(), Qty_InspectedValue) Then
                                 End If
                             End If
 
-                            If (QtyTextValue <= Qty_InspectingValue) Then
-                                calResultAccepting = calResultAccepting + QtyTextValue
-                                calResultInspecting = Math.Abs(Qty_InspectingValue - QtyTextValue)
+
+                            If (receivedQtyTextValue <= Qty_InspectedValue) Then
+                                calResult = Qty_AcceptedValue + receivedQtyTextValue
+                                calResultReceived = Math.Abs(Qty_InspectedValue - receivedQtyTextValue)
                             Else
                                 MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "The quantity desired to return is more that existing quantity, Reminder: Reload to see existing quantity.")
 
                                 Exit Sub
                             End If
 
-                            'UPDATE QTY_INSPECTED VALUE
-                            Dim updateDtlSQL As String = "UPDATE AMS.Tb_Receiving_Dtl SET Qty_Inspecting = '" & calResultInspecting & "' WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'"
+                            'UPDATE QTY_Accepted VALUE
+                            Dim updateDtlSQL As String = "UPDATE AMS.Tb_Receiving_Dtl SET Qty_Accepting = '" & calResult & "' WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'"
                             objDerived.Execute(updateDtlSQL, CommandType.Text)
 
-                            'UPDATE QTY_RECEIVE VALUE
-                            Dim updateDtlReceived As String = "UPDATE AMS.Tb_Receiving_Dtl SET Qty_Accepting = '" & calResultAccepting & "' WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'"
+                            'UPDATE QTY_Inspected VALUE
+                            Dim updateDtlReceived As String = "UPDATE AMS.Tb_Receiving_Dtl SET Qty_Inspecting = '" & calResultReceived & "' WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'"
                             objDerived.Execute(updateDtlReceived, CommandType.Text)
 
                             'for report
@@ -1173,291 +887,611 @@ Partial Class Inventory_t_for_Inspection
                             objDerived.Execute(updateItemReportDisplay, CommandType.Text)
 
                             'for report
-                            Dim updateTempQuantity As String = "update AMS.Tb_Receiving_Dtl set AMS.Tb_Receiving_Dtl.tempReportQuantity = '" & QtyTextValue & "' where AMS.Tb_Receiving_Dtl.Received_Dtl_ID = '" & RcvDtl_ID & "' "
+                            Dim updateTempQuantity As String = "update AMS.Tb_Receiving_Dtl set AMS.Tb_Receiving_Dtl.tempReportQuantity = '" & receivedQtyTextValue & "' where AMS.Tb_Receiving_Dtl.Received_Dtl_ID = '" & RcvDtl_ID & "' "
                             objDerived.Execute(updateTempQuantity, CommandType.Text)
 
-                            Dim Re_Qty_ReceivedValue As Decimal = objDerived.GetValue("select AMS.Tb_Receiving_Dtl.Qty_Receiving from AMS.Tb_Receiving_Dtl  WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'", CommandType.Text)
+
+                            Dim Re_Qty_InspectedValue As Decimal = objDerived.GetValue("select AMS.Tb_Receiving_Dtl.Qty_Inspecting from AMS.Tb_Receiving_Dtl  WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'", CommandType.Text)
                             'ONLY PASS TO Acceptance WHEN NO QTY IS Received, should be inspected (NOT DISPLAY)
-                            If Re_Qty_ReceivedValue = 0 Then
+                            If Re_Qty_InspectedValue = 0 Then
                                 Dim updateDtlStatus As String = "UPDATE AMS.Tb_Receiving_Dtl SET Status = 2  WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'"
                             End If
 
+                        End If
 
-                            If grdAIR.SelectedDataKey("GA_ID") = 1060 Or grdAIR.SelectedDataKey("GA_ID") = 1062 Or grdAIR.SelectedDataKey("GA_ID") = 1067 Then '=== grdAIR.SelectedDataKey("GA_ID") = 520 Or grdAIR.SelectedDataKey("GA_ID") = 521 Then
-                                '=-= LAND
-                                'MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Not Available at this Time, Contanct Administrator.")
-                                With LandDtl
-                                    '.LandId = LandId
-                                    .LguCode = txtLandlgucode.Text
-                                    .SectionNo = txtLandSectionno.Text
-                                    .PIN = txtLandPIN.Text
-                                    .TDN = txtLandTdn.Text
-                                    .DistrictCode = txtLanddistrictcode.Text
-                                    .ParcelNo = txtLandParcelno.Text
-                                    .ARP = txtLandARP.Text
-                                    .CityMunCode = txtLandcitymunicipality1.Text
-                                    .SeriesNo = txtLandSeriesno.Text
-                                    .RevYear = txtLandrevyear.Text
-                                    .BarangayCode = txtLandbrgycode.Text
-                                    .RPTIN = txtLandRPTIN.Text
-                                    .DepreciationRate = txtLandDepriciationRate.Text
-                                    .DepreciationValue = txtLandDepreciatedValue.Text
-                                    .LotNo = txtLandlocationLot.Text
-                                    .BlkNo = txtLandlocationblkno.Text
-                                    .StreetName = txtLandlocationstreetname.Text
-                                    .Subdivision = txtLandlocationsubdivisionvillage.Text
-                                    .PhaseNo = txtLandlocationphaseno.Text
-                                    .Purok = txtLandlocationpurok.Text
-                                    .Sitio = txtLandlocationsitio.Text
-                                    .Barangay = txtLandbarangay.Text
-                                    .District = txtLandDistrict.Text
-                                    .CityMunicipal = txtLandCitymunicipality.Text
-                                    .Province = txtLandprovince.Text
-                                    .Region = txtLandRegion.Text
-                                    .ZipCode = txtLandzipcode.Text
-                                    .Classification = txtLandClassification.Text
-                                    .SubClass = txtLandSubClass.Text
-                                    .LandUse = txtLandUse.Text
-                                    .Area = txtLandArea.Text
-                                    .AVAmountWords = txtLandAssessedAmount.Text
-                                    .MVAmountWords = txtLandMarketAmount.Text
-                                    .AssessmentLevel = dpLandAssessmentLvl.SelectedValue
-                                    .Status_1 = txtLandStatus1.Text
-                                    .Status_2 = txtLandStatus2.Text
-                                    .AssessedValue = txtLandAssessedValue.Text
-                                    .MarketValue = txtLandMarketValue.Text
-                                    .UnitValue = txtLandUnitValue.Text
-                                    .Taxable = ddwnLandTaxable.SelectedItem.Text
+                        If grdAIR.SelectedDataKey("GA_ID") = 1427 Then '=== grdAIR.SelectedDataKey("GA_ID") = 788 Then
+                            '=-= OFFICE SUPPLIES 
+                            With OfficeSup
+                                .StockID = 0
+                                .AIRDtl_ID = 0
+                                .ItemId = pInspection_detail.Rows(MOOE)("Item_ID")
+                                .Description = txtOSDescription.Text
+                                .BrandName = txtOSBrandName.Text
+                                .SupplierId = grdAIR.SelectedDataKey("Supplier_Id")
+                                .Size = txtOSSize.Text
+                                .Color = txtOSColor.Text
+                                .Category = txtOSCategory.Text
+                                .Length = txtOSLength.Text
+                                .Width = txtOSWidth.Text
+                                .Height = txtOSHeight.Text
+                                .Weight = txtOSWeight.Text
+                                .DepreciatedRate = 0
 
-                                    If txtLandAssessedDate.Text = "" Then
-                                        .AssessedDate = "01/01/1900"
-                                    Else
-                                        .AssessedDate = txtLandAssessedDate.Text
-                                    End If
+                                .DepreciatedValue = 0
 
-                                    If txtLandMarketDate.Text = "" Then
-                                        .MarketDate = "01/01/1900"
-                                    Else
-                                        .MarketDate = txtLandMarketDate.Text
-                                    End If
+                                .Status = "Received"
+                                .Received_ID = rcvID
+                                .Componentof = ""
+                            End With
+                            'here fix
+                            Dim Supp_ID As Long = OfficeSup.save
 
-                                    If txtLandUnitDate.Text = "" Then
-                                        .UnitDate = "01/01/1900"
-                                    Else
-                                        .UnitDate = txtLandUnitDate.Text
-                                    End If
-                                    .Received_ID = rcvID
-                                    .save()
-                                End With
+                        ElseIf grdAIR.SelectedDataKey("GA_ID") = 1432 Or grdAIR.SelectedDataKey("GA_ID") = 1433 Then '=== grdAIR.SelectedDataKey("GA_ID") = 792 Or grdAIR.SelectedDataKey("GA_ID") = 793 Then
+                            '=-= MEDICINES SUPPLIES AND MEDICAL SUPPLIES
+                            With MedInfo
+                                .StockId = 0
+                                .AIRDtl_ID = 0
+                                .Item_ID = pInspection_detail.Rows(MOOE)("Item_ID")
+                                .DeliveryDate = rcv_Date
+                                .Description = txtMOOE_Description.Text
+                                .DrugName = txtMOOE_Description.Text
+                                .BrandName = txtMOOE_Brand.Text
+                                .SupplierId = grdAIR.SelectedDataKey("Supplier_Id")
+                                .Dose = txtDose.Text
+                                .Location = ""
+                                .Status = "Received"
+                                .Received_ID = rcvID
+                                .Depreciatedrate = txtMOOE_DepRate.Text
+                                If txtMOOE_DepValue.Text = "" Then
+                                    .Depreciatedvalue = 0
+                                Else
+                                    .Depreciatedvalue = txtMOOE_DepValue.Text
+                                End If
 
-                            ElseIf grdAIR.SelectedDataKey("GA_ID") = 1082 Or grdAIR.SelectedDataKey("GA_ID") = 1085 Then '=== grdAIR.SelectedDataKey("GA_ID") = 525 Or grdAIR.SelectedDataKey("GA_ID") = 526 Then
-                                '=-= BUILDINGS
-                                'MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Not Available at this Time, Contanct Administrator.")
-                                With BldgInfo
-                                    '.BuildingId = BuildingId
-                                    .BuildingControlNo = txtbuildingcontolno.Text
-                                    .BuildingCode = txtbuildingcode.Text
-                                    .BuildingName = txtbuildingname.Text
-                                    .Address = txtbuildingaddress.Text
-                                    .PostalCode = txtbuildingpostalcode.Text
+                            End With
 
-                                    If txtbuildingdepreciationrate.Text = "" Then
-                                        .BuildingDepreciationRate = "0.00"
-                                    Else
-                                        .BuildingDepreciationRate = txtbuildingdepreciationrate.Text
-                                    End If
-                                    .BuildingUse = txtbuildinguse.Text
-                                    .BuildingOccupancy = txtbuildingoccupancy.Text
-                                    .NumberFloors = txtbuildingnumberoffloors.Text
-                                    .AvgAreaFloor = txtbuildingavgareaperfloor.Text
-                                    .CostPerArea = txtbuildingcostperarea.Text
-                                    '.Status_AIR = ""
+                            Dim MedID As Long = MedInfo.save
 
-                                    If txtbuildingdepreciationvalue.Text = "" Then
-                                        .BuildingDepreciationValue = "0.00"
-                                    Else
-                                        .BuildingDepreciationValue = txtbuildingdepreciationvalue.Text
-                                    End If
-                                    .Received_ID = rcvID
-                                    .save()
-
-                                End With
+                            With MedDtl
+                                .MedicineID = MedID
+                                .StockId = 0
+                                .Item_ID = pInspection_detail.Rows(MOOE)("Item_ID")
+                                .Form = txtMOOE_Form.Text
+                                .OTCRx = txtMOOE_OTCRx.Text
+                                .Batch = txtMOOE_Batch.Text
+                                .Lot = txtMOOE_Lot.Text
+                                .Mftgdate = txtMOOE_MftgDate.Text
+                                .EpiryDate = txtMOOE_ExpiryDate.Text
+                                .Alert = txtMOOE_AlertDate.Text
+                                .save()
+                            End With
 
 
-                            ElseIf grdAIR.SelectedDataKey("GA_ID") = 1118 Then '=== grdAIR.SelectedDataKey("GA_ID") = 534 Then
-                                '=-= FURNITURE AND FIXTURES
-                                With FurnitureInfo
-                                    .AIRDtl_ID = 0
-                                    .IsAccepted = False
-                                    .Property_Dtl_ID = 0
-                                    .SerialNo = "-"
-                                    .Name = txtCO_Name.Text
-                                    .Description = txtCO_Description.Text
-                                    .Dimension = txtCO_Dimension.Text
-                                    .AreaCapacity = txtCO_AreaCap.Text
-                                    .Model = txtCO_Model.Text
-                                    .Warranty = txtWarranty.Text
-                                    .Specification = txtCO_Specs.Text
-                                    .DepreciationRate = txtCO_DepRate.Text
-                                    If txtCO_DepValue.Text = "" Then
-                                        .DepreciationValue = 0
-                                    Else
-                                        .DepreciationValue = txtCO_DepValue.Text
-                                    End If
-                                    .Received_ID = rcvID
-                                End With
+                        ElseIf grdAIR.SelectedDataKey("GA_ID") = 1441 Then '=== grdAIR.SelectedDataKey("GA_ID") = 799 Then
+                            '=-= WATER SUPPLIES
+                            With Water
+                                .StockId = 0
+                                .AIRDtl_ID = 0
+                                .Item_ID = pInspection_detail.Rows(MOOE)("Item_ID")
+                                .DeliveryDate = rcv_Date
+                                .Form = txtMOOE_Form.Text
+                                .OTCRx = txtMOOE_OTCRx.Text
+                                .Batch = txtMOOE_Batch.Text
+                                .Lot = txtMOOE_Lot.Text
+                                .Mftgdate = txtMOOE_MftgDate.Text
+                                .EpiryDate = txtMOOE_ExpiryDate.Text
+                                .Alert = txtMOOE_AlertDate.Text
+                                .ItemDesc = txtMOOE_Description.Text
+                                .BrandName = txtMOOE_Brand.Text
+                                .Supplier_Id = grdAIR.SelectedDataKey("Supplier_Id")
+                                .Storage = ""
+                                .Depreciationrate = txtMOOE_DepRate.Text
+                                If txtMOOE_DepValue.Text = "" Then
+                                    .Depreciationvalue = 0
+                                Else
+                                    .Depreciationvalue = txtMOOE_DepValue.Text
+                                End If
 
-                                Dim FurniID As Long = FurnitureInfo.save
-                                objDerived.GetRecords("UPDATE AMS.TbFurniture_Info SET Received_Dtl_ID = '" & Session("Received_Dtl_ID") & "' WHERE FurnitureInfoId = '" & FurniID & "'", CommandType.Text)
+                                .Status = "Received"
+                                .Received_ID = rcvID
+                            End With
 
-                                With FurnitureDtl
-                                    .FurnitureInfoId = FurniID
-                                    .Property_Dtl_ID = 0
-                                    .MarketValue = MrketValue
-                                    .Condition = Cndtion
-                                    .Location = Lction
-                                    .Status = "Received"
-                                    .save()
-                                End With
+                            Dim WaterID As Long = Water.save
 
-                            ElseIf grdAIR.SelectedDataKey("GA_ID") = 1127 Then '=== grdAIR.SelectedDataKey("GA_ID") = 537 Then
-                                '=-= MACHINIRIES
-                                With MachineInfo
-                                    .AIRDtl_ID = 0
-                                    .IsAccepted = False
-                                    .Property_Dtl_ID = 0
-                                    .SerialNo = "-"
-                                    .MachineDesc = txtCO_Description.Text
-                                    .MachineLocation = Lction
-                                    .BrandModel = txtCO_Model.Text
-                                    .DepreciationRate = txtCO_DepRate.Text
-                                    If txtCO_DepValue.Text = "" Then
-                                        .DepreciationValue = 0
-                                    Else
-                                        .DepreciationValue = txtCO_DepValue.Text
-                                    End If
-                                    .Received_ID = rcvID
-                                End With
+                        ElseIf grdAIR.SelectedDataKey("GA_ID") = 1430 Then '=== grdAIR.SelectedDataKey("GA_ID") = 791 Then
+                            '=-= FOOD SUPPLIES
+                            With Food
+                                .StockId = 0
+                                .AIRDtl_ID = 0
+                                .Item_ID = pInspection_detail.Rows(MOOE)("Item_ID")
+                                .DeliveryDate = rcv_Date
+                                .Form = txtMOOE_Form.Text
+                                .OTCRx = txtMOOE_OTCRx.Text
+                                .Batch = txtMOOE_Batch.Text
+                                .Lot = txtMOOE_Lot.Text
+                                .Mftgdate = txtMOOE_MftgDate.Text
+                                .EpiryDate = txtMOOE_ExpiryDate.Text
+                                .Alert = txtMOOE_AlertDate.Text
+                                .ItemDesc = txtMOOE_Description.Text
+                                .BrandName = txtMOOE_Brand.Text
+                                .Supplier_Id = grdAIR.SelectedDataKey("Supplier_Id")
+                                .Storage = ""
+                                .Depreciationrate = txtMOOE_DepRate.Text
+                                If txtMOOE_DepValue.Text = "" Then
+                                    .Depreciationvalue = 0
+                                Else
+                                    .Depreciationvalue = txtMOOE_DepValue.Text
+                                End If
 
-                                Dim MachineID As Long = MachineInfo.save
-                                objDerived.GetRecords("UPDATE AMS.TbMachinery_Information SET Received_Dtl_ID = '" & Session("Received_Dtl_ID") & "' WHERE MachineryInfoId = '" & MachineID & "'", CommandType.Text)
+                                .Status = "Received"
+                                .Received_ID = rcvID
+                            End With
 
-                                With MachineDtl
-                                    .MachineryInfoId = MachineID
-                                    .Property_Dtl_ID = 0
-                                    .MarketValue = MrketValue
-                                    .Condition = Cndtion
-                                    .Location = Lction
-                                    .Status = "Received"
-                                    .save()
-                                End With
+                            Dim FoodID As Long = Food.save
 
-                            ElseIf grdAIR.SelectedDataKey("GA_ID") = 1166 Then
-                                '=-= TRANSPORTATION
-                                ''here 12012023
+                        Else '=-= OTHER SUPPLIES 
+                            With NonFood
+                                .StockId = 0
+                                .AIRDtl_ID = 0
+                                .Item_ID = pInspection_detail.Rows(MOOE)("Item_ID")
+                                .DeliveryDate = rcv_Date
+                                .Form = txtMOOE_Form.Text
+                                .OTCRx = txtMOOE_OTCRx.Text
+                                .Batch = txtMOOE_Batch.Text
+                                .Lot = txtMOOE_Lot.Text
+                                .Mftgdate = txtMOOE_MftgDate.Text
+                                .EpiryDate = txtMOOE_ExpiryDate.Text
+                                .Alert = txtMOOE_AlertDate.Text
+                                .ItemDesc = txtMOOE_Description.Text
+                                .BrandName = txtMOOE_Brand.Text
+                                .Supplier_Id = grdAIR.SelectedDataKey("Supplier_Id")
+                                .Storage = ""
+                                .Depreciationrate = txtMOOE_DepRate.Text
+                                If txtMOOE_DepValue.Text = "" Then
+                                    .Depreciationvalue = 0
+                                Else
+                                    .Depreciationvalue = txtMOOE_DepValue.Text
+                                End If
 
-                                With MotorInfo
+                                .Status = "Received"
+                                .Received_ID = rcvID
+                            End With
 
-                                    .AIRDtl_ID = 0
-                                    .IsAccepted = False
-                                    .Property_Dtl_ID = 0
-                                    .Name = txtCO_MName.Text
-                                    .PlateNo = ""
-                                    .Model = txtCO_MModel.Text
-                                    .MotorNo = ""
-                                    .ChasisNo = txtCO_MChasisNo.Text
-                                    .VehicleColor = txtCO_MColor.Text
-                                    .WheelsCapacity = txtCO_MCapacity.Text
-                                    .GrossWeight = txtCO_MWeight.Text
-                                    .Seats = txtCO_MSeats.Text
-                                    .Warranty = txtCO_MWarranty.Text
-                                    .VehicleOwner = ""
-                                    .DeclaredName = txtDeclaredName.Text
-                                    .BeneficialUser = txtBeneficialUser.Text
-                                    .VehicleSpecification = txtCO_MSpecs.Text
-                                    .Received_ID = rcvID
-                                    .Item_ID = pInspection_detail.Rows(CO)("Item_ID")
-                                End With
+                            Dim NonFoodID As Long = NonFood.save
 
-                                Dim MotorID As Long = MotorInfo.save
-                                objDerived.GetRecords("UPDATE AMS.TbMotor_Info SET Received_Dtl_ID = '" & Session("Received_Dtl_ID") & "', CSNo = '" & txtCSNumber.Text & "', EngineNo = '" & txtEngineNo.Text & "', Displacement = '" & txtDisplacement.Text & "' WHERE Motor_InfoId = '" & MotorID & "'", CommandType.Text)
+                        End If
+                    End If
 
-                                With MotorDtl
-                                    .Motor_InfoId = MotorID
-                                    .Property_Dtl_ID = 0
-                                    .MarketValue = MrketValue
-                                    .Condition = Cndtion
-                                    .Location = Lction
-                                    .Status = "Received"
-                                    .save()
-                                End With
 
-                            Else '=-= ALL EQUIPMENTS
-                                With EquipInfo
-                                    .AIRDtl_ID = 0
-                                    .IsAccepted = False
-                                    .Property_Dtl_ID = 0
-                                    .SerialNo = "-"
-                                    .Name = txtCO_Name.Text
-                                    .Description = txtCO_Description.Text
-                                    .PowerInput = txtCO_PowerIn.Text
-                                    .Dimension = txtCO_Dimension.Text
-                                    .AreaCapacity = txtCO_AreaCap.Text
-                                    .Model = txtCO_Model.Text
-                                    .Warranty = txtWarranty.Text
-                                    .Specification = txtCO_Specs.Text
-                                    .DepreciationRate = txtCO_DepRate.Text
-                                    If txtCO_DepValue.Text = "" Then
-                                        .DepreciationValue = 0
-                                    Else
-                                        .DepreciationValue = txtCO_DepValue.Text
-                                    End If
-                                    .Received_ID = rcvID
-                                End With
+                Next
 
-                                Dim EuipID As Long = EquipInfo.save
-                                objDerived.GetRecords("UPDATE AMS.TbEquipment_Info SET Received_Dtl_ID = '" & Session("Received_Dtl_ID") & "' WHERE EquipInfoId = '" & EuipID & "'", CommandType.Text)
+                If ddInspection1.SelectedItem.Value = "Select" Then
+                    objDerived.GetRecords("UPDATE AMS.Tb_Receiving SET InspectedBy = '" & 0 & "' ,InspectedBy3 = 0 WHERE Received_ID = '" & rcvID & "'", CommandType.Text)
+                Else
+                    objDerived.GetRecords("UPDATE AMS.Tb_Receiving SET InspectedBy = '" & ddInspection1.SelectedItem.Value & "' ,InspectedBy3 = 0 WHERE Received_ID = '" & rcvID & "'", CommandType.Text)
+                End If
 
-                                With EquipDtl
-                                    .EquipInfoId = EuipID
-                                    .Property_Dtl_ID = 0
-                                    .MarketValue = MrketValue
-                                    .Condition = Cndtion
-                                    .Location = Lction
-                                    .Status = "Received"
-                                    .save()
-                                End With
+                If ddInspection2.SelectedItem.Value = "Select" Then
+                    objDerived.GetRecords("UPDATE AMS.Tb_Receiving SET InspectedBy2 = '" & 0 & "' ,InspectedBy3 = 0 WHERE Received_ID = '" & rcvID & "'", CommandType.Text)
+                Else
+                    objDerived.GetRecords("UPDATE AMS.Tb_Receiving SET InspectedBy2 = '" & ddInspection2.SelectedItem.Value & "' ,InspectedBy3 = 0 WHERE Received_ID = '" & rcvID & "'", CommandType.Text)
+                End If
 
+
+                'objDerived.GetRecords("UPDATE AMS.Tb_Receiving SET InspectedBy = '" & ddInspection1.SelectedItem.Value & "',InspectedBy2 = '" & ddInspection2.SelectedItem.Value & "' ,InspectedBy3 = 0 WHERE Received_ID = '" & rcvID & "'", CommandType.Text)
+
+                objDerived.GetRecords("UPDATE AMS.Tb_Receiving SET inspection_date='" & txtDate.Text & "' WHERE Received_ID = '" & rcvID & "'", CommandType.Text)
+
+                ''here 12355
+
+
+                Dim stck1 As Long = 0
+                'For allotment class 2
+                stck1 = objDerived.GetValue("SELECT StockID FROM AMS.Stock WHERE POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "'", CommandType.Text)
+
+                Dim dt2 As DataTable = objDerived.GetDataTable("EXEC [AMS].[sp_ReceivedItems_Inspection] '" & grdAIR.SelectedDataKey("POHdr_ID") & "','" & stck1 & "','" & AllotmentClass_ID & "'", CommandType.Text)
+
+                If dt2.Rows.Count = 0 Then
+                    objDerived.GetRecords("UPDATE AMS.Tb_Receiving SET Status = 2 WHERE Received_ID = '" & rcvID & "'", CommandType.Text)
+                End If
+
+                ' Retrieve the newly saved POHdr_ID. (This example uses MAX; adjust as needed.)
+                Dim newPOHdrID As Long = CLng(grdAIR.SelectedDataKey("POHdr_ID"))
+                Session("POHdr_ID") = newPOHdrID
+                btnPreview.Enabled = True
+
+
+            ElseIf AllotmentClass_ID = 3 Then
+                Dim rcvID As Long = objDerived.GetValue("SELECT Received_ID FROM AMS.Tb_Receiving WHERE POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "'", CommandType.Text)
+
+                Dim rcv_Date As String = objDerived.GetValue("SELECT Received_Date FROM AMS.Tb_Receiving WHERE POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "'", CommandType.Text)
+
+                Session("Received_ID") = rcvID
+
+                Dim updateQuery As String = "UPDATE AMS.Tb_Receiving SET "
+                Dim conditions As New List(Of String)()
+
+                If ddInspection1.SelectedIndex > 0 Then
+                    conditions.Add("InspectedBy = '" & ddInspection1.SelectedItem.Value & "'")
+                End If
+                If ddInspection2.SelectedIndex > 0 Then
+                    conditions.Add("InspectedBy2 = '" & ddInspection2.SelectedItem.Value & "'")
+                End If
+                If conditions.Count > 0 Then
+                    updateQuery &= String.Join(", ", conditions) & " WHERE Received_ID = '" & rcvID & "'"
+                    objDerived.GetRecords(updateQuery, CommandType.Text)
+                End If
+
+                '----------------SAVING AIR
+                Dim xAIRHdr_ID As Long = SaveAIR(rcvID) 'see definition below
+
+                For CO As Integer = 0 To grdInspection.Rows.Count - 1
+                    cb = CType(Me.grdInspection.Rows(CO).Cells(0).FindControl("cbInspection"), CheckBox)
+
+                    If cb.Checked = True Then
+                        Dim AcptQty As Decimal = CType(CType(grdInspection.Rows(CO).FindControl("txtActQty"), TextBox).Text, Decimal)
+
+                        strFinish += 1
+                        Dim Lction As String = ""
+                        Dim MrketValue As Decimal = 0
+                        Dim Cndtion As String = ""
+
+                        Dim a As Integer = pInspection_detail.Rows(CO)("Item_ID")
+
+
+                        Dim RcvDtl_ID As Long = objDerived.GetValue("SELECT Received_Dtl_ID FROM AMS.Tb_Receiving_Dtl WHERE Received_ID = '" & rcvID & "' AND Item_ID = '" & a & "'", CommandType.Text)
+
+                        Dim QtyTextValue As Decimal
+
+                        If Not Decimal.TryParse(CType(grdInspection.Rows(CO).FindControl("txtActQty"), TextBox).Text, QtyTextValue) Then
+                            QtyTextValue = 0 ' Default to 0 if parsing fails
+                        End If
+
+                        'save airdtl
+                        Dim AIRDtl_ID As Long
+                        With AIR_Dtl
+                            .AIRHdr_ID = xAIRHdr_ID
+                            .Item_ID = pInspection_detail.Rows(CO)("Item_ID")
+                            .Cost = pInspection_detail.Rows(CO)("Cost")
+                            .GA_ID = grdAIR.SelectedDataKey("GA_ID")
+                            .Warranty = 0
+                            .Qty_Inspected = QtyTextValue
+                        End With
+
+                        AIRDtl_ID = AIR_Dtl.save
+                        objDerived.GetRecords("UPDATE AMS.AIR_Dtl SET OtherSpecs = '" & pInspection_detail.Rows(CO)("OtherSpecs") & "', isAccepted = 1 WHERE AIRDtl_ID = '" & AIRDtl_ID & "' ", CommandType.Text)
+
+
+                        Dim calResultAccepting As Decimal
+                        Dim calResultInspecting As Decimal
+
+                        'save Inspection > Acceptance
+                        Dim result As Object = objDerived.GetValue("select AMS.Tb_Receiving_Dtl.Qty_Inspecting from AMS.Tb_Receiving_Dtl  WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'", CommandType.Text)
+                        Dim Qty_InspectingValue As Decimal
+
+                        If result IsNot DBNull.Value Then
+                            ' Try parsing the result as Decimal
+                            If Decimal.TryParse(result.ToString(), Qty_InspectingValue) Then
                             End If
                         End If
-                    Next
-                    Dim stck1 As Long = 0
-                    'For allotment class 3
-                    stck1 = objDerived.GetValue("SELECT Property_ID FROM AMS.Property WHERE POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "'", CommandType.Text)
 
-                    Dim dt2 As DataTable = objDerived.GetDataTable("EXEC [AMS].[sp_ReceivedItems_Inspection] '" & grdAIR.SelectedDataKey("POHdr_ID") & "','" & stck1 & "','" & AllotmentClass_ID & "'", CommandType.Text)
 
-                    objDerived.GetRecords("UPDATE AMS.Tb_Receiving SET Status = 2 WHERE Received_ID = '" & rcvID & "'", CommandType.Text)
+                        Dim result2 As Object = objDerived.GetValue("select AMS.Tb_Receiving_Dtl.Qty_Accepting from AMS.Tb_Receiving_Dtl  WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'", CommandType.Text)
+                        Dim Qty_AcceptingValue As Decimal
 
-                    objDerived.GetRecords("UPDATE AMS.Tb_Receiving SET inspection_date='" & txtDate.Text & "' WHERE Received_ID = '" & rcvID & "'", CommandType.Text)
+                        If result2 IsNot DBNull.Value Then
+                            ' Try parsing the result as Decimal
+                            If Decimal.TryParse(result2.ToString(), Qty_AcceptingValue) Then
+                            End If
+                        End If
 
-                    ' If you also need to capture the header ID here, add the same block as above:
-                    Dim newPOHdrID As Long = CLng(grdAIR.SelectedDataKey("POHdr_ID"))
-                    Session("POHdr_ID") = newPOHdrID
-                    btnPreview.Enabled = True
+                        If (QtyTextValue <= Qty_InspectingValue) Then
+                            calResultAccepting = calResultAccepting + QtyTextValue
+                            calResultInspecting = Math.Abs(Qty_InspectingValue - QtyTextValue)
+                        Else
+                            MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "The quantity desired to return is more that existing quantity, Reminder: Reload to see existing quantity.")
 
-                End If
+                            Exit Sub
+                        End If
+
+                        'UPDATE QTY_INSPECTED VALUE
+                        Dim updateDtlSQL As String = "UPDATE AMS.Tb_Receiving_Dtl SET Qty_Inspecting = '" & calResultInspecting & "' WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'"
+                        objDerived.Execute(updateDtlSQL, CommandType.Text)
+
+                        'UPDATE QTY_RECEIVE VALUE
+                        Dim updateDtlReceived As String = "UPDATE AMS.Tb_Receiving_Dtl SET Qty_Accepting = '" & calResultAccepting & "' WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'"
+                        objDerived.Execute(updateDtlReceived, CommandType.Text)
+
+                        'for report
+                        Dim updateItemReportDisplay = "update AMS.Tb_Receiving_Dtl set AMS.Tb_Receiving_Dtl.IsDisplayReport = 1 where AMS.Tb_Receiving_Dtl.Received_Dtl_ID = '" & RcvDtl_ID & "' "
+                        objDerived.Execute(updateItemReportDisplay, CommandType.Text)
+
+                        'for report
+                        Dim updateTempQuantity As String = "update AMS.Tb_Receiving_Dtl set AMS.Tb_Receiving_Dtl.tempReportQuantity = '" & QtyTextValue & "' where AMS.Tb_Receiving_Dtl.Received_Dtl_ID = '" & RcvDtl_ID & "' "
+                        objDerived.Execute(updateTempQuantity, CommandType.Text)
+
+                        Dim Re_Qty_ReceivedValue As Decimal = objDerived.GetValue("select AMS.Tb_Receiving_Dtl.Qty_Receiving from AMS.Tb_Receiving_Dtl  WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'", CommandType.Text)
+                        'ONLY PASS TO Acceptance WHEN NO QTY IS Received, should be inspected (NOT DISPLAY)
+                        If Re_Qty_ReceivedValue = 0 Then
+                            Dim updateDtlStatus As String = "UPDATE AMS.Tb_Receiving_Dtl SET Status = 2  WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'"
+                        End If
+
+
+                        If grdAIR.SelectedDataKey("GA_ID") = 1060 Or grdAIR.SelectedDataKey("GA_ID") = 1062 Or grdAIR.SelectedDataKey("GA_ID") = 1067 Then '=== grdAIR.SelectedDataKey("GA_ID") = 520 Or grdAIR.SelectedDataKey("GA_ID") = 521 Then
+                            '=-= LAND
+                            'MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Not Available at this Time, Contanct Administrator.")
+                            With LandDtl
+                                '.LandId = LandId
+                                .LguCode = txtLandlgucode.Text
+                                .SectionNo = txtLandSectionno.Text
+                                .PIN = txtLandPIN.Text
+                                .TDN = txtLandTdn.Text
+                                .DistrictCode = txtLanddistrictcode.Text
+                                .ParcelNo = txtLandParcelno.Text
+                                .ARP = txtLandARP.Text
+                                .CityMunCode = txtLandcitymunicipality1.Text
+                                .SeriesNo = txtLandSeriesno.Text
+                                .RevYear = txtLandrevyear.Text
+                                .BarangayCode = txtLandbrgycode.Text
+                                .RPTIN = txtLandRPTIN.Text
+                                .DepreciationRate = txtLandDepriciationRate.Text
+                                .DepreciationValue = txtLandDepreciatedValue.Text
+                                .LotNo = txtLandlocationLot.Text
+                                .BlkNo = txtLandlocationblkno.Text
+                                .StreetName = txtLandlocationstreetname.Text
+                                .Subdivision = txtLandlocationsubdivisionvillage.Text
+                                .PhaseNo = txtLandlocationphaseno.Text
+                                .Purok = txtLandlocationpurok.Text
+                                .Sitio = txtLandlocationsitio.Text
+                                .Barangay = txtLandbarangay.Text
+                                .District = txtLandDistrict.Text
+                                .CityMunicipal = txtLandCitymunicipality.Text
+                                .Province = txtLandprovince.Text
+                                .Region = txtLandRegion.Text
+                                .ZipCode = txtLandzipcode.Text
+                                .Classification = txtLandClassification.Text
+                                .SubClass = txtLandSubClass.Text
+                                .LandUse = txtLandUse.Text
+                                .Area = txtLandArea.Text
+                                .AVAmountWords = txtLandAssessedAmount.Text
+                                .MVAmountWords = txtLandMarketAmount.Text
+                                .AssessmentLevel = dpLandAssessmentLvl.SelectedValue
+                                .Status_1 = txtLandStatus1.Text
+                                .Status_2 = txtLandStatus2.Text
+                                .AssessedValue = txtLandAssessedValue.Text
+                                .MarketValue = txtLandMarketValue.Text
+                                .UnitValue = txtLandUnitValue.Text
+                                .Taxable = ddwnLandTaxable.SelectedItem.Text
+
+                                If txtLandAssessedDate.Text = "" Then
+                                    .AssessedDate = "01/01/1900"
+                                Else
+                                    .AssessedDate = txtLandAssessedDate.Text
+                                End If
+
+                                If txtLandMarketDate.Text = "" Then
+                                    .MarketDate = "01/01/1900"
+                                Else
+                                    .MarketDate = txtLandMarketDate.Text
+                                End If
+
+                                If txtLandUnitDate.Text = "" Then
+                                    .UnitDate = "01/01/1900"
+                                Else
+                                    .UnitDate = txtLandUnitDate.Text
+                                End If
+                                .Received_ID = rcvID
+                                .save()
+                            End With
+
+                        ElseIf grdAIR.SelectedDataKey("GA_ID") = 1082 Or grdAIR.SelectedDataKey("GA_ID") = 1085 Then '=== grdAIR.SelectedDataKey("GA_ID") = 525 Or grdAIR.SelectedDataKey("GA_ID") = 526 Then
+                            '=-= BUILDINGS
+                            'MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Not Available at this Time, Contanct Administrator.")
+                            With BldgInfo
+                                '.BuildingId = BuildingId
+                                .BuildingControlNo = txtbuildingcontolno.Text
+                                .BuildingCode = txtbuildingcode.Text
+                                .BuildingName = txtbuildingname.Text
+                                .Address = txtbuildingaddress.Text
+                                .PostalCode = txtbuildingpostalcode.Text
+
+                                If txtbuildingdepreciationrate.Text = "" Then
+                                    .BuildingDepreciationRate = "0.00"
+                                Else
+                                    .BuildingDepreciationRate = txtbuildingdepreciationrate.Text
+                                End If
+                                .BuildingUse = txtbuildinguse.Text
+                                .BuildingOccupancy = txtbuildingoccupancy.Text
+                                .NumberFloors = txtbuildingnumberoffloors.Text
+                                .AvgAreaFloor = txtbuildingavgareaperfloor.Text
+                                .CostPerArea = txtbuildingcostperarea.Text
+                                '.Status_AIR = ""
+
+                                If txtbuildingdepreciationvalue.Text = "" Then
+                                    .BuildingDepreciationValue = "0.00"
+                                Else
+                                    .BuildingDepreciationValue = txtbuildingdepreciationvalue.Text
+                                End If
+                                .Received_ID = rcvID
+                                .save()
+
+                            End With
+
+
+                        ElseIf grdAIR.SelectedDataKey("GA_ID") = 1118 Then '=== grdAIR.SelectedDataKey("GA_ID") = 534 Then
+                            '=-= FURNITURE AND FIXTURES
+                            With FurnitureInfo
+                                .AIRDtl_ID = 0
+                                .IsAccepted = False
+                                .Property_Dtl_ID = 0
+                                .SerialNo = "-"
+                                .Name = txtCO_Name.Text
+                                .Description = txtCO_Description.Text
+                                .Dimension = txtCO_Dimension.Text
+                                .AreaCapacity = txtCO_AreaCap.Text
+                                .Model = txtCO_Model.Text
+                                .Warranty = txtWarranty.Text
+                                .Specification = txtCO_Specs.Text
+                                .DepreciationRate = txtCO_DepRate.Text
+                                If txtCO_DepValue.Text = "" Then
+                                    .DepreciationValue = 0
+                                Else
+                                    .DepreciationValue = txtCO_DepValue.Text
+                                End If
+                                .Received_ID = rcvID
+                            End With
+
+                            Dim FurniID As Long = FurnitureInfo.save
+                            objDerived.GetRecords("UPDATE AMS.TbFurniture_Info SET Received_Dtl_ID = '" & Session("Received_Dtl_ID") & "' WHERE FurnitureInfoId = '" & FurniID & "'", CommandType.Text)
+
+                            With FurnitureDtl
+                                .FurnitureInfoId = FurniID
+                                .Property_Dtl_ID = 0
+                                .MarketValue = MrketValue
+                                .Condition = Cndtion
+                                .Location = Lction
+                                .Status = "Received"
+                                .save()
+                            End With
+
+                        ElseIf grdAIR.SelectedDataKey("GA_ID") = 1127 Then '=== grdAIR.SelectedDataKey("GA_ID") = 537 Then
+                            '=-= MACHINIRIES
+                            With MachineInfo
+                                .AIRDtl_ID = 0
+                                .IsAccepted = False
+                                .Property_Dtl_ID = 0
+                                .SerialNo = "-"
+                                .MachineDesc = txtCO_Description.Text
+                                .MachineLocation = Lction
+                                .BrandModel = txtCO_Model.Text
+                                .DepreciationRate = txtCO_DepRate.Text
+                                If txtCO_DepValue.Text = "" Then
+                                    .DepreciationValue = 0
+                                Else
+                                    .DepreciationValue = txtCO_DepValue.Text
+                                End If
+                                .Received_ID = rcvID
+                            End With
+
+                            Dim MachineID As Long = MachineInfo.save
+                            objDerived.GetRecords("UPDATE AMS.TbMachinery_Information SET Received_Dtl_ID = '" & Session("Received_Dtl_ID") & "' WHERE MachineryInfoId = '" & MachineID & "'", CommandType.Text)
+
+                            With MachineDtl
+                                .MachineryInfoId = MachineID
+                                .Property_Dtl_ID = 0
+                                .MarketValue = MrketValue
+                                .Condition = Cndtion
+                                .Location = Lction
+                                .Status = "Received"
+                                .save()
+                            End With
+
+                        ElseIf grdAIR.SelectedDataKey("GA_ID") = 1166 Then
+                            '=-= TRANSPORTATION
+                            ''here 12012023
+
+                            With MotorInfo
+
+                                .AIRDtl_ID = 0
+                                .IsAccepted = False
+                                .Property_Dtl_ID = 0
+                                .Name = txtCO_MName.Text
+                                .PlateNo = ""
+                                .Model = txtCO_MModel.Text
+                                .MotorNo = ""
+                                .ChasisNo = txtCO_MChasisNo.Text
+                                .VehicleColor = txtCO_MColor.Text
+                                .WheelsCapacity = txtCO_MCapacity.Text
+                                .GrossWeight = txtCO_MWeight.Text
+                                .Seats = txtCO_MSeats.Text
+                                .Warranty = txtCO_MWarranty.Text
+                                .VehicleOwner = ""
+                                .DeclaredName = txtDeclaredName.Text
+                                .BeneficialUser = txtBeneficialUser.Text
+                                .VehicleSpecification = txtCO_MSpecs.Text
+                                .Received_ID = rcvID
+                                .Item_ID = pInspection_detail.Rows(CO)("Item_ID")
+                            End With
+
+                            Dim MotorID As Long = MotorInfo.save
+                            objDerived.GetRecords("UPDATE AMS.TbMotor_Info SET Received_Dtl_ID = '" & Session("Received_Dtl_ID") & "', CSNo = '" & txtCSNumber.Text & "', EngineNo = '" & txtEngineNo.Text & "', Displacement = '" & txtDisplacement.Text & "' WHERE Motor_InfoId = '" & MotorID & "'", CommandType.Text)
+
+                            With MotorDtl
+                                .Motor_InfoId = MotorID
+                                .Property_Dtl_ID = 0
+                                .MarketValue = MrketValue
+                                .Condition = Cndtion
+                                .Location = Lction
+                                .Status = "Received"
+                                .save()
+                            End With
+
+                        Else '=-= ALL EQUIPMENTS
+                            With EquipInfo
+                                .AIRDtl_ID = 0
+                                .IsAccepted = False
+                                .Property_Dtl_ID = 0
+                                .SerialNo = "-"
+                                .Name = txtCO_Name.Text
+                                .Description = txtCO_Description.Text
+                                .PowerInput = txtCO_PowerIn.Text
+                                .Dimension = txtCO_Dimension.Text
+                                .AreaCapacity = txtCO_AreaCap.Text
+                                .Model = txtCO_Model.Text
+                                .Warranty = txtWarranty.Text
+                                .Specification = txtCO_Specs.Text
+                                .DepreciationRate = txtCO_DepRate.Text
+                                If txtCO_DepValue.Text = "" Then
+                                    .DepreciationValue = 0
+                                Else
+                                    .DepreciationValue = txtCO_DepValue.Text
+                                End If
+                                .Received_ID = rcvID
+                            End With
+
+                            Dim EuipID As Long = EquipInfo.save
+                            objDerived.GetRecords("UPDATE AMS.TbEquipment_Info SET Received_Dtl_ID = '" & Session("Received_Dtl_ID") & "' WHERE EquipInfoId = '" & EuipID & "'", CommandType.Text)
+
+                            With EquipDtl
+                                .EquipInfoId = EuipID
+                                .Property_Dtl_ID = 0
+                                .MarketValue = MrketValue
+                                .Condition = Cndtion
+                                .Location = Lction
+                                .Status = "Received"
+                                .save()
+                            End With
+
+                        End If
+                    End If
+                Next
+                Dim stck1 As Long = 0
+                'For allotment class 3
+                stck1 = objDerived.GetValue("SELECT Property_ID FROM AMS.Property WHERE POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "'", CommandType.Text)
+
+                Dim dt2 As DataTable = objDerived.GetDataTable("EXEC [AMS].[sp_ReceivedItems_Inspection] '" & grdAIR.SelectedDataKey("POHdr_ID") & "','" & stck1 & "','" & AllotmentClass_ID & "'", CommandType.Text)
+
+                objDerived.GetRecords("UPDATE AMS.Tb_Receiving SET Status = 2 WHERE Received_ID = '" & rcvID & "'", CommandType.Text)
+
+                objDerived.GetRecords("UPDATE AMS.Tb_Receiving SET inspection_date='" & txtDate.Text & "' WHERE Received_ID = '" & rcvID & "'", CommandType.Text)
+
+                ' If you also need to capture the header ID here, add the same block as above:
+                Dim newPOHdrID As Long = CLng(grdAIR.SelectedDataKey("POHdr_ID"))
+                Session("POHdr_ID") = newPOHdrID
+                btnPreview.Enabled = True
+
             End If
+        End If
 
-            MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Transaction has been successfully saved.")
-            LoadrbALL()
-            ClearTextBoxes(Me)
-            btnSave.Enabled = False
+        MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Transaction has been successfully saved.")
+        LoadrbALL()
+        ClearTextBoxes(Me)
+        btnSave.Enabled = False
 
 
-        Catch ex As Exception
-            MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Error: '" & ex.Message & "'")
-        End Try
+        'Catch ex As Exception
+        '    MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Error: '" & ex.Message & "'")
+        'End Try
     End Sub
 
     Protected Sub ScriptManager1_AsyncPostBackError(sender As Object, e As AsyncPostBackErrorEventArgs)
@@ -1614,4 +1648,66 @@ Partial Class Inventory_t_for_Inspection
         MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "The selected PO has been returned successfully.")
 
     End Sub
+
+    Private Function SaveAIR(ByVal rcvID As Long) As Integer
+
+        'Check AIR----------------------------------
+        'Dim checkAIR As Long = objDerived.GetValue("select * from AMS.AIR_Hdr where AMS.AIR_Hdr.Received_ID = '" & rcvID & "' or AMS.AIR_Hdr.POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "'", CommandType.Text)
+
+        Dim AIR_No As String = supplies.GetValue("select [AMS].[func_GenerateAIR]( '" & txtDate.Text & "')", CommandType.Text)
+
+        Dim ReceivedBy As String = objDerived.GetValue("SELECT full_name FROM HRMS.view_signatory WHERE Signatory_ID = '" & pInspection_detail.Rows(0)("ReceivedBY") & "'", CommandType.Text)
+        Dim InspectedBy As String = objDerived.GetValue("SELECT full_name FROM HRMS.view_signatory WHERE Signatory_ID = '" & pInspection_detail.Rows(0)("InspectedBy") & "'", CommandType.Text)
+
+        Dim functionID As Long = objDerived.GetValue("SELECT Function_ID FROM dbo.View_RespCenter_withFunctions WHERE RC_id = '" & grdAIR.SelectedDataKey("RC_ID") & "' AND Function_ID = '" & grdAIR.SelectedDataKey("Function_ID") & "'", CommandType.Text)
+        Dim rc_ID As Long = objDerived.GetValue("SELECT RC_ID FROM dbo.View_RespCenter_withFunctions WHERE RC_id = '" & grdAIR.SelectedDataKey("RC_ID") & "'", CommandType.Text)
+        Dim invoiceNum As String = objDerived.GetValue("SELECT InvoiceNo FROM AMS.Tb_Receiving WHERE POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "'", CommandType.Text)
+
+        Dim xAIRHdr_ID As Long
+
+        'If checkAIR = 0 Then
+        With AIR_Hdr
+            .AIR_No = AIR_No
+            .AIR_Date = txtDate.Text
+            .Invoice_No = invoiceNum
+            .Invoice_date = Date.Today.ToString("MM/dd/yyyy")
+            .POHdr_ID = grdAIR.SelectedDataKey("POHdr_ID")
+            .PO_No = grdAIR.SelectedDataKey("PO_No")
+            .Supplier_ID = grdAIR.SelectedDataKey("Supplier_Id")
+            .Date_Received = CDate(pInspection_detail.Rows(0)("Received_Date")).Date
+            .Date_Inspect = txtDate.Text
+            .Trans_ID = 1
+            .remarks = Nothing 'No column in tbReceivng
+            .IsInspected = True
+            .Date_Accepted = New DateTime(1900, 1, 1)
+            '.InspectedPersonPos = Nothing --ON SP 
+            '.InspectedPersonPos2 = Nothing
+
+            If grdAIR.SelectedDataKey("RC_ID") = 0 Then
+                .RC_ID = functionID
+                .Function_ID = rc_ID
+            Else
+                .RC_ID = grdAIR.SelectedDataKey("RC_ID")
+                .Function_ID = grdAIR.SelectedDataKey("Function_ID")
+            End If
+
+            Dim Box As CheckBox
+            For a As Integer = 0 To grdInspection.Rows.Count - 1
+                Box = CType(Me.grdInspection.Rows(a).Cells(0).FindControl("cbInspection"), CheckBox)
+                If Box IsNot Nothing AndAlso Box.Checked Then
+                    Dim zx As Long = pInspection_detail.Rows(a)("Received_ID")
+                    Session("xReceived_ID") = zx
+                    Exit For
+                End If
+            Next
+
+            .Received_ID = Session("xReceived_ID")
+            .UserID = Session("@UserName")
+        End With
+
+        xAIRHdr_ID = AIR_Hdr.save
+        'End If
+
+        Return xAIRHdr_ID
+    End Function
 End Class

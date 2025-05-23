@@ -14,7 +14,7 @@ Partial Class Procurement_t_receiving
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
         If Not Page.IsPostBack Then
 
-            grdReceived.DataSource = objDerived.GetDataTable("SELECT * FROM [dbo].[View_RQ_Receiving] ", CommandType.Text)
+            grdReceived.DataSource = objDerived.GetDataTable("SELECT * FROM [dbo].[View_RQ_Receiving] order by Received_ID desc", CommandType.Text)
             grdReceived.DataBind()
 
             rbChoice.SelectedItem.Value = 1
@@ -108,9 +108,15 @@ Partial Class Procurement_t_receiving
 
     Protected Sub grdReceived_PageIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewPageEventArgs)
         If rbChoice.SelectedItem.Value = 1 Then
-            grdReceived.DataSource = objDerived.GetDataTable("SELECT * FROM [dbo].[View_RQ_Receiving] WHERE ReceivedBy_ID = '" & ddReceivedBy.SelectedItem.Value & "'", CommandType.Text)
-            grdReceived.PageIndex = e.NewPageIndex
-            grdReceived.DataBind()
+            If ddReceivedBy.SelectedItem.Value = "Select" Then
+                grdReceived.DataSource = objDerived.GetDataTable("SELECT * FROM [dbo].[View_RQ_Receiving] order by Received_ID desc", CommandType.Text)
+                grdReceived.PageIndex = e.NewPageIndex
+                grdReceived.DataBind()
+            Else
+                grdReceived.DataSource = objDerived.GetDataTable("SELECT * FROM [dbo].[View_RQ_Receiving] WHERE ReceivedBy_ID = '" & ddReceivedBy.SelectedItem.Value & "'", CommandType.Text)
+                grdReceived.PageIndex = e.NewPageIndex
+                grdReceived.DataBind()
+            End If
 
         ElseIf rbChoice.SelectedItem.Value = 2 Then
             grdReceived.DataSource = objDerived.GetDataTable("SELECT * FROM [dbo].[View_RQ_Receiving] WHERE Received_Date BETWEEN '" & txtFrom.Text & "' and '" & txtTo.Text & "'", CommandType.Text)
@@ -121,7 +127,7 @@ Partial Class Procurement_t_receiving
             grdReceived.DataSource = objDerived.GetDataTable("SELECT * FROM [dbo].[View_RQ_Receiving] WHERE PO_No like '%" & txtPONumber.Text & "%'", CommandType.Text)
             grdReceived.PageIndex = e.NewPageIndex
             grdReceived.DataBind()
-
+        Else
         End If
     End Sub
 End Class

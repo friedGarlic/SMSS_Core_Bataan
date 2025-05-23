@@ -1358,62 +1358,62 @@ Partial Class Inventory_t_for_Acceptance
 
                 Dim xAIRHdr_ID As Long
 
-                If checkAIR = 0 Then
-                    With AIR_Hdr
-                        .AIR_No = AIR_No
-                        .AIR_Date = txtAcceptDate.Text
-                        .Invoice_No = txtInvoiceNumber.Text
-                        .Invoice_date = Date.Parse(txtInvoiceDate.Text)
-                        .POHdr_ID = grdAIR.SelectedDataKey("POHdr_ID")
-                        .PO_No = grdAIR.SelectedDataKey("PO_No")
-                        .Supplier_ID = grdAIR.SelectedDataKey("Supplier_Id")
-                        .Date_Received = pInspection_detail.Rows(0)("Received_Date")
-                        .Date_Inspect = pInspection_detail.Rows(0)("Received_Date")
-                        .Date_Accepted = txtAcceptDate.Text
-                        .Signatory1 = ReceivedBy
-                        .Signatory2 = InspectedBy
-                        .Signatory3 = ddAcceptedBy.SelectedItem.Text
-                        .Trans_ID = 1
-                        .remarks = txtRemakrs.Text
+                With AIR_Hdr
+                    .AIR_No = AIR_No
+                    .AIR_Date = txtAcceptDate.Text
+                    .Invoice_No = txtInvoiceNumber.Text
+                    .Invoice_date = Date.Parse(txtInvoiceDate.Text)
+                    .POHdr_ID = grdAIR.SelectedDataKey("POHdr_ID")
+                    .PO_No = grdAIR.SelectedDataKey("PO_No")
+                    .Supplier_ID = grdAIR.SelectedDataKey("Supplier_Id")
+                    .Date_Received = pInspection_detail.Rows(0)("Received_Date")
+                    .Date_Inspect = pInspection_detail.Rows(0)("Received_Date")
+                    .Date_Accepted = txtAcceptDate.Text
+                    .Trans_ID = 1
+                    .remarks = txtRemakrs.Text
 
-                        If rbStatus.SelectedItem.Value = 2 Then
-                            .isComplete = True
-                        Else
-                            .isComplete = False
+                    If rbStatus.SelectedItem.Value = 2 Then
+                        .isComplete = True
+                    Else
+                        .isComplete = False
+                    End If
+                    AddTrace("AIR_Hdr isComplete: " & .isComplete.ToString())
+
+                    If grdAIR.SelectedDataKey("RC_ID") = 0 Then
+                        AddTrace("RC_ID=0 => Using ddDepartment/ddFunction.")
+                        .RC_ID = ddDepartment.SelectedItem.Value
+                        .Function_ID = ddFunction.SelectedItem.Value
+                    Else
+                        .RC_ID = grdAIR.SelectedDataKey("RC_ID")
+                        .Function_ID = grdAIR.SelectedDataKey("Function_ID")
+                        AddTrace("RC_ID and Function_ID read from SelectedDataKey: RC_ID=" & .RC_ID & ", Function_ID=" & .Function_ID)
+                    End If
+
+                    AddTrace("Looping through grdInspection checkboxes to find first checked item.")
+                    Dim Box As CheckBox
+                    For a As Integer = 0 To grdInspection.Rows.Count - 1
+                        Box = CType(Me.grdInspection.Rows(a).Cells(0).FindControl("cbInspection"), CheckBox)
+                        If Box IsNot Nothing AndAlso Box.Checked Then
+                            Dim zx As Long = pInspection_detail.Rows(a)("Received_ID")
+                            Session("xReceived_ID") = zx
+                            AddTrace("Found a checked item. xReceived_ID set to: " & zx)
+                            Exit For
                         End If
-                        AddTrace("AIR_Hdr isComplete: " & .isComplete.ToString())
+                    Next
 
-                        If grdAIR.SelectedDataKey("RC_ID") = 0 Then
-                            AddTrace("RC_ID=0 => Using ddDepartment/ddFunction.")
-                            .RC_ID = ddDepartment.SelectedItem.Value
-                            .Function_ID = ddFunction.SelectedItem.Value
-                        Else
-                            .RC_ID = grdAIR.SelectedDataKey("RC_ID")
-                            .Function_ID = grdAIR.SelectedDataKey("Function_ID")
-                            AddTrace("RC_ID and Function_ID read from SelectedDataKey: RC_ID=" & .RC_ID & ", Function_ID=" & .Function_ID)
-                        End If
+                    .Received_ID = Session("xReceived_ID")
+                    .UserID = Session("@UserName")
+                End With
 
-                        AddTrace("Looping through grdInspection checkboxes to find first checked item.")
-                        Dim Box As CheckBox
-                        For a As Integer = 0 To grdInspection.Rows.Count - 1
-                            Box = CType(Me.grdInspection.Rows(a).Cells(0).FindControl("cbInspection"), CheckBox)
-                            If Box IsNot Nothing AndAlso Box.Checked Then
-                                Dim zx As Long = pInspection_detail.Rows(a)("Received_ID")
-                                Session("xReceived_ID") = zx
-                                AddTrace("Found a checked item. xReceived_ID set to: " & zx)
-                                Exit For
-                            End If
-                        Next
+                AddTrace("Saving AIR_Hdr record now...")
+                xAIRHdr_ID = AIR_Hdr.save
+                AddTrace("AIR_Hdr saved. xAIRHdr_ID = " & xAIRHdr_ID.ToString())
+                Session("AIRHdr_ID") = xAIRHdr_ID
 
-                        .Received_ID = Session("xReceived_ID")
-                        .UserID = Session("@UserName")
-                    End With
+                '
+                Dim updateAcceptSignatory As String = "UPDATE AMS.Tb_Receiving SET InspectedBy3 = '" & If(ddAcceptedBy.SelectedItem.Value, Nothing) & "' WHERE Received_ID = '" & Session("xReceived_ID") & "'"
+                objDerived.Execute(updateAcceptSignatory, CommandType.Text)
 
-                    AddTrace("Saving AIR_Hdr record now...")
-                    xAIRHdr_ID = AIR_Hdr.save
-                    AddTrace("AIR_Hdr saved. xAIRHdr_ID = " & xAIRHdr_ID.ToString())
-                    Session("AIRHdr_ID") = xAIRHdr_ID
-                End If
 
 
                 ' Validate StockDate format
@@ -1439,24 +1439,23 @@ Partial Class Inventory_t_for_Acceptance
                         Dim AIRDtl_ID As Long
 
                         '=-= SAVE AMS.AIR_Dtl
-                        If checkAIR = 0 Then
-                            AddTrace("Now saving AIR_Dtl for item_id=" & pInspection_detail.Rows(x)("Item_ID").ToString())
-                            With AIR_Dtl
-                                .AIRHdr_ID = xAIRHdr_ID
-                                .Item_ID = pInspection_detail.Rows(x)("Item_ID")
-                                .Qty = AcptQty
-                                .Cost = pInspection_detail.Rows(x)("Cost")
-                                .GA_ID = grdAIR.SelectedDataKey("GA_ID")
-                                .Warranty = 0
-                            End With
+                        AddTrace("Now saving AIR_Dtl for item_id=" & pInspection_detail.Rows(x)("Item_ID").ToString())
+                        With AIR_Dtl
+                            .AIRHdr_ID = xAIRHdr_ID
+                            .Item_ID = pInspection_detail.Rows(x)("Item_ID")
+                            .Qty = AcptQty
+                            .Cost = pInspection_detail.Rows(x)("Cost")
+                            .GA_ID = grdAIR.SelectedDataKey("GA_ID")
+                            .Warranty = 0
+                        End With
 
 
-                            AIRDtl_ID = AIR_Dtl.save
-                            AddTrace("AIR_Dtl saved with ID=" & AIRDtl_ID.ToString())
+                        AIRDtl_ID = AIR_Dtl.save
+                        AddTrace("AIR_Dtl saved with ID=" & AIRDtl_ID.ToString())
 
-                            objDerived.GetRecords("UPDATE AMS.AIR_Dtl SET OtherSpecs = '" & pInspection_detail.Rows(x)("OtherSpecs") & "', isAccepted = 1 WHERE AIRDtl_ID = '" & AIRDtl_ID & "' ", CommandType.Text)
-                            AddTrace("Updated AMS.AIR_Dtl => set isAccepted=1, OtherSpecs=" & pInspection_detail.Rows(x)("OtherSpecs").ToString())
-                        End If
+                        objDerived.GetRecords("UPDATE AMS.AIR_Dtl SET OtherSpecs = '" & pInspection_detail.Rows(x)("OtherSpecs") & "', isAccepted = 1 WHERE AIRDtl_ID = '" & AIRDtl_ID & "' ", CommandType.Text)
+                        AddTrace("Updated AMS.AIR_Dtl => set isAccepted=1, OtherSpecs=" & pInspection_detail.Rows(x)("OtherSpecs").ToString())
+
                         '==================================================================================
                         '=-= SAVE AMS.STOCK
 

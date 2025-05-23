@@ -1,4 +1,5 @@
 ﻿Imports System.Data
+Imports System.Data.SqlClient
 Imports System.Drawing
 Partial Class Inventory_t_for_Receiving
     Inherits System.Web.UI.Page
@@ -795,6 +796,21 @@ Partial Class Inventory_t_for_Receiving
             btnSave.Enabled = False
         End If
 
+        ''Create row for Receive Report
+        'Dim insertSQL As String = "INSERT INTO AMS.Tb_ReceiveRpt (RC_Name, PO_No, Invoice_No, Date_Received, Item_ID, Qty_Receiving)" &
+        '    "VALUES (@RC_Name, @PO_No, @Invoice_No, @Date_Received, @Item_ID, @Qty_Receiving)"
+
+        'Dim parameters As New List(Of SqlParameter) From {
+        '    New SqlParameter("@RC_Name", "123"),
+        '    New SqlParameter("@PO_No", "456"),
+        '    New SqlParameter("@Invoice_No", 10),
+        '    New SqlParameter("@Date_Received", 10),
+        '    New SqlParameter("@Item_ID", 10),
+        '    New SqlParameter("@Qty_Receiving", 10)
+        '}
+        'objDerived.Execute(insertSQL, CommandType.Text, parameters.ToArray())
+
+
         'Catch ex As Exception
         '    Dim script As String = "console.log('" & ex.Message & "')"
         '    ScriptManager.RegisterStartupScript(Me, Me.GetType(), "TRY SCRIPT RETURN", script, True)
@@ -850,6 +866,8 @@ Partial Class Inventory_t_for_Receiving
 
 
     Protected Sub btnPreview_Click(sender As Object, e As EventArgs) Handles btnPreview.Click
+
+
         ' 1) Verify we have a valid Received_ID in session
         If Session("Received_ID") Is Nothing OrElse Convert.ToInt64(Session("Received_ID")) = 0 Then
             MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "No Received transaction found. Please save a receiving record first.")

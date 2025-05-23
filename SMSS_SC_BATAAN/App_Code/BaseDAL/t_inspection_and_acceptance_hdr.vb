@@ -219,6 +219,61 @@ Public Class t_inspection_and_acceptance_hdr
         End Set
     End Property
 
+
+    Private pIsPartial As Boolean
+    Public Property IsPartial() As Boolean
+        Get
+            Return pIsPartial
+        End Get
+        Set(ByVal value As Boolean)
+            pIsPartial = value
+        End Set
+    End Property
+
+
+    Private pIsInspected As Boolean
+    Public Property IsInspected() As Boolean
+        Get
+            Return pIsInspected
+        End Get
+        Set(ByVal value As Boolean)
+            pIsInspected = value
+        End Set
+    End Property
+
+
+    Private pInspectedPersonPos As String
+    Public Property InspectedPersonPos() As String
+        Get
+            Return pInspectedPersonPos
+        End Get
+        Set(ByVal value As String)
+            pInspectedPersonPos = value
+        End Set
+    End Property
+
+
+    Private pInspectedPersonPos2 As String
+    Public Property InspectedPersonPos2() As String
+        Get
+            Return pInspectedPersonPos2
+        End Get
+        Set(ByVal value As String)
+            pInspectedPersonPos2 = value
+        End Set
+    End Property
+
+
+    Private pAcceptedPersonPos As String
+    Public Property AcceptedPersonPos() As String
+        Get
+            Return pAcceptedPersonPos
+        End Get
+        Set(ByVal value As String)
+            pAcceptedPersonPos = value
+        End Set
+    End Property
+
 #End Region
 
     Public Function save() As Long
@@ -245,6 +300,13 @@ Public Class t_inspection_and_acceptance_hdr
         objDerived.cmd.Parameters.AddWithValue("@remarks", remarks)
         objDerived.cmd.Parameters.AddWithValue("@Received_ID", Received_ID)
         objDerived.cmd.Parameters.AddWithValue("@UserID", UserID)
+
+        objDerived.cmd.Parameters.AddWithValue("@isPartial", IsPartial)
+        objDerived.cmd.Parameters.AddWithValue("@isInspected", IsInspected)
+        objDerived.cmd.Parameters.AddWithValue("@InspectedPersonPos", InspectedPersonPos)
+        objDerived.cmd.Parameters.AddWithValue("@InspectedPersonPos2", InspectedPersonPos2)
+        objDerived.cmd.Parameters.AddWithValue("@AcceptedPersonPos", AcceptedPersonPos)
+
         objDerived.cmd.Parameters.Add("@CurrID", SqlDbType.BigInt).Direction = ParameterDirection.Output
         i = objDerived.Execute("@CurrID", "AMS.spSave_AIR_Hdr", CommandType.StoredProcedure, Nothing)
         Return i
@@ -274,6 +336,14 @@ Public Class t_inspection_and_acceptance_hdr
         objDerived.cmd.Parameters.AddWithValue("@remarks", remarks)
         objDerived.cmd.Parameters.AddWithValue("@Received_ID", Received_ID)
         objDerived.cmd.Parameters.AddWithValue("@UserID", UserID)
+
+        objDerived.cmd.Parameters.AddWithValue("@isPartial", IsPartial)
+        objDerived.cmd.Parameters.AddWithValue("@isInspected", IsInspected)
+        objDerived.cmd.Parameters.AddWithValue("@InspectedPersonPos", InspectedPersonPos)
+        objDerived.cmd.Parameters.AddWithValue("@InspectedPersonPos2", InspectedPersonPos2)
+        objDerived.cmd.Parameters.AddWithValue("@AcceptedPersonPos", AcceptedPersonPos)
+
+
         objDerived.cmd.Parameters.Add("@CurrID", SqlDbType.BigInt).Direction = ParameterDirection.Output
         i = objDerived.Execute("@CurrID", "AMS.spSave_AIR_Hdr", CommandType.StoredProcedure, Nothing)
         Return i

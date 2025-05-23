@@ -80,6 +80,38 @@ Public Class t_inspection_and_acceptance_dtl
     End Property
 
 
+    Private pDate_Inspected As Date
+    Public Property Date_Inspected() As Date
+        Get
+            Return pDate_Inspected
+        End Get
+        Set(ByVal value As Date)
+            pDate_Inspected = value
+        End Set
+    End Property
+
+
+    Private pDate_Accepted As Date
+    Public Property Date_Accepted() As Date
+        Get
+            Return pDate_Accepted
+        End Get
+        Set(ByVal value As Date)
+            pDate_Accepted = value
+        End Set
+    End Property
+
+
+    Private pQty_Inspected As Decimal
+    Public Property Qty_Inspected() As Decimal
+        Get
+            Return pQty_Inspected
+        End Get
+        Set(ByVal value As Decimal)
+            pQty_Inspected = value
+        End Set
+    End Property
+
 
 #End Region
     Public Function save() As Long
@@ -87,11 +119,12 @@ Public Class t_inspection_and_acceptance_dtl
         Dim i As Long
         objDerived.cmd.Parameters.AddWithValue("@AIRDtl_ID", 0)
         objDerived.cmd.Parameters.AddWithValue("@Item_ID", Item_ID)
-        objDerived.cmd.Parameters.AddWithValue("@Qty", Qty)
         objDerived.cmd.Parameters.AddWithValue("@Cost", Cost)
         objDerived.cmd.Parameters.AddWithValue("@AIRHdr_ID", AIRHdr_ID)
         objDerived.cmd.Parameters.AddWithValue("@GA_ID", GA_ID)
         objDerived.cmd.Parameters.AddWithValue("@Warranty", Warranty)
+        objDerived.cmd.Parameters.AddWithValue("@Qty_Inspected", Qty_Inspected)
+        objDerived.cmd.Parameters.AddWithValue("@Qty_Accepted", Qty)
         objDerived.cmd.Parameters.Add("@CurrID", SqlDbType.BigInt).Direction = ParameterDirection.Output
         i = objDerived.Execute("@CurrID", "AMS.spSave_AIR_Dtl", CommandType.StoredProcedure, Nothing)
         Return i
@@ -102,11 +135,12 @@ Public Class t_inspection_and_acceptance_dtl
         Dim i As Long
         objDerived.cmd.Parameters.AddWithValue("@AIRDtl_ID", AIRDtl_ID)
         objDerived.cmd.Parameters.AddWithValue("@Item_ID", Item_ID)
-        objDerived.cmd.Parameters.AddWithValue("@Qty", Qty)
         objDerived.cmd.Parameters.AddWithValue("@Cost", Cost)
         objDerived.cmd.Parameters.AddWithValue("@AIRHdr_ID", AIRHdr_ID)
         objDerived.cmd.Parameters.AddWithValue("@GA_ID", GA_ID)
         objDerived.cmd.Parameters.AddWithValue("@Warranty", Warranty)
+        objDerived.cmd.Parameters.AddWithValue("@Qty_Inspected", Qty_Inspected)
+        objDerived.cmd.Parameters.AddWithValue("@Qty_Accepted", Qty)
         objDerived.cmd.Parameters.Add("@CurrID", SqlDbType.BigInt).Direction = ParameterDirection.Output
         i = objDerived.Execute("@CurrID", "AMS.spSave_AIR_Dtl", CommandType.StoredProcedure, Nothing)
         Return i
