@@ -364,7 +364,7 @@
                                      <tr>
                                          <td class="column_RightBold">Received By :</td>
                                           <td>
-                                              <asp:DropDownList ID="ddReceiveBy" CssClass="drpdownCSS" Width="250px" runat="server"></asp:DropDownList></td>
+                                              <asp:DropDownList ID="ddReceiveBy" CssClass="drpdownCSS" Width="250px" runat="server" AutoPostBack="True" OnSelectedIndexChanged="ddReceiveBy_SelectedIndexChanged"></asp:DropDownList></td>
                                      </tr>
                                      
                                  </table>

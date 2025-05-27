@@ -465,7 +465,7 @@ Partial Class Inventory_t_for_Receiving
             ddReceiveBy.Items.Insert(0, "Select")
 
             btnReturn.Enabled = True
-            'btnSave.Enabled = True
+            btnSave.Enabled = False
         End If
     End Sub
     Protected Sub grdAIR_RowDataBound(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewRowEventArgs)
@@ -884,9 +884,10 @@ Partial Class Inventory_t_for_Receiving
     End Sub
 
     Protected Sub CheckboxVerficationEnabling()
+        btnSave.Enabled = False
+
         Dim cb1 As CheckBox
         Dim isReturn As Boolean = False
-        Dim isSave As Boolean = False
 
         For i As Integer = 0 To grdItems.Rows.Count - 1
             cb1 = CType(Me.grdItems.Rows(i).Cells(0).FindControl("CheckBox1"), CheckBox)
@@ -895,11 +896,9 @@ Partial Class Inventory_t_for_Receiving
 
                 txtQty.Enabled = True
                 btnReturn.Enabled = True
-                btnSave.Enabled = True
 
                 'FLAGGING
                 isReturn = True
-                isSave = True
             Else
                 txtQty.Enabled = False
             End If
@@ -907,8 +906,31 @@ Partial Class Inventory_t_for_Receiving
         Next
 
         btnReturn.Enabled = isReturn
-        btnSave.Enabled = isSave
+        If ddReceiveBy.SelectedIndex > 0 Then
+            btnSave.Enabled = True
+        End If
 
     End Sub
 
+    Protected Sub ddReceiveBy_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ddReceiveBy.SelectedIndexChanged
+
+        Dim cb1 As CheckBox
+        Dim itemIsSelected As Boolean = False
+
+        For i As Integer = 0 To grdItems.Rows.Count - 1
+            cb1 = CType(Me.grdItems.Rows(i).Cells(0).FindControl("CheckBox1"), CheckBox)
+            Dim txtQty As TextBox = CType(grdItems.Rows(i).FindControl("txtQty"), TextBox)
+            If cb1.Checked = True Then
+                itemIsSelected = True
+
+            End If
+        Next
+
+        If itemIsSelected = True And ddReceiveBy.SelectedIndex > 0 Then
+            btnSave.Enabled = True
+        Else
+            btnSave.Enabled = False
+        End If
+
+    End Sub
 End Class
