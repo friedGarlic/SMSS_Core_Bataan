@@ -872,43 +872,49 @@ Partial Class Inventory_t_for_Acceptance
 
             '=-= SAVE AMS.AIR_Hdr
             Dim AIR_No As String = supplies.GetValue("select [AMS].[func_GenerateAIR]( '" & txtAcceptDate.Text & "')", CommandType.Text)
+
             With AIR_Hdr
                 .AIR_No = AIR_No
                 .AIR_Date = txtAcceptDate.Text
                 .Invoice_No = txtInvoiceNumber.Text
-                .Invoice_date = txtInvoiceDate.Text
+                .Invoice_date = Date.Parse(txtInvoiceDate.Text)
                 .POHdr_ID = grdAIR.SelectedDataKey("POHdr_ID")
                 .PO_No = grdAIR.SelectedDataKey("PO_No")
                 .Supplier_ID = grdAIR.SelectedDataKey("Supplier_Id")
                 .Date_Received = pInspection_detail.Rows(0)("Received_Date")
                 .Date_Inspect = pInspection_detail.Rows(0)("Received_Date")
                 .Date_Accepted = txtAcceptDate.Text
-                .Signatory1 = ReceivedBy
-                .Signatory2 = InspectedBy
-                .Signatory3 = ddAcceptedBy.SelectedItem.Text
                 .Trans_ID = 1
                 .remarks = txtRemakrs.Text
+                If rbStatus.SelectedIndex = 0 Then
+                    .IsPartial = True
+                End If
 
                 If rbStatus.SelectedItem.Value = 2 Then
                     .isComplete = True
                 Else
                     .isComplete = False
                 End If
+                AddTrace("AIR_Hdr isComplete: " & .isComplete.ToString())
 
                 If grdAIR.SelectedDataKey("RC_ID") = 0 Then
+                    AddTrace("RC_ID=0 => Using ddDepartment/ddFunction.")
                     .RC_ID = ddDepartment.SelectedItem.Value
                     .Function_ID = ddFunction.SelectedItem.Value
                 Else
                     .RC_ID = grdAIR.SelectedDataKey("RC_ID")
                     .Function_ID = grdAIR.SelectedDataKey("Function_ID")
+                    AddTrace("RC_ID and Function_ID read from SelectedDataKey: RC_ID=" & .RC_ID & ", Function_ID=" & .Function_ID)
                 End If
 
+                AddTrace("Looping through grdInspection checkboxes to find first checked item.")
                 Dim Box As CheckBox
                 For a As Integer = 0 To grdInspection.Rows.Count - 1
                     Box = CType(Me.grdInspection.Rows(a).Cells(0).FindControl("cbInspection"), CheckBox)
-                    If Box.Checked = True Then
+                    If Box IsNot Nothing AndAlso Box.Checked Then
                         Dim zx As Long = pInspection_detail.Rows(a)("Received_ID")
                         Session("xReceived_ID") = zx
+                        AddTrace("Found a checked item. xReceived_ID set to: " & zx)
                         Exit For
                     End If
                 Next
@@ -927,6 +933,7 @@ Partial Class Inventory_t_for_Acceptance
                     Dim AcptQty As Decimal = CType(CType(grdInspection.Rows(x).FindControl("txtActQty"), TextBox).Text, Decimal)
 
                     '=-= SAVE AMS.AIR_Dtl
+                    AddTrace("Now saving AIR_Dtl for item_id=" & pInspection_detail.Rows(x)("Item_ID").ToString())
                     With AIR_Dtl
                         .AIRHdr_ID = xAIRHdr_ID
                         .Item_ID = pInspection_detail.Rows(x)("Item_ID")
@@ -935,6 +942,7 @@ Partial Class Inventory_t_for_Acceptance
                         .GA_ID = grdAIR.SelectedDataKey("GA_ID")
                         .Warranty = 0
                     End With
+
 
                     Dim AIRDtl_ID As Long = AIR_Dtl.save
                     objDerived.GetRecords("UPDATE AMS.AIR_Dtl SET OtherSpecs = '" & pInspection_detail.Rows(x)("OtherSpecs") & "', isAccepted = 1 WHERE AIRDtl_ID = '" & AIRDtl_ID & "' ", CommandType.Text)
@@ -1234,523 +1242,526 @@ Partial Class Inventory_t_for_Acceptance
     End Sub
     Protected Sub btnSave_Click(sender As Object, e As EventArgs)
         ' --- TRACER: Check if any row is selected in grdAIR ---
-        Try
+        'Try
 
 
-            If grdAIR.SelectedIndex < 0 OrElse grdAIR.SelectedDataKey Is Nothing Then
-                AddTrace("No row is currently selected in grdAIR. Exiting.")
-                MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "No row selected. Please select a row from the Purchase Orders list before saving.")
+        If grdAIR.SelectedIndex < 0 OrElse grdAIR.SelectedDataKey Is Nothing Then
+            AddTrace("No row is currently selected in grdAIR. Exiting.")
+            MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "No row selected. Please select a row from the Purchase Orders list before saving.")
+            Exit Sub
+        Else
+            AddTrace("Row is selected. SelectedIndex = " & grdAIR.SelectedIndex.ToString() &
+                 ", POHdr_ID = " & grdAIR.SelectedDataKey("POHdr_ID").ToString() &
+                 ", RC_ID = " & grdAIR.SelectedDataKey("RC_ID").ToString())
+        End If
+
+        AddTrace("Attempting to parse invoiceDate from txtInvoiceDate.Text = '" & txtInvoiceDate.Text & "'")
+        Dim invoiceDate As DateTime = DateTime.Parse(txtInvoiceDate.Text)
+        AddTrace("invoiceDate successfully parsed: " & invoiceDate.ToString("yyyy-MM-dd"))
+
+        ' Ensure Department/Function is selected if RC_ID=0
+        If grdAIR.SelectedDataKey("RC_ID") = 0 Then
+            AddTrace("Checking if ddDepartment or ddFunction is set to 'Select' because RC_ID=0")
+            If ddDepartment.SelectedItem.Text = "Select" Or ddFunction.SelectedItem.Text = "Select" Then
+                AddTrace("Either Department or Function not selected; exiting.")
+                MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Select department and its function.")
                 Exit Sub
-            Else
-                AddTrace("Row is selected. SelectedIndex = " & grdAIR.SelectedIndex.ToString() &
-                     ", POHdr_ID = " & grdAIR.SelectedDataKey("POHdr_ID").ToString() &
-                     ", RC_ID = " & grdAIR.SelectedDataKey("RC_ID").ToString())
+            End If
+        End If
+
+        Dim poHdrIdVal As String = grdAIR.SelectedDataKey("POHdr_ID").ToString()
+        AddTrace("Retrieving Received_ID from Tb_Receiving for POHdr_ID = " & poHdrIdVal)
+        Dim rcvID As Long = objDerived.GetValue("SELECT Received_ID FROM AMS.Tb_Receiving WHERE POHdr_ID = '" & poHdrIdVal & "'", CommandType.Text)
+
+        Dim resetIsDisplayReport = "update AMS.Tb_Receiving_Dtl set AMS.Tb_Receiving_Dtl.IsDisplayReport = 0 where AMS.Tb_Receiving_Dtl.Received_ID = '" & rcvID & "' "
+        objDerived.Execute(resetIsDisplayReport, CommandType.Text)
+
+        '--ALREADY EXIST
+        'UPDATE
+        Dim checkAIR As Long = objDerived.GetValue("select * from AMS.AIR_Hdr where AMS.AIR_Hdr.Received_ID = '" & rcvID & "' or AMS.AIR_Hdr.POHdr_ID = '" & poHdrIdVal & "'", CommandType.Text)
+
+        Dim checkStock As Long = objDerived.GetValue("select AMS.Stock.StockID from AMS.Stock where AMS.Stock.Received_ID = '" & rcvID & "' or AMS.Stock.POHdr_ID = '" & poHdrIdVal & "'", CommandType.Text)
+
+
+        Dim cb_1 As CheckBox
+        For x As Integer = 0 To grdInspection.Rows.Count - 1
+            cb_1 = CType(Me.grdInspection.Rows(x).Cells(0).FindControl("cbInspection"), CheckBox)
+            Dim RcvDtl_ID As Long = objDerived.GetValue("SELECT Received_Dtl_ID FROM AMS.Tb_Receiving_Dtl WHERE Received_ID = '" & rcvID & "' AND Item_ID = '" & pInspection_detail.Rows(x)("Item_ID") & "'", CommandType.Text)
+
+            Dim txtQty As TextBox = CType(grdInspection.Rows(x).FindControl("txtActQty"), TextBox)
+
+            Dim receivedQty As Decimal
+            If Not Decimal.TryParse(txtQty.Text, receivedQty) Then
+                receivedQty = 0 ' Default to 0 if parsing fails
             End If
 
-            AddTrace("Attempting to parse invoiceDate from txtInvoiceDate.Text = '" & txtInvoiceDate.Text & "'")
-            Dim invoiceDate As DateTime = DateTime.Parse(txtInvoiceDate.Text)
-            AddTrace("invoiceDate successfully parsed: " & invoiceDate.ToString("yyyy-MM-dd"))
+            If cb_1 IsNot Nothing AndAlso cb_1.Checked Then
 
-            ' Ensure Department/Function is selected if RC_ID=0
-            If grdAIR.SelectedDataKey("RC_ID") = 0 Then
-                AddTrace("Checking if ddDepartment or ddFunction is set to 'Select' because RC_ID=0")
-                If ddDepartment.SelectedItem.Text = "Select" Or ddFunction.SelectedItem.Text = "Select" Then
-                    AddTrace("Either Department or Function not selected; exiting.")
-                    MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Select department and its function.")
+                'for report
+                Dim updateItemReportDisplay = "update AMS.Tb_Receiving_Dtl set AMS.Tb_Receiving_Dtl.IsDisplayReport = 1 where AMS.Tb_Receiving_Dtl.Received_Dtl_ID = '" & RcvDtl_ID & "' "
+                objDerived.Execute(updateItemReportDisplay, CommandType.Text)
+
+                'for report
+                Dim updateTempQuantity As String = "update AMS.Tb_Receiving_Dtl set AMS.Tb_Receiving_Dtl.tempReportQuantity = '" & receivedQty & "' where AMS.Tb_Receiving_Dtl.Received_Dtl_ID = '" & RcvDtl_ID & "' "
+                objDerived.Execute(updateTempQuantity, CommandType.Text)
+
+                Dim result As Object = objDerived.GetValue("SELECT AMS.Tb_Receiving_Dtl.Qty_Accepting FROM AMS.Tb_Receiving_Dtl WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'", CommandType.Text)
+                Dim Qty_AcceptedValue As Decimal
+                Dim calResult As Decimal
+
+                If result IsNot DBNull.Value Then
+                    ' Try parsing the result as Decimal
+                    If Decimal.TryParse(result.ToString(), Qty_AcceptedValue) Then
+                    End If
+                End If
+
+                If (receivedQty <= Qty_AcceptedValue) Then
+                    calResult = Math.Abs(Qty_AcceptedValue - receivedQty) '// 0 if complete, 8-8
+                Else
+                    MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "The quantity desired to return is more that existing quantity, Reminder: Reload to see existing quantity.")
+
                     Exit Sub
                 End If
-            End If
 
-            Dim poHdrIdVal As String = grdAIR.SelectedDataKey("POHdr_ID").ToString()
-            AddTrace("Retrieving Received_ID from Tb_Receiving for POHdr_ID = " & poHdrIdVal)
-            Dim rcvID As Long = objDerived.GetValue("SELECT Received_ID FROM AMS.Tb_Receiving WHERE POHdr_ID = '" & poHdrIdVal & "'", CommandType.Text)
-
-            Dim resetIsDisplayReport = "update AMS.Tb_Receiving_Dtl set AMS.Tb_Receiving_Dtl.IsDisplayReport = 0 where AMS.Tb_Receiving_Dtl.Received_ID = '" & rcvID & "' "
-            objDerived.Execute(resetIsDisplayReport, CommandType.Text)
-
-            '--ALREADY EXIST
-            'UPDATE
-            Dim checkAIR As Long = objDerived.GetValue("select * from AMS.AIR_Hdr where AMS.AIR_Hdr.Received_ID = '" & rcvID & "' or AMS.AIR_Hdr.POHdr_ID = '" & poHdrIdVal & "'", CommandType.Text)
-
-            Dim checkStock As Long = objDerived.GetValue("select AMS.Stock.StockID from AMS.Stock where AMS.Stock.Received_ID = '" & rcvID & "' or AMS.Stock.POHdr_ID = '" & poHdrIdVal & "'", CommandType.Text)
+                'UPDATE QTY_Accepted VALUE
+                Dim updateDtlSQL As String = "UPDATE AMS.Tb_Receiving_Dtl SET Qty_Accepting = '" & calResult & "' WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'"
+                objDerived.Execute(updateDtlSQL, CommandType.Text)
 
 
-            Dim cb_1 As CheckBox
-            For x As Integer = 0 To grdInspection.Rows.Count - 1
-                cb_1 = CType(Me.grdInspection.Rows(x).Cells(0).FindControl("cbInspection"), CheckBox)
-                Dim RcvDtl_ID As Long = objDerived.GetValue("SELECT Received_Dtl_ID FROM AMS.Tb_Receiving_Dtl WHERE Received_ID = '" & rcvID & "' AND Item_ID = '" & pInspection_detail.Rows(x)("Item_ID") & "'", CommandType.Text)
+                If checkStock <> 0 Then
+                    'stock no dtl
 
-                Dim txtQty As TextBox = CType(grdInspection.Rows(x).FindControl("txtActQty"), TextBox)
+                    Dim updateStock As String = "update AMS.Stock set AMS.Stock.Qty = '" & receivedQty & "' + AMS.Stock.Qty, AMS.Stock.Balance = '" & receivedQty & "' + AMS.Stock.Balance where AMS.Stock.Received_ID = '" & rcvID & "' or AMS.Stock.POHdr_ID = '" & poHdrIdVal & "' "
+                    objDerived.Execute(updateStock, CommandType.Text)
 
-                Dim receivedQty As Decimal
-                If Not Decimal.TryParse(txtQty.Text, receivedQty) Then
-                    receivedQty = 0 ' Default to 0 if parsing fails
+                    'update stock ledger
+                    Dim updateStockLedger As String = "update AMS.TbStock_Ledger set AMS.TbStock_Ledger.DebitQty = '" & receivedQty & "' + AMS.TbStock_Ledger.DebitQty where AMS.TbStock_Ledger.StockID = '" & checkStock & "' and AMS.TbStock_Ledger.Item_ID = '" & pInspection_detail.Rows(x)("Item_ID") & "' "
                 End If
 
-                If cb_1 IsNot Nothing AndAlso cb_1.Checked Then
+                If checkAIR <> 0 Then
+                    'stock no dtl
+                    Dim getAIR_ID As Integer = objDerived.GetValue("select AMS.AIR_Hdr.AIRHdr_ID from AMS.AIR_Hdr where AMS.AIR_Hdr.Received_ID = '" & rcvID & "' or AMS.AIR_Hdr.POHdr_ID = '" & poHdrIdVal & "' ", CommandType.Text)
 
-                    'for report
-                    Dim updateItemReportDisplay = "update AMS.Tb_Receiving_Dtl set AMS.Tb_Receiving_Dtl.IsDisplayReport = 1 where AMS.Tb_Receiving_Dtl.Received_Dtl_ID = '" & RcvDtl_ID & "' "
-                    objDerived.Execute(updateItemReportDisplay, CommandType.Text)
 
-                    'for report
-                    Dim updateTempQuantity As String = "update AMS.Tb_Receiving_Dtl set AMS.Tb_Receiving_Dtl.tempReportQuantity = '" & receivedQty & "' where AMS.Tb_Receiving_Dtl.Received_Dtl_ID = '" & RcvDtl_ID & "' "
-                    objDerived.Execute(updateTempQuantity, CommandType.Text)
+                    Dim updateStock As String = "update AMS.AIR_Dtl set AMS.AIR_Dtl.Qty_Accepted = '" & receivedQty & "' + AMS.AIR_Dtl.Qty_Accepted where AMS.AIR_Dtl.AIRHdr_ID = '" & getAIR_ID & "' and AMS.AIR_Dtl.Item_ID = '" & pInspection_detail.Rows(x)("Item_ID") & "'"
+                    objDerived.Execute(updateStock, CommandType.Text)
+                End If
+            End If
+        Next
 
-                    Dim result As Object = objDerived.GetValue("SELECT AMS.Tb_Receiving_Dtl.Qty_Accepting FROM AMS.Tb_Receiving_Dtl WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'", CommandType.Text)
-                    Dim Qty_AcceptedValue As Decimal
-                    Dim calResult As Decimal
 
-                    If result IsNot DBNull.Value Then
-                        ' Try parsing the result as Decimal
-                        If Decimal.TryParse(result.ToString(), Qty_AcceptedValue) Then
+        '--NON EXISTING STOCK AND AIR
+        'SAVE AND CREATE ROW
+        'TODO else no need to run just update
+        If AllotmentClass = 2 Then
+            AddTrace("AllotmentClass=2 => MOOE flow.")
+            Dim ReceivedBy As String = objDerived.GetValue("SELECT full_name FROM HRMS.view_signatory WHERE Signatory_ID = '" & pInspection_detail.Rows(0)("ReceivedBY") & "'", CommandType.Text)
+            AddTrace("ReceivedBy from pInspection_detail: " & ReceivedBy)
+            Dim InspectedBy As String = objDerived.GetValue("SELECT full_name FROM HRMS.view_signatory WHERE Signatory_ID = '" & pInspection_detail.Rows(0)("InspectedBy") & "'", CommandType.Text)
+            AddTrace("InspectedBy from pInspection_detail: " & InspectedBy)
+
+            AddTrace("Generating AIR_No via [AMS].[func_GenerateAIR] for date = " & txtAcceptDate.Text)
+            Dim AIR_No As String = supplies.GetValue("select [AMS].[func_GenerateAIR]( '" & txtAcceptDate.Text & "')", CommandType.Text)
+            AddTrace("AIR_No generated: " & AIR_No)
+
+            Dim xAIRHdr_ID As Long
+
+            With AIR_Hdr
+                .AIR_No = AIR_No
+                .AIR_Date = txtAcceptDate.Text
+                .Invoice_No = txtInvoiceNumber.Text
+                .Invoice_date = Date.Parse(txtInvoiceDate.Text)
+                .POHdr_ID = grdAIR.SelectedDataKey("POHdr_ID")
+                .PO_No = grdAIR.SelectedDataKey("PO_No")
+                .Supplier_ID = grdAIR.SelectedDataKey("Supplier_Id")
+                .Date_Received = pInspection_detail.Rows(0)("Received_Date")
+                .Date_Inspect = pInspection_detail.Rows(0)("Received_Date")
+                .Date_Accepted = txtAcceptDate.Text
+                .Trans_ID = 1
+                .remarks = txtRemakrs.Text
+                If rbStatus.SelectedIndex = 0 Then
+                    .IsPartial = True
+                End If
+
+                If rbStatus.SelectedItem.Value = 2 Then
+                    .isComplete = True
+                Else
+                    .isComplete = False
+                End If
+                AddTrace("AIR_Hdr isComplete: " & .isComplete.ToString())
+
+                If grdAIR.SelectedDataKey("RC_ID") = 0 Then
+                    AddTrace("RC_ID=0 => Using ddDepartment/ddFunction.")
+                    .RC_ID = ddDepartment.SelectedItem.Value
+                    .Function_ID = ddFunction.SelectedItem.Value
+                Else
+                    .RC_ID = grdAIR.SelectedDataKey("RC_ID")
+                    .Function_ID = grdAIR.SelectedDataKey("Function_ID")
+                    AddTrace("RC_ID and Function_ID read from SelectedDataKey: RC_ID=" & .RC_ID & ", Function_ID=" & .Function_ID)
+                End If
+
+                AddTrace("Looping through grdInspection checkboxes to find first checked item.")
+                Dim Box As CheckBox
+                For a As Integer = 0 To grdInspection.Rows.Count - 1
+                    Box = CType(Me.grdInspection.Rows(a).Cells(0).FindControl("cbInspection"), CheckBox)
+                    If Box IsNot Nothing AndAlso Box.Checked Then
+                        Dim zx As Long = pInspection_detail.Rows(a)("Received_ID")
+                        Session("xReceived_ID") = zx
+                        AddTrace("Found a checked item. xReceived_ID set to: " & zx)
+                        Exit For
+                    End If
+                Next
+
+                .Received_ID = Session("xReceived_ID")
+                .UserID = Session("@UserName")
+            End With
+
+            AddTrace("Saving AIR_Hdr record now...")
+            xAIRHdr_ID = AIR_Hdr.save
+            AddTrace("AIR_Hdr saved. xAIRHdr_ID = " & xAIRHdr_ID.ToString())
+            Session("AIRHdr_ID") = xAIRHdr_ID
+
+            '
+            Dim updateAcceptSignatory As String = "UPDATE AMS.Tb_Receiving SET InspectedBy3 = '" & If(ddAcceptedBy.SelectedItem.Value, Nothing) & "' WHERE Received_ID = '" & Session("xReceived_ID") & "'"
+            objDerived.Execute(updateAcceptSignatory, CommandType.Text)
+
+
+
+            ' Validate StockDate format
+            Try
+                Dim testDate As DateTime = DateTime.Parse(txtAcceptDate.Text)
+                AddTrace("StockDate is valid: " & testDate.ToString("yyyy-MM-dd"))
+            Catch ex As Exception
+                AddTrace("ERROR: Invalid StockDate format: " & txtAcceptDate.Text)
+                MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Invalid date format for Stock Date")
+                Exit Sub
+            End Try
+
+            Dim cb As CheckBox
+            For x As Integer = 0 To grdInspection.Rows.Count - 1
+                cb = CType(Me.grdInspection.Rows(x).Cells(0).FindControl("cbInspection"), CheckBox)
+                If cb IsNot Nothing AndAlso cb.Checked Then
+                    Dim AcptQty As Decimal = CType(CType(grdInspection.Rows(x).FindControl("txtActQty"), TextBox).Text, Decimal)
+                    AddTrace("Accepting item with index " & x & ": AcptQty=" & AcptQty.ToString())
+
+                    objDerived.GetRecords("UPDATE AMS.Tb_Receiving_Dtl Set Status = 2 where Received_ID = '" & rcvID & "' and Item_ID='" & pInspection_detail.Rows(x)("Item_ID") & "'", CommandType.Text)
+                    AddTrace("Executed: UPDATE AMS.Tb_Receiving_Dtl for Received_ID=" & rcvID & " Item_ID=" & pInspection_detail.Rows(x)("Item_ID").ToString())
+
+                    Dim AIRDtl_ID As Long
+
+                    '=-= SAVE AMS.AIR_Dtl
+                    AddTrace("Now saving AIR_Dtl for item_id=" & pInspection_detail.Rows(x)("Item_ID").ToString())
+                    With AIR_Dtl
+                        .AIRHdr_ID = xAIRHdr_ID
+                        .Item_ID = pInspection_detail.Rows(x)("Item_ID")
+                        .Qty = AcptQty
+                        .Cost = pInspection_detail.Rows(x)("Cost")
+                        .GA_ID = grdAIR.SelectedDataKey("GA_ID")
+                        .Warranty = 0
+                    End With
+
+
+                    AIRDtl_ID = AIR_Dtl.save
+                    AddTrace("AIR_Dtl saved with ID=" & AIRDtl_ID.ToString())
+
+                    objDerived.GetRecords("UPDATE AMS.AIR_Dtl SET OtherSpecs = '" & pInspection_detail.Rows(x)("OtherSpecs") & "', isAccepted = 1 WHERE AIRDtl_ID = '" & AIRDtl_ID & "' ", CommandType.Text)
+                    AddTrace("Updated AMS.AIR_Dtl => set isAccepted=1, OtherSpecs=" & pInspection_detail.Rows(x)("OtherSpecs").ToString())
+
+                    '==================================================================================
+                    '=-= SAVE AMS.STOCK
+
+                    If checkStock = 0 Then
+                        With Stock
+                            .StockDate = txtAcceptDate.Text
+                            .AIRDtl_ID = AIRDtl_ID
+                            .Item_ID = pInspection_detail.Rows(x)("Item_ID")
+                            .Qty = AcptQty
+                            .Balance = AcptQty
+                            .Expiration_Date = CDate(txtAcceptDate.Text).AddYears(5)
+
+                            .Issuance = 0
+                            .Cost = pInspection_detail.Rows(x)("Cost")
+                            .Project_ID = 0
+                            .Program_id = 0
+                            .F_ID = 1
+                            .GA_ID = grdAIR.SelectedDataKey("GA_ID")
+                            .Location = pInspection_detail.Rows(x)("Location")
+
+                            If grdAIR.SelectedDataKey("RC_ID") = 0 Then
+                                .RC_ID = ddDepartment.SelectedItem.Value
+                                .Function_ID = ddFunction.SelectedItem.Value
+                            Else
+                                .RC_ID = grdAIR.SelectedDataKey("RC_ID")
+                                .Function_ID = grdAIR.SelectedDataKey("Function_ID")
+                            End If
+
+                            .POHdr_ID = grdAIR.SelectedDataKey("POHdr_ID")
+                            .Received_ID = Session("xReceived_ID")
+                            .UserID = Session("@UserName")
+                        End With
+
+                        AddTrace("Stock object initialized successfully. Proceeding to save...")
+
+                        Dim StckID As Long = Stock.save
+                        AddTrace("Stock record saved with ID=" & StckID.ToString())
+
+
+                        objDerived.Execute("update ams.TBSupplies_Info set StockID = '" & StckID & "' where ams.TBSupplies_Info.Received_ID = '" & rcvID & "' And ams.TBSupplies_Info.ItemId = '" & pInspection_detail.Rows(x)("Item_ID") & "' ", CommandType.Text)
+
+
+                        objDerived.Execute("UPDATE [AMS].[Stock] SET [OtherSpecs] = '" & pInspection_detail.Rows(x)("OtherSpecs") & "' WHERE [StockID] = " & StckID & "", CommandType.Text)
+                        AddTrace("Updated [AMS].[Stock] => set OtherSpecs=" & pInspection_detail.Rows(x)("OtherSpecs").ToString())
+
+                        Dim Remarks = objDerived.Execute("select count(*) from [AMS].[Stock]  WHERE [StockID] = " & StckID & "", CommandType.Text)
+                        AddTrace("Remarks count from AMS.Stock => " & Remarks.ToString())
+
+                        '=-= SAVE AMS.TbStock_Ledger
+                        Dim A As String = objDerived.GetValue("select distinct Trans_Type from AMS.TbStock_Ledger where Trans_Type = 'Starting Inventory' and Item_ID='" & pInspection_detail.Rows(x)("Item_ID") & "'", CommandType.Text)
+                        If A = "Starting Inventory" Then
+                            AddTrace("Existing 'Starting Inventory' ledger found for Item_ID=" & pInspection_detail.Rows(x)("Item_ID").ToString())
+                            If Remarks <> 0 Then
+                                AddTrace("Saving Stock_Ledger => Trans_Type='Purchase Order Delivered'")
+                                With Stock_Ledger
+                                    .StockID = StckID
+                                    .Item_ID = pInspection_detail.Rows(x)("Item_ID")
+                                    .dDate = txtAcceptDate.Text
+                                    .Trans_Type = "Purchase Order Delivered"
+                                    .Ref = AIR_No
+                                    .AccountablePerson = objDerived.GetValue("SELECT SuppName FROM dbo.Supplier WHERE Supplier_Id = '" & grdAIR.SelectedDataKey("Supplier_Id") & "'", CommandType.Text)
+                                    .ReceivedBy = ReceivedBy
+                                    .InspectedBy = InspectedBy
+                                    .AcceptedBy = ddAcceptedBy.SelectedItem.Text
+                                    .DebitQty = AcptQty
+                                    .DebitCost = FormatNumber(AcptQty * pInspection_detail.Rows(x)("Cost"), 2)
+                                    .DebitUnit = pInspection_detail.Rows(x)("Unit")
+                                    .CreditQty = 0
+                                    .CreditCost = "0.00"
+                                    .CreditUnit = pInspection_detail.Rows(x)("Unit")
+                                    .BalanceUnit = pInspection_detail.Rows(x)("Unit")
+
+                                    If grdAIR.SelectedDataKey("RC_ID") = 0 Then
+                                        .Department = ddDepartment.SelectedItem.Text
+                                    Else
+                                        .Department = objDerived.GetValue("SELECT RC_Name FROM dbo.View_RespCenter_withFunctions WHERE RC_id = '" & grdAIR.SelectedDataKey("RC_ID") & "'", CommandType.Text)
+                                    End If
+                                    .save()
+                                End With
+                            Else
+                                AddTrace("No remarks in Stock => still using 'Purchase Order Delivered' ledger entry")
+                                With Stock_Ledger
+                                    .StockID = StckID
+                                    .Item_ID = pInspection_detail.Rows(x)("Item_ID")
+                                    .dDate = txtAcceptDate.Text
+                                    .Trans_Type = "Purchase Order Delivered"
+                                    .Ref = AIR_No
+                                    .AccountablePerson = objDerived.GetValue("SELECT SuppName FROM dbo.Supplier WHERE Supplier_Id = '" & grdAIR.SelectedDataKey("Supplier_Id") & "'", CommandType.Text)
+                                    .ReceivedBy = ReceivedBy
+                                    .InspectedBy = InspectedBy
+                                    .AcceptedBy = ddAcceptedBy.SelectedItem.Text
+                                    .DebitQty = AcptQty
+                                    .DebitCost = FormatNumber(AcptQty * pInspection_detail.Rows(x)("Cost"), 2)
+                                    .DebitUnit = pInspection_detail.Rows(x)("Unit")
+                                    .CreditQty = 0
+                                    .CreditCost = "0.00"
+                                    .CreditUnit = pInspection_detail.Rows(x)("Unit")
+                                    .BalanceUnit = pInspection_detail.Rows(x)("Unit")
+
+                                    If grdAIR.SelectedDataKey("RC_ID") = 0 Then
+                                        .Department = ddDepartment.SelectedItem.Text
+                                    Else
+                                        .Department = objDerived.GetValue("SELECT RC_Name FROM dbo.View_RespCenter_withFunctions WHERE RC_id = '" & grdAIR.SelectedDataKey("RC_ID") & "'", CommandType.Text)
+                                    End If
+                                    .save()
+                                End With
+                            End If
+                        ElseIf IsDBNull(A) OrElse A = "" Then
+                            AddTrace("No 'Starting Inventory' ledger => creating new one.")
+                            If Remarks <> 0 Then
+                                AddTrace("Some remarks => saving with Trans_Type='Starting Inventory'")
+                                With Stock_Ledger
+                                    .StockID = StckID
+                                    .Item_ID = pInspection_detail.Rows(x)("Item_ID")
+                                    .dDate = txtAcceptDate.Text
+                                    .Trans_Type = "Starting Inventory"
+                                    .Ref = AIR_No
+                                    .AccountablePerson = objDerived.GetValue("SELECT SuppName FROM dbo.Supplier WHERE Supplier_Id = '" & grdAIR.SelectedDataKey("Supplier_Id") & "'", CommandType.Text)
+                                    .ReceivedBy = ReceivedBy
+                                    .InspectedBy = InspectedBy
+                                    .AcceptedBy = ddAcceptedBy.SelectedItem.Text
+                                    .DebitQty = AcptQty
+                                    .DebitCost = FormatNumber(AcptQty * pInspection_detail.Rows(x)("Cost"), 2)
+                                    .DebitUnit = pInspection_detail.Rows(x)("Unit")
+                                    .CreditQty = 0
+                                    .CreditCost = "0.00"
+                                    .CreditUnit = pInspection_detail.Rows(x)("Unit")
+                                    .BalanceUnit = pInspection_detail.Rows(x)("Unit")
+
+                                    If grdAIR.SelectedDataKey("RC_ID") = 0 Then
+                                        .Department = ddDepartment.SelectedItem.Text
+                                    Else
+                                        .Department = objDerived.GetValue("SELECT RC_Name FROM dbo.View_RespCenter_withFunctions WHERE RC_id = '" & grdAIR.SelectedDataKey("RC_ID") & "'", CommandType.Text)
+                                    End If
+                                    .save()
+                                End With
+                            Else
+                                AddTrace("No remarks => STILL saving with Trans_Type='Starting Inventory'")
+                                With Stock_Ledger
+                                    .StockID = StckID
+                                    .Item_ID = pInspection_detail.Rows(x)("Item_ID")
+                                    .dDate = txtAcceptDate.Text
+                                    .Trans_Type = "Starting Inventory"
+                                    .Ref = AIR_No
+                                    .AccountablePerson = objDerived.GetValue("SELECT SuppName FROM dbo.Supplier WHERE Supplier_Id = '" & grdAIR.SelectedDataKey("Supplier_Id") & "'", CommandType.Text)
+                                    .ReceivedBy = ReceivedBy
+                                    .InspectedBy = InspectedBy
+                                    .AcceptedBy = ddAcceptedBy.SelectedItem.Text
+                                    .DebitQty = AcptQty
+                                    .DebitCost = FormatNumber(AcptQty * pInspection_detail.Rows(x)("Cost"), 2)
+                                    .DebitUnit = pInspection_detail.Rows(x)("Unit")
+                                    .CreditQty = 0
+                                    .CreditCost = "0.00"
+                                    .CreditUnit = pInspection_detail.Rows(x)("Unit")
+                                    .BalanceUnit = pInspection_detail.Rows(x)("Unit")
+
+                                    If grdAIR.SelectedDataKey("RC_ID") = 0 Then
+                                        .Department = ddDepartment.SelectedItem.Text
+                                    Else
+                                        .Department = objDerived.GetValue("SELECT RC_Name FROM dbo.View_RespCenter_withFunctions WHERE RC_id = '" & grdAIR.SelectedDataKey("RC_ID") & "'", CommandType.Text)
+                                    End If
+                                    .save()
+                                End With
+                            End If
                         End If
-                    End If
-
-                    If (receivedQty <= Qty_AcceptedValue) Then
-                        calResult = Math.Abs(Qty_AcceptedValue - receivedQty)
-                    Else
-                        MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "The quantity desired to return is more that existing quantity, Reminder: Reload to see existing quantity.")
-
-                        Exit Sub
-                    End If
-
-                    'UPDATE QTY_Accepted VALUE
-                    Dim updateDtlSQL As String = "UPDATE AMS.Tb_Receiving_Dtl SET Qty_Accepting = '" & calResult & "' WHERE Received_Dtl_ID = '" & RcvDtl_ID & "'"
-                    objDerived.Execute(updateDtlSQL, CommandType.Text)
-
-
-                    If checkStock <> 0 Then
-                        'stock no dtl
-
-                        Dim updateStock As String = "update AMS.Stock set AMS.Stock.Qty = '" & receivedQty & "' + AMS.Stock.Qty, AMS.Stock.Balance = '" & receivedQty & "' + AMS.Stock.Balance where AMS.Stock.Received_ID = '" & rcvID & "' or AMS.Stock.POHdr_ID = '" & poHdrIdVal & "' "
-                        objDerived.Execute(updateStock, CommandType.Text)
-
-                        'update stock ledger
-                        Dim updateStockLedger As String = "update AMS.TbStock_Ledger set AMS.TbStock_Ledger.DebitQty = '" & receivedQty & "' + AMS.TbStock_Ledger.DebitQty where AMS.TbStock_Ledger.StockID = '" & checkStock & "' and AMS.TbStock_Ledger.Item_ID = '" & pInspection_detail.Rows(x)("Item_ID") & "' "
-                    End If
-
-                    If checkAIR <> 0 Then
-                        'stock no dtl
-                        Dim getAIR_ID As Integer = objDerived.GetValue("select AMS.AIR_Hdr.AIRHdr_ID from AMS.AIR_Hdr where AMS.AIR_Hdr.Received_ID = '" & rcvID & "' or AMS.AIR_Hdr.POHdr_ID = '" & poHdrIdVal & "' ", CommandType.Text)
-
-
-                        Dim updateStock As String = "update AMS.AIR_Dtl set AMS.AIR_Dtl.Qty = '" & receivedQty & "' + AMS.AIR_Dtl.Qty where AMS.AIR_Dtl.AIRHdr_ID = '" & getAIR_ID & "' and AMS.AIR_Dtl.Item_ID = '" & pInspection_detail.Rows(x)("Item_ID") & "'"
-                        objDerived.Execute(updateStock, CommandType.Text)
+                        'end of checking if stock exist
                     End If
                 End If
             Next
 
+            AddTrace("MOOE transaction completed => Alert user & refresh grids.")
+            MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Transaction has been successfully saved.")
+            btnActSave.Enabled = False
+            btnActPreview.Enabled = True
+            'LoadSearchBy()
 
-            '--NON EXISTING STOCK AND AIR
-            'SAVE AND CREATE ROW
-            'TODO else no need to run just update
-            If AllotmentClass = 2 Then
-                AddTrace("AllotmentClass=2 => MOOE flow.")
-                Dim ReceivedBy As String = objDerived.GetValue("SELECT full_name FROM HRMS.view_signatory WHERE Signatory_ID = '" & pInspection_detail.Rows(0)("ReceivedBY") & "'", CommandType.Text)
-                AddTrace("ReceivedBy from pInspection_detail: " & ReceivedBy)
-                Dim InspectedBy As String = objDerived.GetValue("SELECT full_name FROM HRMS.view_signatory WHERE Signatory_ID = '" & pInspection_detail.Rows(0)("InspectedBy") & "'", CommandType.Text)
-                AddTrace("InspectedBy from pInspection_detail: " & InspectedBy)
+            Dim currentPOHdrID As Long = CLng(grdAIR.SelectedDataKey("POHdr_ID"))
 
-                AddTrace("Generating AIR_No via [AMS].[func_GenerateAIR] for date = " & txtAcceptDate.Text)
-                Dim AIR_No As String = supplies.GetValue("select [AMS].[func_GenerateAIR]( '" & txtAcceptDate.Text & "')", CommandType.Text)
-                AddTrace("AIR_No generated: " & AIR_No)
 
-                Dim xAIRHdr_ID As Long
+            LoadSearchBy()
 
-                With AIR_Hdr
-                    .AIR_No = AIR_No
-                    .AIR_Date = txtAcceptDate.Text
-                    .Invoice_No = txtInvoiceNumber.Text
-                    .Invoice_date = Date.Parse(txtInvoiceDate.Text)
-                    .POHdr_ID = grdAIR.SelectedDataKey("POHdr_ID")
-                    .PO_No = grdAIR.SelectedDataKey("PO_No")
-                    .Supplier_ID = grdAIR.SelectedDataKey("Supplier_Id")
-                    .Date_Received = pInspection_detail.Rows(0)("Received_Date")
-                    .Date_Inspect = pInspection_detail.Rows(0)("Received_Date")
-                    .Date_Accepted = txtAcceptDate.Text
-                    .Trans_ID = 1
-                    .remarks = txtRemakrs.Text
 
-                    If rbStatus.SelectedItem.Value = 2 Then
-                        .isComplete = True
-                    Else
-                        .isComplete = False
-                    End If
-                    AddTrace("AIR_Hdr isComplete: " & .isComplete.ToString())
-
-                    If grdAIR.SelectedDataKey("RC_ID") = 0 Then
-                        AddTrace("RC_ID=0 => Using ddDepartment/ddFunction.")
-                        .RC_ID = ddDepartment.SelectedItem.Value
-                        .Function_ID = ddFunction.SelectedItem.Value
-                    Else
-                        .RC_ID = grdAIR.SelectedDataKey("RC_ID")
-                        .Function_ID = grdAIR.SelectedDataKey("Function_ID")
-                        AddTrace("RC_ID and Function_ID read from SelectedDataKey: RC_ID=" & .RC_ID & ", Function_ID=" & .Function_ID)
-                    End If
-
-                    AddTrace("Looping through grdInspection checkboxes to find first checked item.")
-                    Dim Box As CheckBox
-                    For a As Integer = 0 To grdInspection.Rows.Count - 1
-                        Box = CType(Me.grdInspection.Rows(a).Cells(0).FindControl("cbInspection"), CheckBox)
-                        If Box IsNot Nothing AndAlso Box.Checked Then
-                            Dim zx As Long = pInspection_detail.Rows(a)("Received_ID")
-                            Session("xReceived_ID") = zx
-                            AddTrace("Found a checked item. xReceived_ID set to: " & zx)
-                            Exit For
-                        End If
-                    Next
-
-                    .Received_ID = Session("xReceived_ID")
-                    .UserID = Session("@UserName")
-                End With
-
-                AddTrace("Saving AIR_Hdr record now...")
-                xAIRHdr_ID = AIR_Hdr.save
-                AddTrace("AIR_Hdr saved. xAIRHdr_ID = " & xAIRHdr_ID.ToString())
-                Session("AIRHdr_ID") = xAIRHdr_ID
-
-                '
-                Dim updateAcceptSignatory As String = "UPDATE AMS.Tb_Receiving SET InspectedBy3 = '" & If(ddAcceptedBy.SelectedItem.Value, Nothing) & "' WHERE Received_ID = '" & Session("xReceived_ID") & "'"
-                objDerived.Execute(updateAcceptSignatory, CommandType.Text)
+            Session("POHdr_ID") = currentPOHdrID
 
 
 
-                ' Validate StockDate format
-                Try
-                    Dim testDate As DateTime = DateTime.Parse(txtAcceptDate.Text)
-                    AddTrace("StockDate is valid: " & testDate.ToString("yyyy-MM-dd"))
-                Catch ex As Exception
-                    AddTrace("ERROR: Invalid StockDate format: " & txtAcceptDate.Text)
-                    MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Invalid date format for Stock Date")
-                    Exit Sub
-                End Try
+
+            AddTrace("newPOHdrID => " & currentPOHdrID.ToString())
+
+            ' Clear the GridView
+            grdInspection.DataSource = Nothing
+            grdInspection.DataBind()
+
+
+        ElseIf AllotmentClass = 3 Then
+            AddTrace("AllotmentClass=3 => Capital Outlay flow.")
+            Dim a As String = objDerived.GetValue("SELECT DISTINCT dbo.tbl_Classification.ClassificationName " &
+             "FROM dbo.tbl_SubClassification INNER JOIN " &
+             "dbo.tbl_Classification ON dbo.tbl_SubClassification.ClassificationID = dbo.tbl_Classification.ClassificationId " &
+             "INNER JOIN dbo.m_item ON dbo.tbl_SubClassification.SubClassificationID = dbo.m_item.SubClassificationID " &
+             "WHERE dbo.m_item.Item_ID = '" & pInspection_detail.Rows(0)("Item_ID") & "'", CommandType.Text)
+            AddTrace("ClassificationName => " & a)
+
+            If a = "Vehicle" Then
+                AddTrace("Deleting from Temp_ForSerial for POHdr_ID=" & poHdrIdVal)
+                objDerived.GetRecords("DELETE dbo.Temp_ForSerial WHERE POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "' ", CommandType.Text)
 
                 Dim cb As CheckBox
-                For x As Integer = 0 To grdInspection.Rows.Count - 1
-                    cb = CType(Me.grdInspection.Rows(x).Cells(0).FindControl("cbInspection"), CheckBox)
+                For i As Integer = 0 To grdInspection.Rows.Count - 1
+                    cb = CType(Me.grdInspection.Rows(i).Cells(0).FindControl("cbInspection"), CheckBox)
                     If cb IsNot Nothing AndAlso cb.Checked Then
-                        Dim AcptQty As Decimal = CType(CType(grdInspection.Rows(x).FindControl("txtActQty"), TextBox).Text, Decimal)
-                        AddTrace("Accepting item with index " & x & ": AcptQty=" & AcptQty.ToString())
+                        Dim item_ida As Integer = pInspection_detail.Rows(i)("Item_ID").ToString
+                        AddTrace("Processing Vehicle item_id=" & item_ida.ToString())
+                        Dim Motor_InfoId As Integer = objDerived.GetValue("select Motor_InfoId from AMS.TbMotor_Info WHERE Received_ID = '" & rcvID & "' AND Item_ID='" & pInspection_detail.Rows(i)("Item_ID").ToString & "'", CommandType.Text)
+                        AddTrace("Motor_InfoId => " & Motor_InfoId.ToString())
 
-                        objDerived.GetRecords("UPDATE AMS.Tb_Receiving_Dtl Set Status = 2 where Received_ID = '" & rcvID & "' and Item_ID='" & pInspection_detail.Rows(x)("Item_ID") & "'", CommandType.Text)
-                        AddTrace("Executed: UPDATE AMS.Tb_Receiving_Dtl for Received_ID=" & rcvID & " Item_ID=" & pInspection_detail.Rows(x)("Item_ID").ToString())
+                        Dim POHdr_ID As Long = grdAIR.SelectedDataKey("POHdr_ID")
+                        Dim AcptQty As Decimal = CType(CType(grdInspection.Rows(i).FindControl("txtActQty"), TextBox).Text, Decimal)
+                        Dim Item_ID As Long = pInspection_detail.Rows(i)("Item_ID").ToString
+                        Dim Item_Desc As String = pInspection_detail.Rows(i)("Item_Desc").ToString
+                        AddTrace("Saving spSave_Temp_ForSerial => POHdr_ID=" & POHdr_ID.ToString() &
+                             ", Item_ID=" & Item_ID.ToString() & ", AcptQty=" & AcptQty.ToString())
 
-                        Dim AIRDtl_ID As Long
-
-                        '=-= SAVE AMS.AIR_Dtl
-                        AddTrace("Now saving AIR_Dtl for item_id=" & pInspection_detail.Rows(x)("Item_ID").ToString())
-                        With AIR_Dtl
-                            .AIRHdr_ID = xAIRHdr_ID
-                            .Item_ID = pInspection_detail.Rows(x)("Item_ID")
-                            .Qty = AcptQty
-                            .Cost = pInspection_detail.Rows(x)("Cost")
-                            .GA_ID = grdAIR.SelectedDataKey("GA_ID")
-                            .Warranty = 0
-                        End With
-
-
-                        AIRDtl_ID = AIR_Dtl.save
-                        AddTrace("AIR_Dtl saved with ID=" & AIRDtl_ID.ToString())
-
-                        objDerived.GetRecords("UPDATE AMS.AIR_Dtl SET OtherSpecs = '" & pInspection_detail.Rows(x)("OtherSpecs") & "', isAccepted = 1 WHERE AIRDtl_ID = '" & AIRDtl_ID & "' ", CommandType.Text)
-                        AddTrace("Updated AMS.AIR_Dtl => set isAccepted=1, OtherSpecs=" & pInspection_detail.Rows(x)("OtherSpecs").ToString())
-
-                        '==================================================================================
-                        '=-= SAVE AMS.STOCK
-
-                        If checkStock = 0 Then
-                            With Stock
-                                .StockDate = txtAcceptDate.Text
-                                .AIRDtl_ID = AIRDtl_ID
-                                .Item_ID = pInspection_detail.Rows(x)("Item_ID")
-                                .Qty = AcptQty
-                                .Balance = AcptQty
-                                .Expiration_Date = CDate(txtAcceptDate.Text).AddYears(5)
-
-                                .Issuance = 0
-                                .Cost = pInspection_detail.Rows(x)("Cost")
-                                .Project_ID = 0
-                                .Program_id = 0
-                                .F_ID = 1
-                                .GA_ID = grdAIR.SelectedDataKey("GA_ID")
-                                .Location = pInspection_detail.Rows(x)("Location")
-
-                                If grdAIR.SelectedDataKey("RC_ID") = 0 Then
-                                    .RC_ID = ddDepartment.SelectedItem.Value
-                                    .Function_ID = ddFunction.SelectedItem.Value
-                                Else
-                                    .RC_ID = grdAIR.SelectedDataKey("RC_ID")
-                                    .Function_ID = grdAIR.SelectedDataKey("Function_ID")
-                                End If
-
-                                .POHdr_ID = grdAIR.SelectedDataKey("POHdr_ID")
-                                .Received_ID = Session("xReceived_ID")
-                                .UserID = Session("@UserName")
-                            End With
-
-                            AddTrace("Stock object initialized successfully. Proceeding to save...")
-
-                            Dim StckID As Long = Stock.save
-                            AddTrace("Stock record saved with ID=" & StckID.ToString())
-
-
-                            objDerived.Execute("update ams.TBSupplies_Info set StockID = '" & StckID & "' where ams.TBSupplies_Info.Received_ID = '" & rcvID & "' And ams.TBSupplies_Info.ItemId = '" & pInspection_detail.Rows(x)("Item_ID") & "' ", CommandType.Text)
-
-
-                            objDerived.Execute("UPDATE [AMS].[Stock] SET [OtherSpecs] = '" & pInspection_detail.Rows(x)("OtherSpecs") & "' WHERE [StockID] = " & StckID & "", CommandType.Text)
-                            AddTrace("Updated [AMS].[Stock] => set OtherSpecs=" & pInspection_detail.Rows(x)("OtherSpecs").ToString())
-
-                            Dim Remarks = objDerived.Execute("select count(*) from [AMS].[Stock]  WHERE [StockID] = " & StckID & "", CommandType.Text)
-                            AddTrace("Remarks count from AMS.Stock => " & Remarks.ToString())
-
-                            '=-= SAVE AMS.TbStock_Ledger
-                            Dim A As String = objDerived.GetValue("select distinct Trans_Type from AMS.TbStock_Ledger where Trans_Type = 'Starting Inventory' and Item_ID='" & pInspection_detail.Rows(x)("Item_ID") & "'", CommandType.Text)
-                            If A = "Starting Inventory" Then
-                                AddTrace("Existing 'Starting Inventory' ledger found for Item_ID=" & pInspection_detail.Rows(x)("Item_ID").ToString())
-                                If Remarks <> 0 Then
-                                    AddTrace("Saving Stock_Ledger => Trans_Type='Purchase Order Delivered'")
-                                    With Stock_Ledger
-                                        .StockID = StckID
-                                        .Item_ID = pInspection_detail.Rows(x)("Item_ID")
-                                        .dDate = txtAcceptDate.Text
-                                        .Trans_Type = "Purchase Order Delivered"
-                                        .Ref = AIR_No
-                                        .AccountablePerson = objDerived.GetValue("SELECT SuppName FROM dbo.Supplier WHERE Supplier_Id = '" & grdAIR.SelectedDataKey("Supplier_Id") & "'", CommandType.Text)
-                                        .ReceivedBy = ReceivedBy
-                                        .InspectedBy = InspectedBy
-                                        .AcceptedBy = ddAcceptedBy.SelectedItem.Text
-                                        .DebitQty = AcptQty
-                                        .DebitCost = FormatNumber(AcptQty * pInspection_detail.Rows(x)("Cost"), 2)
-                                        .DebitUnit = pInspection_detail.Rows(x)("Unit")
-                                        .CreditQty = 0
-                                        .CreditCost = "0.00"
-                                        .CreditUnit = pInspection_detail.Rows(x)("Unit")
-                                        .BalanceUnit = pInspection_detail.Rows(x)("Unit")
-
-                                        If grdAIR.SelectedDataKey("RC_ID") = 0 Then
-                                            .Department = ddDepartment.SelectedItem.Text
-                                        Else
-                                            .Department = objDerived.GetValue("SELECT RC_Name FROM dbo.View_RespCenter_withFunctions WHERE RC_id = '" & grdAIR.SelectedDataKey("RC_ID") & "'", CommandType.Text)
-                                        End If
-                                        .save()
-                                    End With
-                                Else
-                                    AddTrace("No remarks in Stock => still using 'Purchase Order Delivered' ledger entry")
-                                    With Stock_Ledger
-                                        .StockID = StckID
-                                        .Item_ID = pInspection_detail.Rows(x)("Item_ID")
-                                        .dDate = txtAcceptDate.Text
-                                        .Trans_Type = "Purchase Order Delivered"
-                                        .Ref = AIR_No
-                                        .AccountablePerson = objDerived.GetValue("SELECT SuppName FROM dbo.Supplier WHERE Supplier_Id = '" & grdAIR.SelectedDataKey("Supplier_Id") & "'", CommandType.Text)
-                                        .ReceivedBy = ReceivedBy
-                                        .InspectedBy = InspectedBy
-                                        .AcceptedBy = ddAcceptedBy.SelectedItem.Text
-                                        .DebitQty = AcptQty
-                                        .DebitCost = FormatNumber(AcptQty * pInspection_detail.Rows(x)("Cost"), 2)
-                                        .DebitUnit = pInspection_detail.Rows(x)("Unit")
-                                        .CreditQty = 0
-                                        .CreditCost = "0.00"
-                                        .CreditUnit = pInspection_detail.Rows(x)("Unit")
-                                        .BalanceUnit = pInspection_detail.Rows(x)("Unit")
-
-                                        If grdAIR.SelectedDataKey("RC_ID") = 0 Then
-                                            .Department = ddDepartment.SelectedItem.Text
-                                        Else
-                                            .Department = objDerived.GetValue("SELECT RC_Name FROM dbo.View_RespCenter_withFunctions WHERE RC_id = '" & grdAIR.SelectedDataKey("RC_ID") & "'", CommandType.Text)
-                                        End If
-                                        .save()
-                                    End With
-                                End If
-                            ElseIf IsDBNull(A) OrElse A = "" Then
-                                AddTrace("No 'Starting Inventory' ledger => creating new one.")
-                                If Remarks <> 0 Then
-                                    AddTrace("Some remarks => saving with Trans_Type='Starting Inventory'")
-                                    With Stock_Ledger
-                                        .StockID = StckID
-                                        .Item_ID = pInspection_detail.Rows(x)("Item_ID")
-                                        .dDate = txtAcceptDate.Text
-                                        .Trans_Type = "Starting Inventory"
-                                        .Ref = AIR_No
-                                        .AccountablePerson = objDerived.GetValue("SELECT SuppName FROM dbo.Supplier WHERE Supplier_Id = '" & grdAIR.SelectedDataKey("Supplier_Id") & "'", CommandType.Text)
-                                        .ReceivedBy = ReceivedBy
-                                        .InspectedBy = InspectedBy
-                                        .AcceptedBy = ddAcceptedBy.SelectedItem.Text
-                                        .DebitQty = AcptQty
-                                        .DebitCost = FormatNumber(AcptQty * pInspection_detail.Rows(x)("Cost"), 2)
-                                        .DebitUnit = pInspection_detail.Rows(x)("Unit")
-                                        .CreditQty = 0
-                                        .CreditCost = "0.00"
-                                        .CreditUnit = pInspection_detail.Rows(x)("Unit")
-                                        .BalanceUnit = pInspection_detail.Rows(x)("Unit")
-
-                                        If grdAIR.SelectedDataKey("RC_ID") = 0 Then
-                                            .Department = ddDepartment.SelectedItem.Text
-                                        Else
-                                            .Department = objDerived.GetValue("SELECT RC_Name FROM dbo.View_RespCenter_withFunctions WHERE RC_id = '" & grdAIR.SelectedDataKey("RC_ID") & "'", CommandType.Text)
-                                        End If
-                                        .save()
-                                    End With
-                                Else
-                                    AddTrace("No remarks => STILL saving with Trans_Type='Starting Inventory'")
-                                    With Stock_Ledger
-                                        .StockID = StckID
-                                        .Item_ID = pInspection_detail.Rows(x)("Item_ID")
-                                        .dDate = txtAcceptDate.Text
-                                        .Trans_Type = "Starting Inventory"
-                                        .Ref = AIR_No
-                                        .AccountablePerson = objDerived.GetValue("SELECT SuppName FROM dbo.Supplier WHERE Supplier_Id = '" & grdAIR.SelectedDataKey("Supplier_Id") & "'", CommandType.Text)
-                                        .ReceivedBy = ReceivedBy
-                                        .InspectedBy = InspectedBy
-                                        .AcceptedBy = ddAcceptedBy.SelectedItem.Text
-                                        .DebitQty = AcptQty
-                                        .DebitCost = FormatNumber(AcptQty * pInspection_detail.Rows(x)("Cost"), 2)
-                                        .DebitUnit = pInspection_detail.Rows(x)("Unit")
-                                        .CreditQty = 0
-                                        .CreditCost = "0.00"
-                                        .CreditUnit = pInspection_detail.Rows(x)("Unit")
-                                        .BalanceUnit = pInspection_detail.Rows(x)("Unit")
-
-                                        If grdAIR.SelectedDataKey("RC_ID") = 0 Then
-                                            .Department = ddDepartment.SelectedItem.Text
-                                        Else
-                                            .Department = objDerived.GetValue("SELECT RC_Name FROM dbo.View_RespCenter_withFunctions WHERE RC_id = '" & grdAIR.SelectedDataKey("RC_ID") & "'", CommandType.Text)
-                                        End If
-                                        .save()
-                                    End With
-                                End If
-                            End If
-                            'end of checking if stock exist
-                        End If
+                        objDerived.cmd.Parameters.AddWithValue("@POHdr_ID", POHdr_ID)
+                        objDerived.cmd.Parameters.AddWithValue("@Item_ID", Item_ID)
+                        objDerived.cmd.Parameters.AddWithValue("@Item_Desc", Item_Desc)
+                        objDerived.cmd.Parameters.AddWithValue("@AcptQty", AcptQty)
+                        objDerived.cmd.Parameters.AddWithValue("@motor_id", Motor_InfoId)
+                        objDerived.Execute("[AMS].[spSave_Temp_ForSerial]", CommandType.StoredProcedure, Nothing)
                     End If
                 Next
 
-                AddTrace("MOOE transaction completed => Alert user & refresh grids.")
-                MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Transaction has been successfully saved.")
-                btnActSave.Enabled = False
-                btnActPreview.Enabled = True
-                'LoadSearchBy()
+                AddTrace("Binding data to grdSerialVehicles from sp_Acceptance_SerialNo_List.")
+                pItemForSerial = objDerived.GetDataTable("EXEC [AMS].[sp_Acceptance_SerialNo_List] '" & grdAIR.SelectedDataKey("POHdr_ID") & "'", CommandType.Text)
+                grdSerialVehicles.DataSource = pItemForSerial
+                grdSerialVehicles.DataBind()
 
-                Dim currentPOHdrID As Long = CLng(grdAIR.SelectedDataKey("POHdr_ID"))
-
-
-                LoadSearchBy()
-
-
-                Session("POHdr_ID") = currentPOHdrID
-
-
-
-
-                AddTrace("newPOHdrID => " & currentPOHdrID.ToString())
-
-                ' Clear the GridView
-                grdInspection.DataSource = Nothing
-                grdInspection.DataBind()
-
-
-            ElseIf AllotmentClass = 3 Then
-                AddTrace("AllotmentClass=3 => Capital Outlay flow.")
-                Dim a As String = objDerived.GetValue("SELECT DISTINCT dbo.tbl_Classification.ClassificationName " &
-                 "FROM dbo.tbl_SubClassification INNER JOIN " &
-                 "dbo.tbl_Classification ON dbo.tbl_SubClassification.ClassificationID = dbo.tbl_Classification.ClassificationId " &
-                 "INNER JOIN dbo.m_item ON dbo.tbl_SubClassification.SubClassificationID = dbo.m_item.SubClassificationID " &
-                 "WHERE dbo.m_item.Item_ID = '" & pInspection_detail.Rows(0)("Item_ID") & "'", CommandType.Text)
-                AddTrace("ClassificationName => " & a)
-
-                If a = "Vehicle" Then
-                    AddTrace("Deleting from Temp_ForSerial for POHdr_ID=" & poHdrIdVal)
-                    objDerived.GetRecords("DELETE dbo.Temp_ForSerial WHERE POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "' ", CommandType.Text)
-
-                    Dim cb As CheckBox
-                    For i As Integer = 0 To grdInspection.Rows.Count - 1
-                        cb = CType(Me.grdInspection.Rows(i).Cells(0).FindControl("cbInspection"), CheckBox)
-                        If cb IsNot Nothing AndAlso cb.Checked Then
-                            Dim item_ida As Integer = pInspection_detail.Rows(i)("Item_ID").ToString
-                            AddTrace("Processing Vehicle item_id=" & item_ida.ToString())
-                            Dim Motor_InfoId As Integer = objDerived.GetValue("select Motor_InfoId from AMS.TbMotor_Info WHERE Received_ID = '" & rcvID & "' AND Item_ID='" & pInspection_detail.Rows(i)("Item_ID").ToString & "'", CommandType.Text)
-                            AddTrace("Motor_InfoId => " & Motor_InfoId.ToString())
-
-                            Dim POHdr_ID As Long = grdAIR.SelectedDataKey("POHdr_ID")
-                            Dim AcptQty As Decimal = CType(CType(grdInspection.Rows(i).FindControl("txtActQty"), TextBox).Text, Decimal)
-                            Dim Item_ID As Long = pInspection_detail.Rows(i)("Item_ID").ToString
-                            Dim Item_Desc As String = pInspection_detail.Rows(i)("Item_Desc").ToString
-                            AddTrace("Saving spSave_Temp_ForSerial => POHdr_ID=" & POHdr_ID.ToString() &
-                                 ", Item_ID=" & Item_ID.ToString() & ", AcptQty=" & AcptQty.ToString())
-
-                            objDerived.cmd.Parameters.AddWithValue("@POHdr_ID", POHdr_ID)
-                            objDerived.cmd.Parameters.AddWithValue("@Item_ID", Item_ID)
-                            objDerived.cmd.Parameters.AddWithValue("@Item_Desc", Item_Desc)
-                            objDerived.cmd.Parameters.AddWithValue("@AcptQty", AcptQty)
-                            objDerived.cmd.Parameters.AddWithValue("@motor_id", Motor_InfoId)
-                            objDerived.Execute("[AMS].[spSave_Temp_ForSerial]", CommandType.StoredProcedure, Nothing)
-                        End If
-                    Next
-
-                    AddTrace("Binding data to grdSerialVehicles from sp_Acceptance_SerialNo_List.")
-                    pItemForSerial = objDerived.GetDataTable("EXEC [AMS].[sp_Acceptance_SerialNo_List] '" & grdAIR.SelectedDataKey("POHdr_ID") & "'", CommandType.Text)
-                    grdSerialVehicles.DataSource = pItemForSerial
-                    grdSerialVehicles.DataBind()
-
-                    grdSerial.Columns(3).Visible = False
-                    ModalPopupExtender2.Show()
-                Else
-                    AddTrace("Non-Vehicle classification => " & a & " => still CO.")
-                    objDerived.GetRecords("DELETE dbo.Temp_ForSerial WHERE POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "' ", CommandType.Text)
-
-                    Dim cb As CheckBox
-                    For i As Integer = 0 To grdInspection.Rows.Count - 1
-                        cb = CType(Me.grdInspection.Rows(i).Cells(0).FindControl("cbInspection"), CheckBox)
-                        If cb IsNot Nothing AndAlso cb.Checked Then
-                            Dim Motor_InfoId As Integer = objDerived.GetValue("select Motor_InfoId from AMS.TbMotor_Info WHERE Received_ID = '" & rcvID & "' AND Item_ID='" & pInspection_detail.Rows(i)("Item_ID").ToString & "'", CommandType.Text)
-                            AddTrace("Motor_InfoId => " & Motor_InfoId.ToString())
-
-                            Dim POHdr_ID As Long = grdAIR.SelectedDataKey("POHdr_ID")
-                            Dim AcptQty As Decimal = CType(CType(grdInspection.Rows(i).FindControl("txtActQty"), TextBox).Text, Decimal)
-                            Dim Item_ID As Long = pInspection_detail.Rows(i)("Item_ID").ToString
-                            Dim Item_Desc As String = pInspection_detail.Rows(i)("Item_Desc").ToString
-                            AddTrace("spSave_Temp_ForSerial => POHdr_ID=" & POHdr_ID.ToString() & ", Item_ID=" & Item_ID.ToString() & ", AcptQty=" & AcptQty.ToString())
-
-                            objDerived.cmd.Parameters.AddWithValue("@POHdr_ID", POHdr_ID)
-                            objDerived.cmd.Parameters.AddWithValue("@Item_ID", Item_ID)
-                            objDerived.cmd.Parameters.AddWithValue("@Item_Desc", Item_Desc)
-                            objDerived.cmd.Parameters.AddWithValue("@AcptQty", AcptQty)
-                            objDerived.cmd.Parameters.AddWithValue("@motor_id", Motor_InfoId)
-
-                            objDerived.Execute("[AMS].[spSave_Temp_ForSerial]", CommandType.StoredProcedure, Nothing)
-                        End If
-                    Next
-
-                    AddTrace("Binding data to grdSerial from sp_Acceptance_SerialNo_List.")
-                    pItemForSerial = objDerived.GetDataTable("EXEC [AMS].[sp_Acceptance_SerialNo_List] '" & grdAIR.SelectedDataKey("POHdr_ID") & "'", CommandType.Text)
-                    grdSerial.DataSource = pItemForSerial
-                    grdSerial.DataBind()
-
-                    grdSerial.Columns(3).Visible = False
-                    ModalPopupExtender1.Show()
-                End If
-
-                ' Re-check if there's a selected row (should be, if we got here)
-                Dim newPOHdrID As Long = CLng(grdAIR.SelectedDataKey("POHdr_ID"))
-                AddTrace("Capital Outlay path => newPOHdrID = " & newPOHdrID.ToString())
-                Session("POHdr_ID") = newPOHdrID
-            End If
-
-            If rbStatus.SelectedItem.Value = 2 Then
-                Session("IsComplete") = "X"
-                Session("IsPartial") = " "
+                grdSerial.Columns(3).Visible = False
+                ModalPopupExtender2.Show()
             Else
-                Session("IsComplete") = " "
-                Session("IsPartial") = "X"
+                AddTrace("Non-Vehicle classification => " & a & " => still CO.")
+                objDerived.GetRecords("DELETE dbo.Temp_ForSerial WHERE POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "' ", CommandType.Text)
+
+                Dim cb As CheckBox
+                For i As Integer = 0 To grdInspection.Rows.Count - 1
+                    cb = CType(Me.grdInspection.Rows(i).Cells(0).FindControl("cbInspection"), CheckBox)
+                    If cb IsNot Nothing AndAlso cb.Checked Then
+                        Dim Motor_InfoId As Integer = objDerived.GetValue("select Motor_InfoId from AMS.TbMotor_Info WHERE Received_ID = '" & rcvID & "' AND Item_ID='" & pInspection_detail.Rows(i)("Item_ID").ToString & "'", CommandType.Text)
+                        AddTrace("Motor_InfoId => " & Motor_InfoId.ToString())
+
+                        Dim POHdr_ID As Long = grdAIR.SelectedDataKey("POHdr_ID")
+                        Dim AcptQty As Decimal = CType(CType(grdInspection.Rows(i).FindControl("txtActQty"), TextBox).Text, Decimal)
+                        Dim Item_ID As Long = pInspection_detail.Rows(i)("Item_ID").ToString
+                        Dim Item_Desc As String = pInspection_detail.Rows(i)("Item_Desc").ToString
+                        AddTrace("spSave_Temp_ForSerial => POHdr_ID=" & POHdr_ID.ToString() & ", Item_ID=" & Item_ID.ToString() & ", AcptQty=" & AcptQty.ToString())
+
+                        objDerived.cmd.Parameters.AddWithValue("@POHdr_ID", POHdr_ID)
+                        objDerived.cmd.Parameters.AddWithValue("@Item_ID", Item_ID)
+                        objDerived.cmd.Parameters.AddWithValue("@Item_Desc", Item_Desc)
+                        objDerived.cmd.Parameters.AddWithValue("@AcptQty", AcptQty)
+                        objDerived.cmd.Parameters.AddWithValue("@motor_id", Motor_InfoId)
+
+                        objDerived.Execute("[AMS].[spSave_Temp_ForSerial]", CommandType.StoredProcedure, Nothing)
+                    End If
+                Next
+
+                AddTrace("Binding data to grdSerial from sp_Acceptance_SerialNo_List.")
+                pItemForSerial = objDerived.GetDataTable("EXEC [AMS].[sp_Acceptance_SerialNo_List] '" & grdAIR.SelectedDataKey("POHdr_ID") & "'", CommandType.Text)
+                grdSerial.DataSource = pItemForSerial
+                grdSerial.DataBind()
+
+                grdSerial.Columns(3).Visible = False
+                ModalPopupExtender1.Show()
             End If
 
-            btnActPreview.Enabled = True
-            AddTrace("btnSave_Click completed successfully.")
+            ' Re-check if there's a selected row (should be, if we got here)
+            Dim newPOHdrID As Long = CLng(grdAIR.SelectedDataKey("POHdr_ID"))
+            AddTrace("Capital Outlay path => newPOHdrID = " & newPOHdrID.ToString())
+            Session("POHdr_ID") = newPOHdrID
+        End If
 
-        Catch ex As Exception
-            MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Error: '" & ex.Message & "'")
-        End Try
+        If rbStatus.SelectedItem.Value = 2 Then
+            Session("IsComplete") = "X"
+            Session("IsPartial") = " "
+        Else
+            Session("IsComplete") = " "
+            Session("IsPartial") = "X"
+        End If
+
+        btnActPreview.Enabled = True
+        AddTrace("btnSave_Click completed successfully.")
+
+        'Catch ex As Exception
+        '    MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Error: '" & ex.Message & "'")
+        'End Try
     End Sub
 
 

@@ -1345,7 +1345,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <td style="width: 100%; height: 10px" align="centser"></td>
+                        <td style="width: 100%; height: 10px" align="center"></td>
                     </tr>
                     <tr>
                         <td style="width: 100%" align="center">
