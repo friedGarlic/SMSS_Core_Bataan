@@ -2725,7 +2725,7 @@ Partial Class t_purchase_request_v2
 
             Dim isDBM As Boolean = Convert.ToBoolean(objDerived.GetValue("SELECT ISNULL(isDBM, 0) FROM AMS.PR_Hdr WHERE prhdr_id = '" & Session("prhdr_id") & "'", CommandType.Text))
             If Not isDBM Then
-                Dim url As String = "/procurement/rpt_purchase_request.aspx"
+                Dim url As String = "/MainReports/Procurement_Reports.aspx"
                 Dim fullURL As String = " var win= window.open('" + url + "', '_blank');"
                 ScriptManager.RegisterStartupScript(Me, GetType(String), "OPEN_WINDOW", fullURL, True)
             Else
