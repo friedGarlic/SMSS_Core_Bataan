@@ -278,23 +278,14 @@
                                 <tbody>
                                     <tr>
                                         <td style="width: 15%" class="column_RightBold">Fund Type : </td>
-                                        <td class="column_Left" colspan="3">
+                                        <td class="column_Left" colspan="1">
                                             <asp:DropDownList ID="rbTrustFund" runat="server" CssClass="drpdownCSS"  Width="37%" AutoPostBack="True" OnSelectedIndexChanged="rbTrustFund_SelectedIndexChanged">
                                                 <asp:ListItem Selected="True" Value="1">General Fund</asp:ListItem>
                                                 <asp:ListItem Value="2">Special Education Fund</asp:ListItem>
                                                 <asp:ListItem Value="3">Trust Fund</asp:ListItem>
                                             </asp:DropDownList>
                                         </td>
-                                    </tr>
-
-                                    <tr>
-                                        <td style="width: 15%" class="column_RightBold">Transaction Type :</td>
-                                        <td style="width: 35%" class="column_Left">
-                                            <asp:DropDownList ID="ddTransactionType" runat="server" Width="50%" AutoPostBack="True" CssClass="drpdownCSS" AppendDataBoundItems="True" Enabled="False">
-                                                <asp:ListItem>Purchase Request</asp:ListItem>
-                                                <asp:ListItem>Reimbursement</asp:ListItem>
-                                            </asp:DropDownList></td>
-                                        <td style="width: 20%" class="column_Right">
+                                         <td style="width: 20%" class="column_Right">
                                             <asp:RadioButtonList ID="RadioButtonList1" runat="server" CssClass="rbCS_Horizontal" Width="174px" RepeatDirection="Horizontal" AutoPostBack="True" Height="30px">
                                                 <asp:ListItem Selected="True" Value="0">Current</asp:ListItem>
                                                 <asp:ListItem Value="1">Continuing</asp:ListItem>
@@ -307,19 +298,40 @@
                                             &nbsp;<span class="CalendarFormat">(MM/DD/YYYY)</span>
                                         </td>
                                     </tr>
+
                                     <tr>
-                                        <td style="width: 15%" class="column_RightBold">
-                                            <asp:RequiredFieldValidator ID="RequiredFieldValidator15" runat="server" Width="1px" Height="1px" ValidationGroup="save" InitialValue="Select" ErrorMessage="Responsibility Center" ControlToValidate="ddRC">*</asp:RequiredFieldValidator>Department :</td>
+                                        <td style="width: 15%" class="column_RightBold">Transaction Type :</td>
                                         <td style="width: 35%" class="column_Left">
-                                            <asp:DropDownList ID="ddRC" runat="server" Width="90%" AutoPostBack="True" CssClass="drpdownCSS" AppendDataBoundItems="True">
-                                                <asp:ListItem>Select</asp:ListItem>
+                                            <asp:DropDownList ID="ddTransactionType" runat="server" Width="50%" AutoPostBack="True" CssClass="drpdownCSS" AppendDataBoundItems="True" Enabled="False">
+                                                <asp:ListItem>Purchase Request</asp:ListItem>
+                                                <asp:ListItem>Reimbursement</asp:ListItem>
                                             </asp:DropDownList></td>
+                                       
                                         <td style="width: 20%" class="column_RightBold">Items :</td>
                                         <td style="width: 30%" class="column_Left">
                                             <asp:LinkButton ID="LinkButton2" OnClick="LinkButton2_Click1" runat="server" CssClass="LinkBtnPreview" Text="View List of Goods"></asp:LinkButton>
                                             <asp:CheckBox ID="chkPurchasePerLot" runat="server" Text="Purchase Per Lot" AutoPostBack="True"  OnCheckedChanged="chkPurchasePerLot_CheckedChanged" />
 
                                             <asp:LinkButton ID="lbmeals" runat="server" ForeColor="#00C000" Visible="false">Meals</asp:LinkButton></td>
+
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 15%; height: 23px;" class="column_RightBold">
+                                            <asp:RequiredFieldValidator ID="RequiredFieldValidator15" runat="server" Width="1px" Height="1px" ValidationGroup="save" InitialValue="Select" ErrorMessage="Responsibility Center" ControlToValidate="ddRC">*</asp:RequiredFieldValidator>Department :</td>
+                                        <td style="width: 35%; height: 23px;" class="column_Left">
+                                            <asp:DropDownList ID="ddRC" runat="server" Width="90%" AutoPostBack="True" CssClass="drpdownCSS" AppendDataBoundItems="True">
+                                                <asp:ListItem>Select</asp:ListItem>
+                                            </asp:DropDownList></td>
+                                       
+                                         <td style="width: 20%; height: 23px;" class="column_RightBold">
+                                            <asp:RequiredFieldValidator ID="RequiredFieldValidator11" runat="server" ValidationGroup="save" ErrorMessage="Payee" ControlToValidate="txtpeyee">*</asp:RequiredFieldValidator>Payee :&nbsp;</td>
+                                        <td style="width: 30%; height: 23px;" class="column_Left">
+                                            <asp:TextBox ID="txtpeyee" runat="server" Width="95%" CssClass="txtbox_Var" Text="Purchase Request"></asp:TextBox></td>
+
+
+
+                                        <td style="width: 20%; height: 23px;" class="column_RightBold"></td>
+                                        
                                     </tr>
                                     <tr>
                                         <td style="width: 15%" class="column_RightBold">
@@ -330,12 +342,12 @@
                                             </asp:DropDownList>
 
                                         </td>
-                                        <td style="width: 20%" class="column_RightBold">
-                                            <asp:RequiredFieldValidator ID="RequiredFieldValidator7" runat="server" ValidationGroup="save" ErrorMessage="ObR Title" ControlToValidate="txtOBRpurpose">*</asp:RequiredFieldValidator>
-                                            <asp:Label ID="lblreq2" runat="server" ForeColor="Red" Visible="False" Text="** "></asp:Label>
-                                            OBR Description / Purpose :</td>
-                                        <td style="width: 30%" class="column_Left" rowspan="2">
-                                            <asp:TextBox ID="txtOBRpurpose" runat="server" Width="95%" CssClass="txtbox_Remarks" ReadOnly="True" TextMode="MultiLine" SkinID="text"></asp:TextBox></td>
+                                         <td style="width: 20%" class="column_RightBold">
+                                            <asp:RequiredFieldValidator ID="RequiredFieldValidator12" runat="server" ValidationGroup="save" ErrorMessage="Address" ControlToValidate="txtaddpeyee">*</asp:RequiredFieldValidator>Address :</td>
+                                        <td style="width: 30%" class="column_Left">
+                                            <asp:TextBox ID="txtaddpeyee"  runat="server" Width="95%" CssClass="txtbox_Var" Text="Tuguegarao City, Cagayan"></asp:TextBox></td>
+                                        
+                                       
                                     </tr>
                                     <tr>
                                         <td style="width: 15%" class="column_RightBold">P/P/A :</td>
@@ -345,7 +357,11 @@
                                             </asp:DropDownList>
 
                                         </td>
-                                        <td style="width: 20%" class="column_RightBold"></td>
+                                        <td style="width: 20%" class="column_RightBold">Requesting Person : </td>
+                                        <td style="width: 30%" class="column_Left">
+                                            <asp:DropDownList ID="ddRequestedBy" runat="server" Width="95%" AutoPostBack="True" OnSelectedIndexChanged="ddRequestedBy_SelectedIndexChanged" CssClass="drpdownCSS" AppendDataBoundItems="True" Enabled="False">
+                                            </asp:DropDownList></td>
+                                        
                                     </tr>
                                     <tr>
                                         <td style="width: 15%" class="column_RightBold">
@@ -357,11 +373,15 @@
                                                 <asp:ListItem Value="3">Capital Outlays</asp:ListItem>
                                             </asp:DropDownList>
 
+
+
                                         </td>
-                                        <td style="width: 20%" class="column_RightBold">
-                                            <asp:RequiredFieldValidator ID="RequiredFieldValidator11" runat="server" ValidationGroup="save" ErrorMessage="Payee" ControlToValidate="txtpeyee">*</asp:RequiredFieldValidator>Payee :&nbsp;</td>
+                                             
+                                        <td style="width: 20%" class="column_RightBold">Position : </td>
                                         <td style="width: 30%" class="column_Left">
-                                            <asp:TextBox ID="txtpeyee" runat="server" Width="95%" CssClass="txtbox_Var" Text="Purchase Request"></asp:TextBox></td>
+                                            <asp:TextBox ID="txtposition" runat="server" Width="95%" CssClass="txtbox_Var" ReadOnly="True"></asp:TextBox></td>
+                                        
+                                        
                                     </tr>
                                     <tr>
                                         <td style="width: 15%" class="column_RightBold">Account Title :</td>
@@ -371,27 +391,31 @@
                                             </asp:DropDownList>
 
                                         </td>
-                                        <td style="width: 20%" class="column_RightBold">
-                                            <asp:RequiredFieldValidator ID="RequiredFieldValidator12" runat="server" ValidationGroup="save" ErrorMessage="Address" ControlToValidate="txtaddpeyee">*</asp:RequiredFieldValidator>Address :</td>
+                                         <td style="width: 20%" class="column_RightBold">Approved By : </td>
                                         <td style="width: 30%" class="column_Left">
-                                            <asp:TextBox ID="txtaddpeyee" runat="server" Width="95%" CssClass="txtbox_Var" Text="Tuguegarao City, Cagayan"></asp:TextBox></td>
+                                            <asp:DropDownList ID="ddApprovedBy" runat="server" CssClass="drpdownCSS" Width="95%">
+                                            </asp:DropDownList>
+                                        </td>
+                                        
+                                        
                                     </tr>
                                     <tr>
                                         <td style="width: 15%" class="column_RightBold">
                                             <asp:RequiredFieldValidator ID="RequiredFieldValidator2" runat="server" ValidationGroup="save" ErrorMessage="Purpose" ControlToValidate="txtpurpose">*</asp:RequiredFieldValidator>
-                                            <asp:Label Style="position: relative" ID="lblreq1" runat="server" ForeColor="Red" Visible="False" Text="** "></asp:Label>Purpose :</td>
-                                        <td style="width: 35%" class="column_Left" rowspan="2">
-                                            <asp:TextBox Style="text-align: left" ID="txtpurpose" runat="server" Width="90%" AutoPostBack="True" CssClass="txtbox_Remarks" TextMode="MultiLine" SkinID="text" OnTextChanged="txtpurpose_TextChanged"></asp:TextBox></td>
-                                        <td style="width: 20%" class="column_RightBold">Requesting Person :</td>
-                                        <td style="width: 30%" class="column_Left">
-                                            <asp:DropDownList ID="ddRequestedBy" runat="server" Width="95%" AutoPostBack="True" OnSelectedIndexChanged="ddRequestedBy_SelectedIndexChanged" CssClass="drpdownCSS" AppendDataBoundItems="True" Enabled="False">
-                                            </asp:DropDownList></td>
+                                            <asp:Label  ID="lblreq1" runat="server" ForeColor="Red" Visible="False" Text="** "></asp:Label>Purpose :</td>
+                                        <td style="width: 30%" class="column_Left" rowspan="2">
+                                            <asp:TextBox  ID="txtpurpose" runat="server" Width="90%" AutoPostBack="True" CssClass="txtbox_Remarks" TextMode="MultiLine" SkinID="text" OnTextChanged="txtpurpose_TextChanged"></asp:TextBox></td>
+                                        
+                                       <td style="width: 20%" class="column_RightBold">
+                                            <asp:RequiredFieldValidator ID="RequiredFieldValidator7" runat="server" ValidationGroup="save" ErrorMessage="ObR Title" ControlToValidate="txtOBRpurpose">*</asp:RequiredFieldValidator>
+                                            <asp:Label ID="lblreq2" runat="server" ForeColor="Red" Visible="False" Text="** "></asp:Label>
+                                            OBR Description / Purpose :</td>
+                                        <td style="width: 30%" class="column_Left" rowspan="2">
+                                            <asp:TextBox ID="txtOBRpurpose" runat="server" Width="95%" CssClass="txtbox_Remarks" ReadOnly="True" TextMode="MultiLine" SkinID="text"></asp:TextBox></td>
+                         
                                     </tr>
                                     <tr>
                                         <td style="width: 15%" class="column_RightBold"></td>
-                                        <td style="width: 20%" class="column_RightBold">Position :</td>
-                                        <td style="width: 30%" class="column_Left">
-                                            <asp:TextBox ID="txtposition" runat="server" Width="95%" CssClass="txtbox_Var" ReadOnly="True"></asp:TextBox></td>
                                     </tr>
                                     <tr>
                                         <td style="width: 15%" class="column_RightBold">Note : </td>
@@ -404,11 +428,12 @@
                                             </cc1:ListSearchExtender>
                                             <asp:TextBox ID="txtNote" runat="server" CssClass="txtbox_Var" Width="90%"></asp:TextBox>
                                         </td>
-                                        <td style="width: 20%" class="column_RightBold">Approved By : </td>
-                                        <td style="width: 30%" class="column_Left">
-                                            <asp:DropDownList ID="ddApprovedBy" runat="server" CssClass="drpdownCSS" Width="95%">
-                                            </asp:DropDownList>
+
+                                        <td style="width: 15%" class="column_RightBold">Project Title : </td>
+                                        <td style="width: 35%" class="column_Left">
+                                             <asp:TextBox ID="ProjectTitle" runat="server" Width="95%" CssClass="txtbox_Remarks" TextMode="MultiLine" SkinID="text"></asp:TextBox>
                                         </td>
+                                      
                                     </tr>
                                     <tr>
                                         <td class="column_RightBold" style="width: 15%"></td>
@@ -416,10 +441,16 @@
                                             <asp:TextBox ID="txtrequestingperson" runat="server" CssClass="txtbox_Var" Visible="False" Width="95%"></asp:TextBox>
                                         </td>
                                         <td class="column_RightBold" style="width: 20%"></td>
-                                        <td class="column_Left" style="width: 30%">
+                                        
+                                    </tr>
+                                    <tr>    
+                                    
+                                        <td style="width: 15%" class="column_RightBold">
                                             <asp:CheckBox ID="cbReinbursement" runat="server" Enabled="False" Visible="False" />
                                         </td>
                                     </tr>
+
+
                                 </tbody>
                             </table>
                         </td>

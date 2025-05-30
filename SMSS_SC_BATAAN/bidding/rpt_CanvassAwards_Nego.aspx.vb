@@ -17,17 +17,42 @@ Partial Class bidding_rpt_CanvassAwards_Nego
             Me.CrystalReportViewer1.ReportSource = rpt
         ElseIf Session("Award") = "RRA" Then
 
+            AddTrace(Me.Session("Hdr_ID"))
+            AddTrace(Me.Session("prhdr_id"))
             rpt.FileName = Server.MapPath("rpt_Canvass_Resolution_PR.rpt")
             rpt.SetDatabaseLogon(objDerived.username, objDerived.Password)
-            rpt.SetParameterValue(0, Me.Session("Hdr_ID"))
-            rpt.SetParameterValue(1, Me.Session("prhdr_id"))
+
+            rpt.SetParameterValue(0, Me.Session("prhdr_id"))
+            rpt.SetParameterValue(1, Me.Session("Hdr_ID"))
+
             Me.CrystalReportViewer1.ReportSource = rpt
+
+
         ElseIf Session("Award") = "NTP" Then
 
-            rpt.FileName = Server.MapPath("")
+            rpt.FileName = Server.MapPath("rpt_Canvass_Resolution.rpt")
             rpt.SetDatabaseLogon(objDerived.username, objDerived.Password)
+
+            AddTrace("Hdr_ID: " & Me.Session("Hdr_ID"))
+            AddTrace("prhdr_id: " & Me.Session("prhdr_id"))
+
+            rpt.SetParameterValue(0, Me.Session("Hdr_ID"))
+            rpt.SetParameterValue(1, Me.Session("prhdr_id"))
+
             Me.CrystalReportViewer1.ReportSource = rpt
+
         End If
+    End Sub
+
+
+    Private Sub AddTrace(ByVal message As String)
+        ' Prevent single quotes in the message from breaking JavaScript
+        Dim safeMessage As String = message.Replace("'", "\'")
+        ScriptManager.RegisterClientScriptBlock(Me, Me.GetType(),
+        "TraceKey" & Guid.NewGuid().ToString("N"),
+        "console.log('" & safeMessage & "');",
+        True)
+
     End Sub
 
     Protected Sub Page_Unload(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Unload

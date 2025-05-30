@@ -844,7 +844,7 @@ Partial Class t_purchase_request_v2
             ddRequestedBy.Enabled = True
 
             'ddApprovedBy.DataSource = objDerived.GetDataTable("SELECT * FROM HRMS.view_signatory WHERE  division_key = 86 AND isActive = 1 AND isDeptHead = 'yes' AND office_name in ('OFFICE OF THE PROVINCIAL GOVERNOR','OFFICE OF THE PROVINCIAL ADMINISTRATOR') ORDER BY deptid", CommandType.Text)
-            ddApprovedBy.DataSource = objDerived.GetDataTable("SELECT * FROM HRMS.view_signatory WHERE  division_key = 86 AND isDeptHead = 'yes'AND isActive = 1 and position_desc = 'Vice Governor' or position_desc = 'Governor'", CommandType.Text)
+            ddApprovedBy.DataSource = objDerived.GetDataTable(" SELECT * FROM HRMS.view_signatory WHERE isDeptHead = 'yes' AND isActive = 1 AND (position_desc = 'Vice Governor' OR position_desc = 'Governor') UNION SELECT * FROM HRMS.view_signatory WHERE RC_ID = '" & ddRC.SelectedItem.Value & "' AND division_key = '" & ddFunction.SelectedItem.Value & "' AND isDeptHead = 'yes' AND isActive = 1 ", CommandType.Text)
 
 
             ddApprovedBy.DataTextField = ("full_name")
@@ -2212,8 +2212,11 @@ Partial Class t_purchase_request_v2
             Exit Sub
         End If
 
-        AddTrace("Session('edit_pr') value: " & Session("edit_pr"))
+        Session("ProjTitle") = ProjectTitle.Text
 
+
+
+        AddTrace("Session('edit_pr') value: " & Session("edit_pr"))
         If chkNonPPMP.Checked Then
             AddTrace("Non-PPMP PR detected. Saving as Non-PPMP PR...")
 
@@ -2344,15 +2347,30 @@ Partial Class t_purchase_request_v2
                 CTO = objDerived.GetValue("SELECT empid FROM HRMS.view_signatory WHERE deptid = 10 AND division_key = 86 AND isDeptHead = 'Yes'", CommandType.Text)
                 AddTrace("CTO = " & CTO)
                 If rbTrustFund.SelectedValue = 3 Then
-                    objDerived.GetRecords("UPDATE AMS.PR_Hdr SET F_ID = 3, isFinal = 0,CityTreasurer = '" & CTO & "', Userid ='" & Session("@UserName") & "', isTrustFund = 1, GA_ID = '" & Session("GA_ID") & "', comment = '" & replaceapostrophe(txtNote.Text) & "' WHERE prhdr_id = '" & prhdrID & "'", CommandType.Text)
+                    objDerived.GetRecords(
+                        "UPDATE AMS.PR_Hdr SET " &
+                        "F_ID = 3, " &
+                        "isFinal = 0, " &
+                        "CityTreasurer = " & CTO & ", " &
+                        "Userid = '" & Session("@UserName") & "', " &
+                        "isTrustFund = 1, " &
+                        "GA_ID = " & Session("GA_ID") & ", " &
+                        "ProjectTitle = '" & replaceapostrophe(Session("ProjTitle")) & "', " &
+                        "comment = '" & replaceapostrophe(txtNote.Text) & "' " &
+                        "WHERE prhdr_id = " & prhdrID, CommandType.Text)
 
                 Else
-                    objDerived.GetRecords("UPDATE AMS.PR_Hdr SET F_ID = '" & rbTrustFund.SelectedItem.Value & "', CityTreasurer = '" & CTO & "', comment = '" & replaceapostrophe(txtNote.Text) & "', Address = '" & txtaddpeyee.Text & "' WHERE prhdr_id = '" & prhdrID & "'", CommandType.Text)
+                    objDerived.GetRecords(
+                        "UPDATE AMS.PR_Hdr SET " &
+                        "F_ID = " & rbTrustFund.SelectedItem.Value & ", " &
+                        "CityTreasurer = " & CTO & ", " &
+                        "ProjectTitle = '" & replaceapostrophe(Session("ProjTitle")) & "', " &
+                        "comment = '" & replaceapostrophe(txtNote.Text) & "', " &
+                        "Address = '" & replaceapostrophe(txtaddpeyee.Text) & "' " &
+                        "WHERE prhdr_id = " & prhdrID, CommandType.Text)
+
                     AddTrace("Executed: UPDATE AMS.PR_Hdr ... (F_ID, CityTreasurer, comment, Address)")
-
-
                 End If
-
 
 
                 '=-= Saving PR_Dtl
@@ -2595,11 +2613,13 @@ Partial Class t_purchase_request_v2
                 AddTrace("Updating AMS.PR_Hdr: isPerLot = " & isPerLotValue)
 
                 objDerived.GetRecords("UPDATE ams.pr_hdr SET ABC = '" & pBody.Compute("sum(total)", "") & "', " &
-                      "remarks = '" & replaceapostrophe(txtpurpose.Text) & "', " &
-                      "Requestedby = '" & ddRequestedBy.SelectedItem.Value & "', " &
-                      "CityTreasurer = '" & CTO & "', " &
-                      "isPerLot = '" & isPerLotValue & "' " &
-                      "WHERE prhdr_id='" & gvListPR.SelectedDataKey(0) & "' ", CommandType.Text)
+                  "remarks = '" & replaceapostrophe(txtpurpose.Text) & "', " &
+                  "Requestedby = '" & ddRequestedBy.SelectedItem.Value & "', " &
+                  "CityTreasurer = '" & CTO & "', " &
+                  "ProjectTitle = '" & Session("ProjTitle") & "', " &
+                  "isPerLot = '" & isPerLotValue & "' " &
+                  "WHERE prhdr_id='" & gvListPR.SelectedDataKey(0) & "' ", CommandType.Text)
+
 
                 AddTrace("Executed: UPDATE ams.pr_hdr in edit mode with isPerLot = " & isPerLotValue)
 
@@ -2725,7 +2745,7 @@ Partial Class t_purchase_request_v2
 
             Dim isDBM As Boolean = Convert.ToBoolean(objDerived.GetValue("SELECT ISNULL(isDBM, 0) FROM AMS.PR_Hdr WHERE prhdr_id = '" & Session("prhdr_id") & "'", CommandType.Text))
             If Not isDBM Then
-                Dim url As String = "/procurement/rpt_purchase_request.aspx"
+                Dim url As String = "/MainReports/Procurement_Reports.aspx"
                 Dim fullURL As String = " var win= window.open('" + url + "', '_blank');"
                 ScriptManager.RegisterStartupScript(Me, GetType(String), "OPEN_WINDOW", fullURL, True)
             Else
@@ -2897,6 +2917,12 @@ Partial Class t_purchase_request_v2
         txtpeyee.Enabled = True
         txtpurpose.Enabled = True
         txtaddpeyee.Enabled = True
+
+
+        Dim txtProjectTitle As String = objDerived.GetValue("SELECT ProjectTitle FROM AMS.PR_Hdr WHERE PRHdr_ID = " & Session("prhdr_id"), CommandType.Text)
+        ProjectTitle.Text = txtProjectTitle
+
+
 
         ' Fetch Program/Activity/Project data
         Dim PPAname As DataTable
@@ -3127,14 +3153,20 @@ Partial Class t_purchase_request_v2
         ' Default value of isNonPPMP
         Dim isNonPPMP As Integer = 0 ' Default to 0 (False)
 
-        ' Check if the DataTable contains rows
-        If dt.Rows.Count > 0 Then
-            ' Get the value from the first row and the IsNonPPMP column
-            ' Convert the value to Integer (1 or 0)
-            If dt.Rows(0)("IsNonPPMP") IsNot DBNull.Value Then
-                isNonPPMP = Convert.ToInt32(dt.Rows(0)("IsNonPPMP"))
+        Try
+            ' Check if the DataTable contains rows
+            If dt.Rows.Count > 0 Then
+                ' Get the value from the first row and the IsNonPPMP column
+                ' Convert the value to Integer (1 or 0)
+                If dt.Rows(0)("IsNonPPMP") IsNot DBNull.Value Then
+                    isNonPPMP = Convert.ToInt32(dt.Rows(0)("IsNonPPMP"))
+                End If
             End If
-        End If
+        Catch ex As Exception
+            MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Something went wrong, please try again later.")
+
+        End Try
+
 
         ' Set the checkbox based on the value of isNonPPMP (1 or 0)
         If isNonPPMP = 1 Then
