@@ -8,6 +8,7 @@ Imports System.Windows.Forms.Control
 Partial Class bidding_t_contact_award_nego
     Inherits System.Web.UI.Page
     Private objDerived As New DerivedDal
+    Private Bid As New Bid_information
     Dim obj As New AccessRule
 
 #Region "Property"
@@ -339,17 +340,102 @@ Partial Class bidding_t_contact_award_nego
         grdAbstract.DataBind()
     End Sub
 
+
+    Private Sub AddTrace(ByVal message As String)
+        ' Prevent single quotes in the message from breaking JavaScript
+        Dim safeMessage As String = message.Replace("'", "\'")
+        ScriptManager.RegisterClientScriptBlock(Me, Me.GetType(),
+        "TraceKey" & Guid.NewGuid().ToString("N"),
+        "console.log('" & safeMessage & "');",
+        True)
+    End Sub
+
+
     Private Sub grdAbstract_SelectedIndexChanged(sender As Object, e As EventArgs) Handles grdAbstract.SelectedIndexChanged
         Try
             Session("Award") = "NOA"
             Session("Page") = "BID"
 
+
             Session("Hdr_ID") = grdAbstract.SelectedDataKey("Hdr_ID")
             Session("prhdr_id") = grdAbstract.SelectedDataKey("prhdr_id")
             Session("Supplier_ID") = grdAbstract.SelectedDataKey("Supplier_ID")
 
+            Dim prNo As String = objDerived.GetValue("SELECT pr_no FROM ams.pr_hdr WHERE prhdr_id = '" & Session("prhdr_id") & "'", CommandType.Text)
+
+            Dim totalAmt As Decimal = grdAbstract.SelectedDataKey("Total_Amt")
+
+            Dim result As Object = objDerived.GetValue("SELECT mode_of_procurement_id FROM ams.mode_of_procurement WHERE mode_description LIKE '%Negotiated Procurement%'", CommandType.Text)
+            Dim mode_of_procurement_id As Integer = If(result IsNot Nothing AndAlso Not IsDBNull(result), Convert.ToInt32(result), 0)
+
+
+            'Add some  mode of procurement = nego
+
+            Session("Hdr_ID") = Session("Hdr_ID")
+            Session("prhdr_id") = Session("prhdr_id")
+            Session("Supplier_ID") = Session("Supplier_ID")
+
+            AddTrace("Hdr_ID" & Session("Hdr_ID"))
+            AddTrace("prhdr_id" & Session("prhdr_id"))
+            AddTrace("Supplier_ID" & Session("Supplier_ID"))
+            AddTrace("prNo" & prNo)
+            AddTrace("totalAmt" & totalAmt)
+            AddTrace("mode_of_procurement_id" & mode_of_procurement_id)
+
+
+
             Dim ApprovedBy As Long = objDerived.GetValue("SELECT TOP(1) [EmpID] FROM [HRMS].[view_signatory] WHERE [deptid] = 1 AND [division_Key] = 86 AND [isDeptHead] = 'Yes' AND [isActive] = 1", CommandType.Text)
+            'Dim NOA_Date As String = CType(grdNOA.Rows(grdNOA.SelectedIndex).FindControl("txtNOADate"), TextBox).Text
             Dim NOA_Date As String = CType(grdAbstract.Rows(grdAbstract.SelectedIndex).FindControl("txtNOADate"), TextBox).Text
+            Dim parsedNOADate As DateTime
+
+            ' Add validation for NOA_Date
+            If Not DateTime.TryParse(NOA_Date, parsedNOADate) Then
+                MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Invalid NOA Date format. Please enter a valid date.")
+                Exit Sub
+            End If
+
+            ' Ensure date is within SQL Server range
+            If parsedNOADate < New DateTime(1753, 1, 1) Or parsedNOADate > New DateTime(9999, 12, 31) Then
+                MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "NOA Date must be between 1/1/1753 and 12/31/9999.")
+                Exit Sub
+            End If
+
+
+            With Bid
+                .pre_procurement_hdr_id = mode_of_procurement_id
+                .Article = "Negotiated"
+                .Amount = totalAmt
+                .Supplier_ID = Session("Supplier_ID")
+                .withNOA = True
+                .NOA_Date = NOA_Date
+                .NOA_ApprovedBy = ApprovedBy
+                .NOA_ApprovedBy_Position = replaceapostrophe("")
+                .withPO = False
+                .withNTP = False
+                .NTP_Date = "2024-12-05 00:00:00.000"
+                .NTP_ApprovedBy = Nothing
+                .NTP_ApprovedBy_Position = Nothing
+                .PR_No = prNo
+                .UserID = Session("@UserName")
+            End With
+
+            Dim bidID As Long = Bid.save()
+
+            Session("Bid_ID") = bidID
+
+
+            AddTrace("Bid ID: " & Session("Bid_ID"))
+
+
+
+
+            'Session("Hdr_ID") = grdAbstract.SelectedDataKey("Hdr_ID")
+            'Session("prhdr_id") = grdAbstract.SelectedDataKey("prhdr_id")
+            'Session("Supplier_ID") = grdAbstract.SelectedDataKey("Supplier_ID")
+
+            'Dim ApprovedBy As Long = objDerived.GetValue("SELECT TOP(1) [EmpID] FROM [HRMS].[view_signatory] WHERE [deptid] = 1 AND [division_Key] = 86 AND [isDeptHead] = 'Yes' AND [isActive] = 1", CommandType.Text)
+            'Dim NOA_Date As String = CType(grdAbstract.Rows(grdAbstract.SelectedIndex).FindControl("txtNOADate"), TextBox).Text
 
             Dim NOADate As Date = CType(CType(grdAbstract.Rows(grdAbstract.SelectedIndex).FindControl("txtNOADate"), TextBox).Text, Date)
 
@@ -410,13 +496,17 @@ Partial Class bidding_t_contact_award_nego
 
     Private Sub btnNTP_Save_Click(sender As Object, e As EventArgs) Handles btnNTP_Save.Click
         Try
+            Session("Page") = "Nego"
+
             Session("CanvassAward_ID") = grdNTP.SelectedDataKey("CanvassAward_ID")
             objDerived.Execute("UPDATE AMS.m_CanvassAwards SET NTP_Content = '" & replaceapostrophe(txtNTP_Content.Text) & "', withNTP = 1, NTP_Date = '" & CType(txtNTP_Date.Text, Date) & "', NTP_Approvedby = '" & drpNTP_ApprovedBy.SelectedItem.Value & "' WHERE CanvassAward_ID = '" & grdNTP.SelectedDataKey("CanvassAward_ID") & "'", CommandType.Text)
 
-            Session("Award") = "NTP"
-            Session("Page") = "BID"
+            'Updates the Bid Information of NTP
+            objDerived.Execute("UPDATE AMS.Bid_Information SET withNTP = 1, NTP_Date = '" & CType(txtNTP_Date.Text, Date) & "', NTP_Approvedby = '" & drpNTP_ApprovedBy.SelectedItem.Value & "' WHERE Bid_ID = '" & Session("Bid_ID") & "'", CommandType.Text)
 
-            Me.Page.Response.Redirect("~/bidding/rpt_CanvassAwards_Nego.aspx")
+            Me.Page.Response.Redirect("~/bidding/rpt_notice_to_proceed.aspx")
+
+            'Me.Page.Response.Redirect("~/bidding/rpt_CanvassAwards_Nego.aspx")
 
         Catch ex As Exception
             MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Something went wrong, please contact system admin.")
