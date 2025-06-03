@@ -471,8 +471,9 @@ Partial Class Inventory_t_for_Inspection
                 stck1 = objDerived.GetValue("SELECT Property_ID FROM AMS.Property WHERE POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "'", CommandType.Text)
             End If
 
-            pInspection_detail = objDerived.GetDataTable("EXEC [AMS].[sp_ReceivedItems_Inspection] '" & grdAIR.SelectedDataKey("POHdr_ID") & "','" & stck1 & "','" & AllotmentClass & "'", CommandType.Text)
+            pInspection_detail = objDerived.GetDataTable("EXEC [AMS].[sp_ReceivedItems_Inspection] '" & grdAIR.SelectedDataKey("POHdr_ID") & "','" & stck1 & "','" & AllotmentClass & "', '" & grdAIR.SelectedDataKey("Received_ID") & "'  ", CommandType.Text)
             txtHiddenReceiveQty.Value = pInspection_detail.Rows.Count
+
 
             If pInspection_detail.Rows.Count < 5 Then
                 pInspection_detail.Merge(CreateTable3(5 - pInspection_detail.Rows.Count))
@@ -797,9 +798,6 @@ Partial Class Inventory_t_for_Inspection
 
                 Session("Received_ID") = rcvID
 
-                'Check AIR----------------------------------
-                Dim xAIRHdr_ID As Long = SaveAIR(rcvID) 'see definition below
-
                 For MOOE As Integer = 0 To grdInspection.Rows.Count - 1
                     cb = CType(Me.grdInspection.Rows(MOOE).Cells(0).FindControl("cbInspection"), CheckBox)
                     Dim txtQty As TextBox = CType(grdInspection.Rows(MOOE).FindControl("txtActQty"), TextBox)
@@ -816,20 +814,6 @@ Partial Class Inventory_t_for_Inspection
                         ' Check if record exists for update
                         Dim RcvDtl_ID As Long = objDerived.GetValue("SELECT Received_Dtl_ID FROM AMS.Tb_Receiving_Dtl WHERE Received_ID = '" & rcvID & "' AND Item_ID = '" & pInspection_detail.Rows(MOOE)("Item_ID") & "'", CommandType.Text)
 
-                        'save airdtl
-                        Dim AIRDtl_ID As Long
-                        With AIR_Dtl
-                            .AIRHdr_ID = xAIRHdr_ID
-                            .Item_ID = pInspection_detail.Rows(MOOE)("Item_ID")
-                            .Cost = pInspection_detail.Rows(MOOE)("Cost")
-                            .GA_ID = grdAIR.SelectedDataKey("GA_ID")
-                            .Warranty = 0
-                            .Date_Inspected = txtDate.Text
-                            .Qty_Inspected = receivedQty
-                        End With
-
-                        AIRDtl_ID = AIR_Dtl.save
-                        objDerived.GetRecords("UPDATE AMS.AIR_Dtl SET OtherSpecs = '" & pInspection_detail.Rows(MOOE)("OtherSpecs") & "', isAccepted = 1 WHERE AIRDtl_ID = '" & AIRDtl_ID & "' ", CommandType.Text)
 
                         If RcvDtl_ID = 0 Then
                             ' Insert new record if not existing
@@ -1089,7 +1073,7 @@ Partial Class Inventory_t_for_Inspection
                 'For allotment class 2
                 stck1 = objDerived.GetValue("SELECT StockID FROM AMS.Stock WHERE POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "'", CommandType.Text)
 
-                Dim dt2 As DataTable = objDerived.GetDataTable("EXEC [AMS].[sp_ReceivedItems_Inspection] '" & grdAIR.SelectedDataKey("POHdr_ID") & "','" & stck1 & "','" & AllotmentClass_ID & "'", CommandType.Text)
+                Dim dt2 As DataTable = objDerived.GetDataTable("EXEC [AMS].[sp_ReceivedItems_Inspection] '" & grdAIR.SelectedDataKey("POHdr_ID") & "','" & stck1 & "','" & AllotmentClass & "', '" & grdAIR.SelectedDataKey("Received_ID") & "'  ", CommandType.Text)
 
                 If dt2.Rows.Count = 0 Then
                     objDerived.GetRecords("UPDATE AMS.Tb_Receiving SET Status = 2 WHERE Received_ID = '" & rcvID & "'", CommandType.Text)
@@ -1123,7 +1107,6 @@ Partial Class Inventory_t_for_Inspection
                 End If
 
                 '----------------SAVING AIR
-                Dim xAIRHdr_ID As Long = SaveAIR(rcvID) 'see definition below
 
                 For CO As Integer = 0 To grdInspection.Rows.Count - 1
                     cb = CType(Me.grdInspection.Rows(CO).Cells(0).FindControl("cbInspection"), CheckBox)
@@ -1138,7 +1121,6 @@ Partial Class Inventory_t_for_Inspection
 
                         Dim a As Integer = pInspection_detail.Rows(CO)("Item_ID")
 
-
                         Dim RcvDtl_ID As Long = objDerived.GetValue("SELECT Received_Dtl_ID FROM AMS.Tb_Receiving_Dtl WHERE Received_ID = '" & rcvID & "' AND Item_ID = '" & a & "'", CommandType.Text)
 
                         Dim QtyTextValue As Decimal
@@ -1146,20 +1128,6 @@ Partial Class Inventory_t_for_Inspection
                         If Not Decimal.TryParse(CType(grdInspection.Rows(CO).FindControl("txtActQty"), TextBox).Text, QtyTextValue) Then
                             QtyTextValue = 0 ' Default to 0 if parsing fails
                         End If
-
-                        'save airdtl
-                        Dim AIRDtl_ID As Long
-                        With AIR_Dtl
-                            .AIRHdr_ID = xAIRHdr_ID
-                            .Item_ID = pInspection_detail.Rows(CO)("Item_ID")
-                            .Cost = pInspection_detail.Rows(CO)("Cost")
-                            .GA_ID = grdAIR.SelectedDataKey("GA_ID")
-                            .Warranty = 0
-                            .Qty_Inspected = QtyTextValue
-                        End With
-
-                        AIRDtl_ID = AIR_Dtl.save
-                        objDerived.GetRecords("UPDATE AMS.AIR_Dtl SET OtherSpecs = '" & pInspection_detail.Rows(CO)("OtherSpecs") & "', isAccepted = 1 WHERE AIRDtl_ID = '" & AIRDtl_ID & "' ", CommandType.Text)
 
 
                         Dim calResultAccepting As Decimal
@@ -1469,7 +1437,7 @@ Partial Class Inventory_t_for_Inspection
                 'For allotment class 3
                 stck1 = objDerived.GetValue("SELECT Property_ID FROM AMS.Property WHERE POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "'", CommandType.Text)
 
-                Dim dt2 As DataTable = objDerived.GetDataTable("EXEC [AMS].[sp_ReceivedItems_Inspection] '" & grdAIR.SelectedDataKey("POHdr_ID") & "','" & stck1 & "','" & AllotmentClass_ID & "'", CommandType.Text)
+                Dim dt2 As DataTable = objDerived.GetDataTable("EXEC [AMS].[sp_ReceivedItems_Inspection] '" & grdAIR.SelectedDataKey("POHdr_ID") & "','" & stck1 & "','" & AllotmentClass & "', '" & grdAIR.SelectedDataKey("Received_ID") & "'  ", CommandType.Text)
 
                 objDerived.GetRecords("UPDATE AMS.Tb_Receiving SET Status = 2 WHERE Received_ID = '" & rcvID & "'", CommandType.Text)
 
@@ -1546,7 +1514,7 @@ Partial Class Inventory_t_for_Inspection
             stck1 = objDerived.GetValue("SELECT Property_ID FROM AMS.Property WHERE POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "'", CommandType.Text)
         End If
 
-        Dim dt As DataTable = objDerived.GetDataTable("EXEC [AMS].[sp_ReceivedItems_Inspection] '" & grdAIR.SelectedDataKey("POHdr_ID") & "','" & stck1 & "','" & AllotmentClass & "'", CommandType.Text)
+        Dim dt As DataTable = objDerived.GetDataTable("EXEC [AMS].[sp_ReceivedItems_Inspection] '" & grdAIR.SelectedDataKey("POHdr_ID") & "','" & stck1 & "','" & AllotmentClass & "', '" & grdAIR.SelectedDataKey("Received_ID") & "'  ", CommandType.Text)
 
         Dim cb1 As CheckBox
 
@@ -1615,7 +1583,7 @@ Partial Class Inventory_t_for_Inspection
                     'objDerived.Execute(updateDtlSQL, CommandType.Text)
 
                     'RE EXEC TO REFRESH
-                    Dim dt2 As DataTable = objDerived.GetDataTable("EXEC [AMS].[sp_ReceivedItems_Inspection] '" & grdAIR.SelectedDataKey("POHdr_ID") & "','" & stck1 & "','" & AllotmentClass & "'", CommandType.Text)
+                    Dim dt2 As DataTable = objDerived.GetDataTable("EXEC [AMS].[sp_ReceivedItems_Inspection] '" & grdAIR.SelectedDataKey("POHdr_ID") & "','" & stck1 & "','" & AllotmentClass & "', '" & grdAIR.SelectedDataKey("Received_ID") & "'  ", CommandType.Text)
 
                     If dt2.Rows.Count = 0 Then
                         Dim updateHdrSQL As String = "UPDATE AMS.Tb_Receiving SET Status = 0 WHERE Received_ID = " & rcvID
@@ -1633,7 +1601,7 @@ Partial Class Inventory_t_for_Inspection
             stck2 = objDerived.GetValue("SELECT Property_ID FROM AMS.Property WHERE POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "'", CommandType.Text)
         End If
 
-        pInspection_detail = objDerived.GetDataTable("EXEC [AMS].[sp_ReceivedItems_Inspection] '" & grdAIR.SelectedDataKey("POHdr_ID") & "','" & stck2 & "','" & AllotmentClass & "'", CommandType.Text)
+        pInspection_detail = objDerived.GetDataTable("EXEC [AMS].[sp_ReceivedItems_Inspection] '" & grdAIR.SelectedDataKey("POHdr_ID") & "','" & stck1 & "','" & AllotmentClass & "', '" & grdAIR.SelectedDataKey("Received_ID") & "'  ", CommandType.Text)
         txtHiddenReceiveQty.Value = pInspection_detail.Rows.Count
 
         If pInspection_detail.Rows.Count < 5 Then

@@ -23,6 +23,7 @@ Partial Class Procurement_t_receiving
             txtPONumber.Attributes.Add("onkeypress", "return fun1(event,'" & btnPO.ClientID & "')")
             txtFrom.Attributes.Add("onkeypress", "return fun1(event,'" & btnSearchDate.ClientID & "')")
             txtTo.Attributes.Add("onkeypress", "return fun1(event,'" & btnSearchDate.ClientID & "')")
+            txtInvoiceNum.Attributes.Add("onkeypress", "return fun1(event,'" & btnInvoiceNum.ClientID & "')")
 
 
         End If
@@ -62,7 +63,9 @@ Partial Class Procurement_t_receiving
             Case 2
                 Me.mvSearch.SetActiveView(Me.vwPO)
                 txtPONumber.Text = ""
-
+            Case 3
+                Me.mvSearch.SetActiveView(Me.vwInvoiceNum)
+                txtPONumber.Text = ""
 
         End Select
 
@@ -81,6 +84,9 @@ Partial Class Procurement_t_receiving
             grdReceived.DataSource = objDerived.GetDataTable("SELECT * FROM [dbo].[View_RQ_Receiving] WHERE PO_No like '%" & txtPONumber.Text & "%'", CommandType.Text)
             grdReceived.DataBind()
 
+        ElseIf rbChoice.SelectedItem.Value = 4 Then
+            grdReceived.DataSource = objDerived.GetDataTable("SELECT * FROM [dbo].[View_RQ_Receiving] WHERE InvoiceNo like '%" & txtInvoiceNum.Text & "%'", CommandType.Text)
+            grdReceived.DataBind()
         End If
     End Sub
 
@@ -97,6 +103,10 @@ Partial Class Procurement_t_receiving
     Protected Sub btnPO_Click(ByVal sender As Object, ByVal e As System.EventArgs)
         LoadSearching()
 
+    End Sub
+
+    Protected Sub btnInvoiceClick(ByVal sender As Object, ByVal e As System.EventArgs)
+        LoadSearching()
     End Sub
 
     Protected Sub grdReceived_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs)

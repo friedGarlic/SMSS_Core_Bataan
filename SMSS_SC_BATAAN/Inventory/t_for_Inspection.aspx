@@ -148,7 +148,7 @@
                     <tr>
                         <td>
                             <asp:GridView ID="grdAIR" runat="server" Width="100%" OnSelectedIndexChanged="grdAIR_SelectedIndexChanged"
-                                SkinID="GridViewAA" AllowPaging="True" DataKeyNames="POHdr_ID,PO_No,PO_Date,ContractPrice,SuppName,RC_ID,Function_ID,RC_Name,Function_Desc,GA_ID,Supplier_Id,pre_procurement_hdr_id"
+                                SkinID="GridViewAA" AllowPaging="True" DataKeyNames="POHdr_ID,PO_No,PO_Date,ContractPrice,SuppName,RC_ID,Function_ID,RC_Name,Function_Desc,GA_ID,Supplier_Id,pre_procurement_hdr_id,Received_ID"
                                 OnRowDataBound="grdAIR_RowDataBound" OnPageIndexChanging="grdAIR_PageIndexChanging" Font-Size="8pt" EmptyDataText="No Data Found.">
                                 <PagerSettings FirstPageText="First" LastPageText="Last" Mode="NextPreviousFirstLast" NextPageText="Next" PreviousPageText="Previous"></PagerSettings>
 
@@ -191,6 +191,10 @@
                                         <ItemStyle Width="70px"></ItemStyle>
                                     </asp:BoundField>
                                     <asp:BoundField DataField="RespCenter" HeaderText="RespCenter" Visible="False"></asp:BoundField>
+                                    
+                                    <asp:BoundField DataField="Invoice_No" HeaderText="Invoice No.">
+                                        <ItemStyle HorizontalAlign="Center" Width="80px"></ItemStyle>
+                                    </asp:BoundField>
                                 </Columns>
 
                                 <PagerStyle HorizontalAlign="Center"></PagerStyle>
