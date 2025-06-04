@@ -1086,7 +1086,7 @@ Partial Class Inventory_t_for_Inspection
 
 
             ElseIf AllotmentClass_ID = 3 Then
-                Dim rcvID As Long = objDerived.GetValue("SELECT Received_ID FROM AMS.Tb_Receiving WHERE POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "'", CommandType.Text)
+                Dim rcvID As Long = grdAIR.SelectedDataKey("Received_ID")
 
                 Dim rcv_Date As String = objDerived.GetValue("SELECT Received_Date FROM AMS.Tb_Receiving WHERE POHdr_ID = '" & grdAIR.SelectedDataKey("POHdr_ID") & "'", CommandType.Text)
 
@@ -1154,7 +1154,7 @@ Partial Class Inventory_t_for_Inspection
                         End If
 
                         If (QtyTextValue <= Qty_InspectingValue) Then
-                            calResultAccepting = calResultAccepting + QtyTextValue
+                            calResultAccepting = Qty_AcceptingValue + QtyTextValue
                             calResultInspecting = Math.Abs(Qty_InspectingValue - QtyTextValue)
                         Else
                             MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "The quantity desired to return is more that existing quantity, Reminder: Reload to see existing quantity.")

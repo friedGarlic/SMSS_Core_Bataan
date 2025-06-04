@@ -1355,7 +1355,6 @@ Partial Class Inventory_t_for_Acceptance
 
         '--NON EXISTING STOCK AND AIR
         'SAVE AND CREATE ROW
-        'TODO else no need to run just update
         If AllotmentClass = 2 Then
             AddTrace("AllotmentClass=2 => MOOE flow.")
             Dim ReceivedBy As String = objDerived.GetValue("SELECT full_name FROM HRMS.view_signatory WHERE Signatory_ID = '" & pInspection_detail.Rows(0)("ReceivedBY") & "'", CommandType.Text)
