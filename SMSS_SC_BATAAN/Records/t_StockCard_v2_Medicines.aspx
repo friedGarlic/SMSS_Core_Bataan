@@ -170,7 +170,7 @@
 									<asp:BoundField DataField="Item_ID" HeaderText="Item No.">
 										<ItemStyle HorizontalAlign="Center" Width="5%"></ItemStyle>
 									</asp:BoundField>
-									<asp:BoundField DataField="unit" HeaderText="UNIT">
+									<asp:BoundField DataField="Description" HeaderText="UNIT">
 										<ItemStyle HorizontalAlign="Center" Width="10%"></ItemStyle>
 									</asp:BoundField>
 									<asp:BoundField DataField="Item_Desc" HeaderText="ITEM DESCRIPTION">
