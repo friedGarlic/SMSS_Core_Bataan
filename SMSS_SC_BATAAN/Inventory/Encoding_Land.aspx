@@ -517,49 +517,25 @@
                               <asp:GridView ID="grdLedger1" runat="server" Width="100%" SkinID="GridViewAA" HorizontalAlign="Center" Font-Size="8pt" OnDataBound = "OnDataBound" >
                                                         
                                                         <Columns>
-                                                            <asp:BoundField DataField="dDate" DataFormatString="{0:d}" HeaderText="Date">
+                                                            <asp:BoundField DataField="Property_Date" DataFormatString="{0:d}" HeaderText="Date">
                                                                 <ItemStyle HorizontalAlign="Center" Width="5%" />
                                                             </asp:BoundField>
-                                                            <asp:BoundField DataField="Trans_Type" HeaderText="Particulars">
+                                                            <asp:BoundField DataField="Particulars" HeaderText="Particulars">
                                                                 <ItemStyle HorizontalAlign="Left" Width="46%" />
                                                             </asp:BoundField>
-                                                            <asp:BoundField DataField="ref" HeaderText="Ref No">
+                                                            <asp:BoundField DataField="PropertyNo" HeaderText="Ref No">
                                                                 <ItemStyle HorizontalAlign="Center" Width="8%" />
                                                             </asp:BoundField>
-                                                            <asp:BoundField DataField="AccountablePerson" HeaderText="Accountable Person" Visible="false">
+                                                            <asp:BoundField DataField="OwnerName" HeaderText="Accountable Person" Visible="false">
                                                                 <ItemStyle HorizontalAlign="Left" Width="8%" />
                                                             </asp:BoundField>
-                                                            <asp:BoundField DataField="Department" HeaderText="Office" Visible="false">
-                                                                <ItemStyle HorizontalAlign="Left" Width="10%" />
-                                                            </asp:BoundField>
-                                                            <asp:BoundField DataField="acceptedby" HeaderText="Accepted By" Visible="false">
-                                                                <ItemStyle HorizontalAlign="Left" Width="10%" />
-                                                            </asp:BoundField>
-                                                            <asp:BoundField DataField="inspectedby" HeaderText="Inspected By" Visible="false">
-                                                                <ItemStyle HorizontalAlign="Left" Width="10%" />
-                                                            </asp:BoundField>
-                                                            <asp:BoundField DataField="BalanceUnit" HeaderText="Ref No."  Visible="false">
-                                                                <ItemStyle HorizontalAlign="Center" Width="5%" />
-                                                            </asp:BoundField>
-                                                            <asp:BoundField DataField="UnitPrice" DataFormatString="{0:N}" HeaderText="Unit Price" Visible="false" >
+                                                            <asp:BoundField DataField="Debit" DataFormatString="{0:N}" HeaderText=" ">
                                                                 <ItemStyle HorizontalAlign="Right" Width="7%" />
                                                             </asp:BoundField>
-                                                            <asp:BoundField DataField="DebitQty" HeaderText="Debit Qty" Visible="false">
-                                                                <ItemStyle HorizontalAlign="Center" Width="5%" />
-                                                            </asp:BoundField>
-                                                            <asp:BoundField DataField="DebitCost" DataFormatString="{0:N}" HeaderText=" ">
+                                                            <asp:BoundField DataField="Credit" DataFormatString="{0:N}" HeaderText=" ">
                                                                 <ItemStyle HorizontalAlign="Right" Width="7%" />
                                                             </asp:BoundField>
-                                                            <asp:BoundField DataField="CreditQty" HeaderText="Credit Qty" Visible="false">
-                                                                <ItemStyle HorizontalAlign="Center" Width="5%" />
-                                                            </asp:BoundField>
-                                                            <asp:BoundField DataField="CreditCost" DataFormatString="{0:N}" HeaderText=" ">
-                                                                <ItemStyle HorizontalAlign="Right" Width="7%" />
-                                                            </asp:BoundField>
-                                                            <asp:BoundField DataField="BalQty" HeaderText="Bal Qty" Visible="false">
-                                                                <ItemStyle HorizontalAlign="Center" Width="5%" />
-                                                            </asp:BoundField>
-                                                            <asp:BoundField DataField="BalCost" DataFormatString="{0:N}" HeaderText=" ">
+                                                            <asp:BoundField DataField="Balance" DataFormatString="{0:N}" HeaderText=" ">
                                                                 <ItemStyle HorizontalAlign="Right" Width="7%" />
                                                             </asp:BoundField>
                                                         </Columns>
