@@ -52,11 +52,12 @@
 								</CR:CrystalReportSource>
 							</td>--%>
                             <td style="width: 1000px">
-                                <CR:CrystalReportViewer ID="CrystalReportViewer3" runat="server" AutoDataBind="true" BestFitPage="True" HasToggleGroupTreeButton="False" Height="750px" Style="background-color: white; text-align: left;" Width="1000px" BorderColor="Silver" BorderStyle="Solid" BoreWidth="1px" ToolPanelView="None" />
+                                <CR:CrystalReportViewer ID="CrystalReportViewer" runat="server" AutoDataBind="true" BestFitPage="True" HasToggleGroupTreeButton="False" Height="750px" Style="background-color: white; text-align: left;" Width="1000px" BorderColor="Silver" BorderStyle="Solid" BoreWidth="1px" ToolPanelView="None" />
 
                                 <CR:CrystalReportSource ID="CrystalReportSource1" runat="server"></CR:CrystalReportSource>
                                 <CR:CrystalReportSource ID="CrystalReportSource2" runat="server"></CR:CrystalReportSource>
-
+                                <CR:CrystalReportSource ID="CrystalReportSource3" runat="server"></CR:CrystalReportSource>
+                                <CR:CrystalReportSource ID="CrystalReportSource4" runat="server"></CR:CrystalReportSource>
                             </td>
 						</tr>
 					</table>
