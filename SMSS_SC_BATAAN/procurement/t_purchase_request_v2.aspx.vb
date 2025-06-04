@@ -844,7 +844,7 @@ Partial Class t_purchase_request_v2
             ddRequestedBy.Enabled = True
 
             'ddApprovedBy.DataSource = objDerived.GetDataTable("SELECT * FROM HRMS.view_signatory WHERE  division_key = 86 AND isActive = 1 AND isDeptHead = 'yes' AND office_name in ('OFFICE OF THE PROVINCIAL GOVERNOR','OFFICE OF THE PROVINCIAL ADMINISTRATOR') ORDER BY deptid", CommandType.Text)
-            ddApprovedBy.DataSource = objDerived.GetDataTable(" SELECT * FROM HRMS.view_signatory WHERE isDeptHead = 'yes' AND isActive = 1 AND (position_desc = 'Vice Governor' OR position_desc = 'Governor') UNION SELECT * FROM HRMS.view_signatory WHERE RC_ID = '" & ddRC.SelectedItem.Value & "' AND division_key = '" & ddFunction.SelectedItem.Value & "' AND isDeptHead = 'yes' AND isActive = 1 ", CommandType.Text)
+            ddApprovedBy.DataSource = objDerived.GetDataTable("SELECT * FROM HRMS.view_signatory WHERE isDeptHead = 'yes' AND isActive = 1 AND (position_desc = 'Vice Governor' OR position_desc = 'Governor' OR position_desc = 'Provincial Administrator')", CommandType.Text)
 
 
             ddApprovedBy.DataTextField = ("full_name")
@@ -1812,11 +1812,22 @@ Partial Class t_purchase_request_v2
         Dim GA_ID As Integer = objDerived.GetValue("Select GA_ID from AMS.vw_Ga_Title where GA_Code2 ='" & ddAccounts.SelectedValue & "'", CommandType.Text)
         Session("GA_ID") = GA_ID
 
-        If txtpurpose.Text = "" Or txtOBRpurpose.Text = "" Or ddRequestedBy.Text = "Select" Then
+        For Each row As GridViewRow In gvbody.Rows
+            'Skip footer and header rows
+            If row.RowType = DataControlRowType.DataRow Then
+                Dim txtcost As TextBox = CType(row.FindControl("txtcost"), TextBox)
+                If txtcost IsNot Nothing AndAlso (txtcost.Text = "0.00" Or txtcost.Text = "0") Then
+                    MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Enter a unit price for all items.")
+                    Exit Sub
+                End If
+            End If
+        Next
+
+
+        If txtpurpose.Text = "" Or ProjectTitle.Text = "" Or txtOBRpurpose.Text = "" Or ddRequestedBy.Text = "Select" Then
             MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Fill up required fields.")
             Exit Sub
         Else
-
             SaveGoods()
             LoadPRList_PerRC()
         End If
@@ -1834,6 +1845,9 @@ Partial Class t_purchase_request_v2
 
     Private Function SaveNonPPMPHeader() As Long
 
+
+        Session("ProjTitle") = ProjectTitle.Text
+        AddTrace("ProjTitle: " & Session("ProjTitle"))
 
         If Me.Session("edit_pr") = True Then
             'Edit NON-PPMP PR
@@ -1944,6 +1958,7 @@ Partial Class t_purchase_request_v2
                                 "remarks = '" & replaceapostrophe(txtpurpose.Text) & "', " &
                                 "Requestedby = '" & ddRequestedBy.SelectedItem.Value & "', " &
                                 "CityTreasurer = '" & CTO & "', " &
+                                "ProjectTitle = '" & Session("ProjTitle") & "', " &
                                 "isPerLot = '" & isPerLotValue & "' " &
                                 "WHERE prhdr_id='" & gvListPR.SelectedDataKey(0) & "'"
 
@@ -1960,6 +1975,7 @@ Partial Class t_purchase_request_v2
 
                 ' Tracing successful execution
                 AddTrace("Executed: UPDATE ams.pr_hdr in edit mode with isPerLot = " & isPerLotValue)
+
 
             Catch ex As Exception
                 'MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Server Error, Please try again later.")
@@ -2093,10 +2109,11 @@ Partial Class t_purchase_request_v2
             AddTrace("Saved Non-PPMP PR Header. prhdrID: " & prhdrID)
 
             If rbTrustFund.SelectedValue = 3 Then
-                objDerived.GetRecords("UPDATE AMS.PR_Hdr SET F_ID = 3, isFinal = 0,CityTreasurer = '" & CTO & "', Userid ='" & Session("@UserName") & "', isTrustFund = 1, GA_ID = '" & Session("GA_ID") & "', comment = '" & replaceapostrophe(txtNote.Text) & "' WHERE prhdr_id = '" & prhdrID & "'", CommandType.Text)
+                objDerived.GetRecords("UPDATE AMS.PR_Hdr SET F_ID = 3, isFinal = 0,CityTreasurer = '" & CTO & "', Userid ='" & Session("@UserName") & "', isTrustFund = 1, GA_ID = '" & Session("GA_ID") & "', comment = '" & replaceapostrophe(txtNote.Text) & "ProjectTitle = '" & Session("ProjTitle") & "', " & "' WHERE prhdr_id = '" & prhdrID & "'", CommandType.Text)
 
             Else
-                objDerived.GetRecords("UPDATE AMS.PR_Hdr SET F_ID = '" & rbTrustFund.SelectedItem.Value & "', CityTreasurer = '" & CTO & "', comment = '" & replaceapostrophe(txtNote.Text) & "', Address = '" & txtaddpeyee.Text & "' WHERE prhdr_id = '" & prhdrID & "'", CommandType.Text)
+                objDerived.GetRecords("UPDATE AMS.PR_Hdr SET F_ID = '" & rbTrustFund.SelectedItem.Value & "', CityTreasurer = '" & CTO & "', comment = '" & replaceapostrophe(txtNote.Text) & "', Address = '" & txtaddpeyee.Text & "', ProjectTitle = '" & ProjectTitle.Text & "' WHERE prhdr_id = '" & prhdrID & "'", CommandType.Text)
+
                 AddTrace("Executed: UPDATE AMS.PR_Hdr ... (F_ID, CityTreasurer, comment, Address)")
 
             End If
@@ -3185,13 +3202,17 @@ Partial Class t_purchase_request_v2
 
         Dim isPerlot As Integer = 0
 
-        ' Check if the DataTable contains rows
-        If dt2.Rows.Count > 0 Then
-            ' Make sure to reference dt2, not dt
-            If dt2.Rows(0)("isPerLot") IsNot DBNull.Value Then
-                isPerlot = Convert.ToInt32(dt2.Rows(0)("isPerLot")) ' FIXED: Now referencing dt2 correctly
+        Try
+            ' Check if the DataTable contains rows
+            If dt2.Rows.Count > 0 Then
+                ' Make sure to reference dt2, not dt
+                If dt2.Rows(0)("isPerLot") IsNot DBNull.Value Then
+                    isPerlot = Convert.ToInt32(dt2.Rows(0)("isPerLot")) ' FIXED: Now referencing dt2 correctly
+                End If
             End If
-        End If
+        Catch ex As Exception
+            MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Something went wrong, please try again later.")
+        End Try
 
         ' Set checkbox state based on isPerLot value
         If isPerlot = 1 Then

@@ -225,7 +225,7 @@
                         <td style="width: 1%"></td>
                         <td style="width: 98%" align="center">
                             <asp:Button ID="btnApproved" OnClick="btnApproved_Click" runat="server" Width="150px" CssClass="CSButton"  Enabled="False" Text="APPROVE"></asp:Button>
-                            <asp:Button ID="btnPreviewBacReso" runat="server" Text="Preview Bac Reso." CssClass="CSButton" Enabled="false" Visible="true" OnClick="btnPreviewBacReso_Click" />
+                            <asp:Button ID="btnPreviewBacReso" runat="server" Text="Preview Bac Reso." CssClass="CSButton" Enabled="True" Visible="true" OnClick="btnPreviewBacReso_Click" />
 
 <%--                            &nbsp;<asp:Button ID="btnCancel" OnClick="btnCancel_Click" runat="server" Width="150px" CssClass="CSButton" OnClientClick="StartProgressBar();return SetMessage(this.value);" Enabled="False" Visible="false" Text="RETURN"></asp:Button>
                         --%>

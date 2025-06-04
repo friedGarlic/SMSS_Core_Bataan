@@ -166,6 +166,9 @@ Partial Class bidding_t_Approval_of_Negotiated
             ddApprovedBy.DataValueField = ("ID")
             ddApprovedBy.DataBind()
             ddApprovedBy.Items.Insert(0, "Select")
+
+            btnPreviewBacReso.Enabled = False
+
         End If
     End Sub
     'Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
@@ -420,6 +423,7 @@ Partial Class bidding_t_Approval_of_Negotiated
             'intGetPreProcurementID = objDerived.GetValue("select distinct AMS.pre_procurement.pre_procurement_hdr_id from dbo.view_GetPrHdrID where AMS.PR_Hdr.prhdr_id = '" & grdAbstractCanvass.SelectedDataKey("prhdr_id") & "'", CommandType.Text)
             'objDerived.GetRecords("UPDATE AMS.pre_procurement SET isResoNo_Edited = '" & isEdited & "', resolution_number_date = '" & txtDate.Text & "', declarationDate='" & TextBox1.text & "', resolution_number = '" & txtResolutionNumber.Text & "' WHERE pre_procurement_hdr_id = '" & intGetPreProcurementID & "'", CommandType.Text)
 
+            btnPreviewBacReso.Enabled = True
 
 
             MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Transaction has been successfully saved.")
@@ -427,11 +431,10 @@ Partial Class bidding_t_Approval_of_Negotiated
 
             grdSupplier2 = Nothing
             grdSupplier2.DataBind()
-            btnPreviewBacReso.Enabled = True
+
 
             grdItemList = Nothing
             grdItemList.DataBind()
-
 
         Catch ex As Exception
 
@@ -549,6 +552,7 @@ Partial Class bidding_t_Approval_of_Negotiated
             objDerived.Execute("UPDATE AMS.m_Canvass_Hdr SET isApproved = 1, DateApproved = '" & txtDate.Text & "' WHERE Hdr_ID = '" & grdAbstractCanvass.SelectedDataKey("Hdr_ID") & "'", CommandType.Text)
 
 
+            btnPreviewBacReso.Enabled = True
 
 
             'Bac Reso
@@ -560,7 +564,6 @@ Partial Class bidding_t_Approval_of_Negotiated
 
             MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Transaction has been successfully saved.")
             LoadGrids()
-            btnPreviewBacReso.Enabled = True
 
 
         Catch ex As Exception
