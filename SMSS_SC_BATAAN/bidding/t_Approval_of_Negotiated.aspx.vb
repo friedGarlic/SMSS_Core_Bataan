@@ -166,6 +166,9 @@ Partial Class bidding_t_Approval_of_Negotiated
             ddApprovedBy.DataValueField = ("ID")
             ddApprovedBy.DataBind()
             ddApprovedBy.Items.Insert(0, "Select")
+
+            btnPreviewBacReso.Enabled = False
+
         End If
     End Sub
     'Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
@@ -216,7 +219,7 @@ Partial Class bidding_t_Approval_of_Negotiated
         'grdItemList.DataBind()
 
         btnApproved.Enabled = False
-        btnCancel.Enabled = False
+        ' btnCancel.Enabled = False
     End Sub
 
     Protected Sub btnSearch_Click(sender As Object, e As EventArgs) Handles btnSearch.Click
@@ -275,7 +278,7 @@ Partial Class bidding_t_Approval_of_Negotiated
         'grdItemList.DataBind()
 
         btnApproved.Enabled = False
-        btnCancel.Enabled = False
+        '   btnCancel.Enabled = False
     End Sub
     'Protected Sub grdAbstractCanvass_PageIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewPageEventArgs) Handles grdAbstractCanvass.PageIndexChanging
     '    UpdateSessionFromSelectedData()
@@ -315,7 +318,7 @@ Partial Class bidding_t_Approval_of_Negotiated
 
     Private Sub ResetControlStates()
         btnApproved.Enabled = False
-        btnCancel.Enabled = False
+        ' btnCancel.Enabled = False
     End Sub
 
     Protected Sub grdAbstractCanvass_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs)
@@ -331,12 +334,13 @@ Partial Class bidding_t_Approval_of_Negotiated
         grdSupplier2.DataSource = pSuppliers
         grdSupplier2.DataBind()
 
-        btnApproved.Enabled = True
-        btnCancel.Enabled = True
+        'btnApproved.Enabled = True
+        'btnCancel.Enabled = True
 
     End Sub
     Protected Sub lnkviewItems_Click(ByVal sender As Object, ByVal e As System.EventArgs)
-        lbtn = "view"
+        Lbtn = "view"
+        ddApprovedBy.Enabled = True
     End Sub
 
     Protected Sub grdSupplier2_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs)
@@ -350,7 +354,7 @@ Partial Class bidding_t_Approval_of_Negotiated
             grdItemList.DataSource = dtItems
             grdItemList.DataBind()
         End If
-
+        btnApproved.Enabled = True
     End Sub
 
     Protected Sub grdSupplier2_RowDataBound(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewRowEventArgs)
@@ -360,16 +364,12 @@ Partial Class bidding_t_Approval_of_Negotiated
     End Sub
 
     Protected Sub btnApproved_Click(ByVal sender As Object, ByVal e As System.EventArgs)
-        'Dim Reso As String = objDerived.GetValue("SELECT [AMS].[func_GenerateBAC] ('" & TextBox1.text & "')", CommandType.Text)
-        'txtResolutionNumber.Text = Reso
 
-        'txtDate.Text = Date.Today.ToString("MM/dd/yyyy")
-        'TextBox1.TEXT = Date.Today.ToString("MM/dd/yyyy")
-
-        'isEdited = False
-        'txtResolutionNumber.ReadOnly = True
-
-        'ModalPopupExtender1.Show()
+        AddTrace(ddApprovedBy.SelectedValue)
+        If String.IsNullOrEmpty(ddApprovedBy.SelectedValue) Or ddApprovedBy.SelectedValue = "0" Or ddApprovedBy.SelectedValue = "Select" Then
+            MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Please Enter a signatory.")
+            Exit Sub
+        End If
 
 
         Try
@@ -423,12 +423,18 @@ Partial Class bidding_t_Approval_of_Negotiated
             'intGetPreProcurementID = objDerived.GetValue("select distinct AMS.pre_procurement.pre_procurement_hdr_id from dbo.view_GetPrHdrID where AMS.PR_Hdr.prhdr_id = '" & grdAbstractCanvass.SelectedDataKey("prhdr_id") & "'", CommandType.Text)
             'objDerived.GetRecords("UPDATE AMS.pre_procurement SET isResoNo_Edited = '" & isEdited & "', resolution_number_date = '" & txtDate.Text & "', declarationDate='" & TextBox1.text & "', resolution_number = '" & txtResolutionNumber.Text & "' WHERE pre_procurement_hdr_id = '" & intGetPreProcurementID & "'", CommandType.Text)
 
+            btnPreviewBacReso.Enabled = True
 
 
             MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Transaction has been successfully saved.")
             LoadGrids()
-            btnPreviewBacReso.Enabled = True
 
+            grdSupplier2 = Nothing
+            grdSupplier2.DataBind()
+
+
+            grdItemList = Nothing
+            grdItemList.DataBind()
 
         Catch ex As Exception
 
@@ -438,42 +444,54 @@ Partial Class bidding_t_Approval_of_Negotiated
 
     End Sub
 
-    Protected Sub btnCancel_Click(ByVal sender As Object, ByVal e As System.EventArgs)
-        '=== REMOVE WINNER/S AND RETURN THE TRANSACTION TO CANVASS GOODS / ABSTRACT OF CANVASS ===
-        If txtTraps.Value = "Yes" Then
+    'Protected Sub btnCancel_Click(ByVal sender As Object, ByVal e As System.EventArgs)
+    '    '=== REMOVE WINNER/S AND RETURN THE TRANSACTION TO CANVASS GOODS / ABSTRACT OF CANVASS ===
+    '    If txtTraps.Value = "Yes" Then
 
 
 
-            '=== UPDATE AMS.m_Canvass_Hdr
-            objDerived.Execute("UPDATE AMS.m_Canvass_Hdr SET withWinner = 0, PreparedBy = '', isApproved = 0 WHERE Hdr_ID = '" & grdAbstractCanvass.SelectedDataKey("Hdr_ID") & "'", CommandType.Text)
+    '        '=== UPDATE AMS.m_Canvass_Hdr
+    '        objDerived.Execute("UPDATE AMS.m_Canvass_Hdr SET withWinner = 0, PreparedBy = '', isApproved = 0 WHERE Hdr_ID = '" & grdAbstractCanvass.SelectedDataKey("Hdr_ID") & "'", CommandType.Text)
 
-            '=== UPDATE AMS.m_Canvass_Dtl1
-            'objDerived.GetRecords("UPDATE AMS.m_Canvass_Dtl1 SET withWinner = 0 WHERE Hdr_ID = '" & grdAbstractCanvass.SelectedDataKey("Hdr_ID") & "'", CommandType.Text)
+    '        '=== UPDATE AMS.m_Canvass_Dtl1
+    '        'objDerived.GetRecords("UPDATE AMS.m_Canvass_Dtl1 SET withWinner = 0 WHERE Hdr_ID = '" & grdAbstractCanvass.SelectedDataKey("Hdr_ID") & "'", CommandType.Text)
 
-            '=== UPDATE AMS.m_Canvass_Dtl2
-            Dim dtDetails As New DataTable
-            dtDetails = objDerived.GetDataTable("SELECT * FROM AMS.m_Canvass_Dtl_PR1 WHERE Hdr_ID = '" & grdAbstractCanvass.SelectedDataKey("Hdr_ID") & "'", CommandType.Text)
+    '        '=== UPDATE AMS.m_Canvass_Dtl2
+    '        Dim dtDetails As New DataTable
+    '        dtDetails = objDerived.GetDataTable("SELECT * FROM AMS.m_Canvass_Dtl_PR1 WHERE Hdr_ID = '" & grdAbstractCanvass.SelectedDataKey("Hdr_ID") & "'", CommandType.Text)
 
-            For i As Integer = 0 To dtDetails.Rows.Count - 1
-                Dim id As Long
-                id = dtDetails.Rows(i)("Dtl_ID_PR1")
+    '        For i As Integer = 0 To dtDetails.Rows.Count - 1
+    '            Dim id As Long
+    '            id = dtDetails.Rows(i)("Dtl_ID_PR1")
 
-                ' objDerived.GetRecords("UPDATE AMS.m_Canvass_Dtl2 SET isWinner = 0 WHERE Dtl_ID1 = '" & id & "'", CommandType.Text)
-                objDerived.GetRecords("UPDATE AMS.m_Canvass_Dtl_PR1 SET isWinner = 1 WHERE Dtl_ID_PR1 = '" & id & "'", CommandType.Text)
+    '            ' objDerived.GetRecords("UPDATE AMS.m_Canvass_Dtl2 SET isWinner = 0 WHERE Dtl_ID1 = '" & id & "'", CommandType.Text)
+    '            objDerived.GetRecords("UPDATE AMS.m_Canvass_Dtl_PR1 SET isWinner = 1 WHERE Dtl_ID_PR1 = '" & id & "'", CommandType.Text)
 
-            Next
+    '        Next
 
-            MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Abstract has been successfully returned.")
-            LoadGrids()
-        End If
-    End Sub
+    '        MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Abstract has been successfully returned.")
+    '        LoadGrids()
+    '    End If
+    'End Sub
     Protected Sub btnEdit_Click(sender As Object, e As EventArgs)
         txtResolutionNumber.ReadOnly = False
         isEdited = True
 
         ModalPopupExtender1.Show()
     End Sub
+
+    Private Sub AddTrace(ByVal message As String)
+        ' Prevent single quotes in the message from breaking JavaScript
+        Dim safeMessage As String = message.Replace("'", "\'")
+        ScriptManager.RegisterClientScriptBlock(Me, Me.GetType(),
+        "TraceKey" & Guid.NewGuid().ToString("N"),
+        "console.log('" & safeMessage & "');",
+        True)
+    End Sub
+
     Protected Sub btnPreviewBacReso_Click(sender As Object, e As EventArgs)
+        Session("prhdr_id") = grdAbstractCanvass.SelectedDataKey("prhdr_id")
+        AddTrace("prhdr: " & Session("prhdr_id"))
         Dim intGetPreProcurementID As Integer
         intGetPreProcurementID = objDerived.GetValue("select distinct AMS.pre_procurement.pre_procurement_hdr_id from dbo.view_GetPrHdrID where AMS.PR_Hdr.prhdr_id = '" & grdAbstractCanvass.SelectedDataKey("prhdr_id") & "'", CommandType.Text)
 
@@ -497,7 +515,7 @@ Partial Class bidding_t_Approval_of_Negotiated
             'objDerived.GetRecords("UPDATE AMS.m_Canvass_Dtl1 SET withWinner = 1 WHERE Hdr_ID = '" & grdItemList.SelectedDataKey("Hdr_ID") & "'", CommandType.Text)
 
             dtItems = objDerived.GetDataTable("EXEC [AMS].[sp_Abstract_ItemList_Direct_Nego] '" & grdAbstractCanvass.SelectedDataKey("Hdr_ID") & "','" & grdAbstractCanvass.SelectedDataKey("Supplier_ID") & "','" & grdAbstractCanvass.SelectedDataKey("prhdr_id") & "'", CommandType.Text)
-            countgrdItemList = dtItems.rows.count
+            countgrdItemList = dtItems.Rows.Count
 
 
             For i As Integer = 0 To countgrdItemList - 1
@@ -534,18 +552,18 @@ Partial Class bidding_t_Approval_of_Negotiated
             objDerived.Execute("UPDATE AMS.m_Canvass_Hdr SET isApproved = 1, DateApproved = '" & txtDate.Text & "' WHERE Hdr_ID = '" & grdAbstractCanvass.SelectedDataKey("Hdr_ID") & "'", CommandType.Text)
 
 
+            btnPreviewBacReso.Enabled = True
 
 
             'Bac Reso
             Dim intGetPreProcurementID As Integer
             intGetPreProcurementID = objDerived.GetValue("select distinct AMS.pre_procurement.pre_procurement_hdr_id from dbo.view_GetPrHdrID where AMS.PR_Hdr.prhdr_id = '" & grdAbstractCanvass.SelectedDataKey("prhdr_id") & "'", CommandType.Text)
-            objDerived.GetRecords("UPDATE AMS.pre_procurement SET isResoNo_Edited = '" & isEdited & "', resolution_number_date = '" & txtDate.Text & "', declarationDate='" & TextBox1.text & "', resolution_number = '" & txtResolutionNumber.Text & "' WHERE pre_procurement_hdr_id = '" & intGetPreProcurementID & "'", CommandType.Text)
+            objDerived.GetRecords("UPDATE AMS.pre_procurement SET isResoNo_Edited = '" & isEdited & "', resolution_number_date = '" & txtDate.Text & "', declarationDate='" & TextBox1.Text & "', resolution_number = '" & txtResolutionNumber.Text & "' WHERE pre_procurement_hdr_id = '" & intGetPreProcurementID & "'", CommandType.Text)
 
 
 
             MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Transaction has been successfully saved.")
             LoadGrids()
-            btnPreviewBacReso.Enabled = True
 
 
         Catch ex As Exception

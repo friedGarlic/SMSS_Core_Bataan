@@ -65,8 +65,8 @@
                         <td style="width: 1%"></td>
                     </tr>
                     <tr>
-                         <asp:HiddenField ID="txtTraps" runat="server" />
-                        <asp:HiddenField ID="txtTraps1" runat="server" />
+                      <%--   <asp:HiddenField ID="txtTraps" runat="server" />
+                        <asp:HiddenField ID="txtTraps1" runat="server" />--%>
                         <td style="width: 1%"></td>
                         <td style="width: 98%" align="center">
                             <span class="column_RightBold">Search By :</span>
@@ -116,20 +116,7 @@
                         </td>
                         <td style="width: 1%"></td>
                     </tr>
-                    <tr align="center">
-                        <td style="width: 1%"></td>
-                        <td style="width: 98%" >
-                            <table >
-                                <tr align="center">
-                                    <td class="column_RightBold">Approved By : </td>
-                                    <td class="column_Left">
-                                        <asp:DropDownList ID="ddApprovedBy" runat="server" Width="250px" CssClass="drpdownCSS"  AutoPostBack="True"></asp:DropDownList>
-                                    </td>
-                                </tr>
-                            </table>
-                        </td>
-                        <td style="width: 1%"></td>
-                    </tr>
+                 
                     <tr>
                         <td style="width: 1%"></td>
                         <td style="width: 98%" class="DivTitle">&nbsp;Suppliers</td>
@@ -140,13 +127,23 @@
                         <td style="width: 98%" align="center">
                             <asp:GridView ID="grdSupplier2" runat="server" Width="90%" SkinID="GridViewAA" PageSize="1" DataKeyNames="Supplier_ID, SuppName" AutoGenerateColumns="false" OnSelectedIndexChanged="grdSupplier2_SelectedIndexChanged" EmptyDataText="No Data Found." OnRowDataBound="grdSupplier2_RowDataBound" ShowFooter="true">
                                 <Columns>
+                                    <asp:TemplateField HeaderText=" ">
+                                        <EditItemTemplate>
+                                            <asp:TextBox runat="server" ID="TextBox1"></asp:TextBox>
+                                        </EditItemTemplate>
+                                        <ItemTemplate>
+                                            <asp:LinkButton ID="lnkviewItems" OnClick="lnkviewItems_Click" runat="server" CausesValidation="false" CommandName="Select" CssClass="LinkBtnPreview" Font-Underline="false" Text="Select"></asp:LinkButton>
+                                        </ItemTemplate>
+                                        <ItemStyle HorizontalAlign="Center" Width="5%" />
+                                    </asp:TemplateField>
+
                                     <asp:BoundField DataField="SuppName" HeaderText="Supplier Name">
                                         <ItemStyle HorizontalAlign="Left" Width="60%" />
                                     </asp:BoundField>
                                     <asp:BoundField DataField="Amount" DataFormatString="{0:N}" HeaderText="Amount">
                                         <ItemStyle HorizontalAlign="Right" Width="20%" />
                                     </asp:BoundField>
-                                    <asp:TemplateField HeaderText="List of Items">
+                                    <%--<asp:TemplateField HeaderText="List of Items">
                                         <EditItemTemplate>
                                             <asp:TextBox runat="server" ID="TextBox1"></asp:TextBox>
                                         </EditItemTemplate>
@@ -154,7 +151,7 @@
                                             <asp:LinkButton ID="lnkviewItems" OnClick="lnkviewItems_Click" runat="server" CausesValidation="false" CommandName="Select" CssClass="LinkBtnPreview" Font-Underline="false" Text="View Items"></asp:LinkButton>
                                         </ItemTemplate>
                                         <ItemStyle HorizontalAlign="Center" Width="20%" />
-                                    </asp:TemplateField>
+                                    </asp:TemplateField>--%>
                                 </Columns>
 
                                 <FooterStyle BackColor="#2977DC" />
@@ -164,6 +161,23 @@
                         </td>
                         <td style="width: 1%"></td>
                     </tr>
+
+                       <tr align="center">
+                        <td style="width: 1%"></td>
+                        <td style="width: 98%" >
+                            <table >
+                                <tr align="center">
+                                    <td class="column_RightBold">Approved By : </td>
+                                    <td class="column_Left">
+                                        <asp:DropDownList ID="ddApprovedBy" runat="server" Width="250px" CssClass="drpdownCSS" Enabled="false" AutoPostBack="True"></asp:DropDownList>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td style="width: 1%"></td>
+                    </tr>
+
+
                     <tr>
                         <td style="width: 1%"></td>
                         <td style="width: 98%"></td>
@@ -211,9 +225,10 @@
                         <td style="width: 1%"></td>
                         <td style="width: 98%" align="center">
                             <asp:Button ID="btnApproved" OnClick="btnApproved_Click" runat="server" Width="150px" CssClass="CSButton"  Enabled="False" Text="APPROVE"></asp:Button>
-                            <asp:Button ID="btnPreviewBacReso" runat="server" Text="Preview Bac Reso." CssClass="CSButton" Enabled="false" Visible="true" OnClick="btnPreviewBacReso_Click" />
+                            <asp:Button ID="btnPreviewBacReso" runat="server" Text="Preview Bac Reso." CssClass="CSButton" Enabled="True" Visible="true" OnClick="btnPreviewBacReso_Click" />
 
-                            &nbsp;<asp:Button ID="btnCancel" OnClick="btnCancel_Click" runat="server" Width="150px" CssClass="CSButton" OnClientClick="StartProgressBar();return SetMessage(this.value);" Enabled="False" Visible="false" Text="RETURN"></asp:Button>
+<%--                            &nbsp;<asp:Button ID="btnCancel" OnClick="btnCancel_Click" runat="server" Width="150px" CssClass="CSButton" OnClientClick="StartProgressBar();return SetMessage(this.value);" Enabled="False" Visible="false" Text="RETURN"></asp:Button>
+                        --%>
                         </td>
                         <td style="width: 1%"></td>
                     </tr>

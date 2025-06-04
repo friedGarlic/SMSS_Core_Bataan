@@ -48,6 +48,7 @@ Partial Class Procurement_t_inspection_and_acceptance
             txtPONumber.Attributes.Add("onkeypress", "return fun1(event,'" & btnSearchPO.ClientID & "')")
             txtdatefrom.Attributes.Add("onkeypress", "return fun1(event,'" & btnByDate.ClientID & "')")
             txtdateto.Attributes.Add("onkeypress", "return fun1(event,'" & btnByDate.ClientID & "')")
+            txtInvoiceNum.Attributes.Add("onkeypress", "return fun1(event,'" & btnInvoiceNum.ClientID & "')")
         End If
     End Sub
 
@@ -75,6 +76,9 @@ Partial Class Procurement_t_inspection_and_acceptance
                 MultiView1.SetActiveView(View4)
                 txtdatefrom.Text = Date.Today.ToString("MM/dd/yyyy")
                 txtdateto.Text = Date.Today.ToString("MM/dd/yyyy")
+            Case 3
+                MultiView1.SetActiveView(vwInvoiceNum)
+                txtInvoiceNum.Text = ""
 
         End Select
     End Sub
@@ -89,6 +93,9 @@ Partial Class Procurement_t_inspection_and_acceptance
             myview.RowFilter = "RC_ID = " & ddDepartment.SelectedItem.Value & " AND Function_ID = " & ddFunction.SelectedItem.Value & " "
         ElseIf RadioButtonList1.SelectedItem.Value = 3 Then
             myview.RowFilter = "Date_Accepted >= '" & txtdatefrom.Text & "' AND Date_Accepted <= '" & txtdateto.Text & "'"
+
+        ElseIf RadioButtonList1.SelectedItem.Value = 4 Then
+            myview.RowFilter = "Invoice_No like '%" & txtInvoiceNum.Text & "%'"
         End If
 
         grdAIR.DataSource = myview
@@ -111,13 +118,18 @@ Partial Class Procurement_t_inspection_and_acceptance
 
     End Sub
 
+
+    Protected Sub btnInvoiceClick(ByVal sender As Object, ByVal e As System.EventArgs)
+        LoadSearching()
+    End Sub
+
     Protected Sub grdAIR_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles grdAIR.SelectedIndexChanged
         Session("Page") = "RQ"
 
         Dim input As String = grdAIR.SelectedDataKey("AIRHdr_ID")
 
         If Integer.TryParse(input, Session("AIRHdr_ID")) Then
-
+            'TODO track if parse failed
         End If
 
         'Try

@@ -207,7 +207,7 @@
                                           <td class="column_Left" style="width:250px"><asp:TextBox ID="txtSupplierName" CssClass="txtbox_Var" runat="server" Width="200px"></asp:TextBox></td>
 
                                           <td class="column_RightBold">Invoice Number :</td>
-                                          <td class="column_Left"><asp:TextBox ID="txtInvoiceNumber" CssClass="txtbox_Var" runat="server"></asp:TextBox></td>
+                                          <td class="column_Left"><asp:TextBox ID="txtInvoiceNumber" CssClass="txtbox_Var" runat="server" AutoPostBack="true" OnTextChanged="txtInvoiceNumber_TextChanged"></asp:TextBox></td>
 
                                       </tr>
                                        <tr>
@@ -229,7 +229,7 @@
                                           </td>
 
                                           <td class="column_RightBold" style="width:200px">Remarks :</td>
-                                          <td class="column_Left" style="width:250px"><asp:TextBox ID="txtRemakrs" CssClass="txtbox_Var" runat="server" Width="250px"  ></asp:TextBox></td>
+                                          <td class="column_Left" style="width:250px"><asp:TextBox ID="txtRemakrs" CssClass="txtbox_Var" runat="server" Width="250px"></asp:TextBox></td>
 
                                       </tr>
                                   </tbody>
@@ -286,7 +286,7 @@
 
                                                 <asp:TemplateField HeaderText="Quantity">
                                                     <ItemTemplate>
-                                                        <asp:TextBox ID="txtQty" runat="server" Width="60px" AutoPostBack="True" CssClass="txtbox_Amt" Text='<%#Bind("qty") %>' Visible='<%# bind("isVisible") %>'></asp:TextBox>
+                                                        <asp:TextBox ID="txtQty" runat="server" Width="60px" AutoPostBack="True" CssClass="txtbox_Amt" Text='<%#Bind("qty") %>' OnTextChanged="QtyText_TextChanged" Visible='<%# bind("isVisible") %>'></asp:TextBox>
                                                     </ItemTemplate>
 
                                                     <HeaderStyle HorizontalAlign="Center"></HeaderStyle>

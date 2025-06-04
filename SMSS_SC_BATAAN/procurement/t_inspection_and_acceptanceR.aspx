@@ -33,6 +33,7 @@
                                             <asp:ListItem Selected="True" Value="1">PO Number</asp:ListItem>
                                             <asp:ListItem Value="2">Department</asp:ListItem>
                                             <asp:ListItem Value="3">Date(Duration)</asp:ListItem>
+                                            <asp:ListItem Value="4">Invoice Number</asp:ListItem>
                                         </asp:RadioButtonList>
                                     </td>
                                     <td style="width: 75%" class="column_Left">
@@ -97,6 +98,21 @@
                                                     </tbody>
                                                 </table>
                                             </asp:View>
+
+                                            
+                                            <asp:View ID="vwInvoiceNum" runat="server">
+                                                <table style="width: 100%">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td style="width: 25%" class="column_RightBold">Invoice Number :</td>
+                                                            <td style="width: 75%" class="column_Left">
+                                                                <asp:TextBox ID="txtInvoiceNum" runat="server" Width="200px" CssClass="txtbox_Var"></asp:TextBox>
+                                                                &nbsp;<asp:Button ID="btnInvoiceNum" OnClick="btnInvoiceClick" runat="server" Width="120px" CssClass="CSButton" OnClientClick="StartProgressBar();" Text="Search"></asp:Button></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </asp:View>
+
                                         </asp:MultiView>
                                     </td>
                                 </tr>
