@@ -36,7 +36,7 @@ Partial Class Inventory_Encoding_Land
             Me.ddClass.DataBind()
             selectClassification()
 
-            ddBrgy1.datasource = objDerived.GetDataTable("Select * from dbo.tbl_Brgy_Invent", CommandType.Text)
+            ddBrgy1.DataSource = objDerived.GetDataTable("Select * from dbo.tbl_Brgy_Invent", CommandType.Text)
             ddBrgy1.DataTextField = ("Brgy_Name")
             ddBrgy1.DataValueField = ("Brgy_ID")
             ddBrgy1.DataBind()
@@ -44,21 +44,21 @@ Partial Class Inventory_Encoding_Land
 
         End If
 
-        loadEquipmentLedger()
+        loadLandLedger()
     End Sub
     Public Function selectClassification()
         '  lblClass.text = ddClass.selecteditem.text
         ' lblClass1.text = ddClass.selecteditem.text
         'Dim PListofGL As New DataTable
         'PListofGL = objDerived.GetDataTable("Exec dbo.sp_Accounts_Category_v1_02152022 '" & 2 & "','" & ddClass.selecteditem.value & "'", CommandType.Text)
-            'Me.ddGlAccount.items.add("Select")
-            'Me.ddGlAccount.DataSource = CType(PListofGL, DataTable)
-            'Me.ddGlAccount.DataTextField = ("GA_Title")
-            'Me.ddGlAccount.DataValueField = ("GA_ID")
-            'Me.ddGlAccount.DataBind()
-            'Me.ddGlAccount.enabled = True
-            'SelectGAaccount()
-            End Function
+        'Me.ddGlAccount.items.add("Select")
+        'Me.ddGlAccount.DataSource = CType(PListofGL, DataTable)
+        'Me.ddGlAccount.DataTextField = ("GA_Title")
+        'Me.ddGlAccount.DataValueField = ("GA_ID")
+        'Me.ddGlAccount.DataBind()
+        'Me.ddGlAccount.enabled = True
+        'SelectGAaccount()
+    End Function
 
     Protected Sub ddClass_SelectedIndexChanged(sender As Object, e As EventArgs)
         selectClassification()
@@ -100,7 +100,7 @@ Partial Class Inventory_Encoding_Land
 
         grdLedger1.HeaderRow.Parent.Controls.AddAt(0, row)
     End Sub
-    Public Sub loadEquipmentLedger()
+    Public Sub loadLandLedger()
         ' btnEquipmentLedger.CssClass = "Clicked"
         'btnequipmentrepairs.CssClass = "Initial"
         ' btnequipmentattachdoc.CssClass = "Initial"
@@ -111,13 +111,9 @@ Partial Class Inventory_Encoding_Land
         'If 
 
         'dtAccount = objDerived.GetDataTable("Select * From dbo.View_PropertyLedger where Item_ID = '" & gvsearchproperty.SelectedDataKey("Item_ID") & "' order by dDate", CommandType.Text)
-        If hdnItemNo.value = "" Then
-            dtAccount = objDerived.GetDataTable("Exec [AMS].[PropertyLedger] null", CommandType.Text)
 
-        Else
-            dtAccount = objDerived.GetDataTable("Exec [AMS].[PropertyLedger] '" & hdnItemNo.value & "'", CommandType.Text)
+        dtAccount = objDerived.GetDataTable("Exec [AMS].[sp_LandPropertyLedger]", CommandType.Text)
 
-        End If
         ' dtAccount = objDerived.GetDataTable("Exec [AMS].[PropertyLedger] '" & gvsearchproperty.SelectedDataKey("Item_ID") & "'", CommandType.Text)
 
         If dtAccount.Rows.Count < 10 Then
@@ -391,7 +387,7 @@ Partial Class Inventory_Encoding_Land
 
         btnLandSave.Enabled = False
         hdnItemNo.Value = itemid
-        loadEquipmentLedger()
+        loadLandLedger()
         MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Transaction has been successfully saved.")
     End Sub
     Protected Sub btnLandSave_Click(ByVal sender As Object, ByVal e As System.EventArgs)

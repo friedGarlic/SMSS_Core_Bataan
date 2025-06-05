@@ -335,8 +335,6 @@ Partial Class Records_t_StockCard_v2_MRO
         End If
     End Sub
 
-
-
     Protected Sub drpGenericName_SelectedIndexChanged(sender As Object, e As EventArgs)
         LoadMedicineInfo()
         pTempPPQ = objDerived.GetDataTable("Select * from ams.tbl_Price_per_qty where item_id ='" & drpGenericName.SelectedItem.Value & "'", CommandType.Text)
@@ -446,6 +444,9 @@ Partial Class Records_t_StockCard_v2_MRO
     Protected Sub loadStockOfficeSupplies()
         Dim CY As String
         CY = "CY" & Year(txtDate.Text)
+
+        ddSubCategory.SelectedIndex = 1
+        ddSubCategory.DataBind
 
         Dim dtStock As New DataTable
         ' dtStock = objDerived.GetDataTable("Exec [dbo].[sp_SMSSStockSupplies] '" & ddGlAccount.SelectedValue() & "'", CommandType.Text)
