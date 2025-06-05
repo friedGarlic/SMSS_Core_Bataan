@@ -6,6 +6,7 @@ Partial Class MainReports_Canvass_Reports
     Private objDerived As New connectionreport
     Dim obj As New AccessRule
     Dim rpt As New ReportDocument
+
     Private Sub MainReports_Canvass_Reports_Load(sender As Object, e As EventArgs) Handles Me.Load
 
         If Session("Report") = "AOQ" Then
@@ -30,8 +31,6 @@ Partial Class MainReports_Canvass_Reports
                 Me.Session("Approval") = objDerived.GetValue("SELECT TOP 1 Full_Name FROM HRMS.view_signatory WHERE  division_key = 86 AND isActive = 1 AND isDeptHead = 'yes' AND office_name in ('OFFICE OF THE PROVINCIAL GOVERNOR','OFFICE OF THE PROVINCIAL ADMINISTRATOR') ORDER BY EmpID DESC", CommandType.Text)
             End If
 
-
-
             rpt.FileName = Server.MapPath("Canvass_AOQ_Cagayan.rpt")
             rpt.SetDatabaseLogon(objDerived.username, objDerived.Password)
             rpt.SetParameterValue(0, Me.Session("prhdr_id"))
@@ -39,10 +38,7 @@ Partial Class MainReports_Canvass_Reports
             'rpt.SetParameterValue(2, Me.Session("Position"))
             'rpt.SetParameterValue(3, Me.Session("Approval"))
 
-
             Me.AOQReports.ReportSource = rpt
-
-
 
         ElseIf Session("Report") = "PRE_AOQ" Then
             lblTitle.Text = "ABSTRACT OF QUOTATION REPORT"
@@ -75,9 +71,7 @@ Partial Class MainReports_Canvass_Reports
             'rpt.SetParameterValue(2, Me.Session("Position"))
             'rpt.SetParameterValue(3, Me.Session("Approval"))
 
-
             Me.AOQReports.ReportSource = rpt
-
 
         ElseIf Session("Report") = "RFQ" Then
             lblTitle.Text = "REQUEST FOR QUOTATION REPORT"
@@ -96,6 +90,7 @@ Partial Class MainReports_Canvass_Reports
             rpt.SetDatabaseLogon(objDerived.username, objDerived.Password)
             rpt.SetParameterValue(0, Me.Session("prhdr_id"))
             rpt.SetParameterValue(1, Me.Session("isRecanvass"))
+
             Me.CanvassReport.ReportSource = rpt
 
         ElseIf Session("Report") = "ROA" Then
@@ -104,27 +99,30 @@ Partial Class MainReports_Canvass_Reports
             divAOQ.Visible = False
             divCanvass.Visible = True
 
-
             'Me.CrystalReportSource2.Report.FileName = "Canvass_Resolution.rpt"
             'Me.CanvassReport.ReportSource = Me.CrystalReportSource2
             'Me.CrystalReportSource2.ReportDocument.SetDatabaseLogon(objDerived.username, objDerived.Password)
             'Me.CrystalReportSource2.ReportDocument.SetParameterValue("@Hdr_ID", Session("Hdr_ID"))
             'Me.CrystalReportSource2.ReportDocument.SetParameterValue("@prhdr_id", Session("prhdr_id"))
 
-
             rpt.FileName = Server.MapPath("Canvass_Resolution.rpt")
             rpt.SetDatabaseLogon(objDerived.username, objDerived.Password)
             rpt.SetParameterValue(0, Me.Session("Hdr_ID"))
             rpt.SetParameterValue(1, Me.Session("prhdr_id"))
+
             Me.CanvassReport.ReportSource = rpt
         Else
-
         End If
+
     End Sub
+
+
+
     Protected Sub MainReports_Canvass_Reports_Unload(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Unload
         rpt.Close()
         rpt.Dispose()
     End Sub
+
     Private Sub MainReports_Canvass_Reports_LoadComplete(sender As Object, e As EventArgs) Handles Me.LoadComplete
         Master.FindControl("MasterRowModules").Visible = False
         Master.FindControl("UserRow").Visible = False
@@ -146,9 +144,8 @@ Partial Class MainReports_Canvass_Reports
             ElseIf Session("Report") = "AOQ" Then
                 Me.Page.Response.Redirect("~/bidding/t_abstract_of_canvass.aspx")
             End If
-
-
         End If
-
     End Sub
+
+
 End Class

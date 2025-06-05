@@ -283,7 +283,7 @@ Partial Class bidding_t_canvass_goods
     End Function
 #End Region
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
-       
+
         If Not Page.IsPostBack Then
             obj.GetAccessRight(Me.Session("@UserName"), Page)
             If obj.HasAccess = False Then
@@ -337,6 +337,7 @@ Partial Class bidding_t_canvass_goods
         txtcanvassearch.Attributes.Add("onkeypress", "return fun1(event,'" & btnsearch.ClientID & "')")
 
     End Sub
+
     Protected Sub gvIncomingPR_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs)
         If Session("Action") <> "" Then
 
@@ -467,6 +468,7 @@ Partial Class bidding_t_canvass_goods
 
         End Try
     End Sub
+
     Public Sub call_laod_supplier_per_project()
 
         Session("pre_procurement_hdr_id") = gvIncomingPR.SelectedDataKey(0)
@@ -487,6 +489,7 @@ Partial Class bidding_t_canvass_goods
             Next
         End If
     End Sub
+
     Protected Sub LoadrbChoice()
         Session("rbChoice") = 1
 
@@ -540,6 +543,7 @@ Partial Class bidding_t_canvass_goods
         'End If
 
     End Sub
+
     Protected Sub LoadtxtCostItems()
         Dim x As Decimal
         For i As Integer = 0 To grdPerItems.Rows.Count - 1
@@ -576,6 +580,7 @@ Partial Class bidding_t_canvass_goods
         grdPerItems.Columns(7).Visible = False
 
     End Sub
+
     Protected Sub txtqty_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs)
         If ddSupplier1.SelectedItem.Text = "Select" Then
             MsgeBox.CreateMessageAlertInUpdatePanel(Me.upEmployeeDetail, "Select a supplier first.")
@@ -587,6 +592,7 @@ Partial Class bidding_t_canvass_goods
         End If
 
     End Sub
+
     Protected Sub btnSave1_Click(ByVal sender As Object, ByVal e As System.EventArgs)
         If ddSupplier1.SelectedItem.Text = "Select" Then
             MsgeBox.CreateMessageAlertInUpdatePanel(Me.upEmployeeDetail, "Select a supplier.")
