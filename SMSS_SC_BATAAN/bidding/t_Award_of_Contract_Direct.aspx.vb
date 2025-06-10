@@ -196,8 +196,6 @@ Partial Class t_Award_of_Contract_Direct
         MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Resolution of Award View Clicked.")
     End Sub
 
-
-
     Protected Sub btnTab1_ROA_Click(sender As Object, e As EventArgs) Handles btnTab1_ROA.Click
         btnTab1_ROA.CssClass = "TabButton_Active"
         btnTab2_NOA.CssClass = "TabButton_InActive"
@@ -205,10 +203,6 @@ Partial Class t_Award_of_Contract_Direct
         btnTab4_NTP.CssClass = "TabButton_InActive"
         mvTabs.SetActiveView(vwROA) ' Show the Resolution of Award View
     End Sub
-
-
-
-
 
     Private Sub btnTab2_NOA_Click(sender As Object, e As EventArgs) Handles btnTab2_NOA.Click
         btnTab1_ROA.CssClass = "TabButton_InActive"
@@ -218,6 +212,7 @@ Partial Class t_Award_of_Contract_Direct
 
         LoadTabs()
     End Sub
+
     Private Sub btnTab3_Contract_Click(sender As Object, e As EventArgs) Handles btnTab3_Contract.Click
         btnTab1_ROA.CssClass = "TabButton_InActive"
         btnTab2_NOA.CssClass = "TabButton_InActive"
@@ -234,8 +229,6 @@ Partial Class t_Award_of_Contract_Direct
 
         LoadTabs()
     End Sub
-
-
 
     Private Sub LoadTabs()
         Try
