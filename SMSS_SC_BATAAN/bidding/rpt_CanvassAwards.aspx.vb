@@ -26,15 +26,12 @@ Partial Class bidding_rpt_CanvassAwards
 
         Else
 
-
             'Me.CrystalReportViewer1.ReportSource = Me.CrystalReportSource2
             'Me.CrystalReportSource2.ReportDocument.SetDatabaseLogon(objDerived.username, objDerived.Password)
             'Me.CrystalReportSource2.ReportDocument.SetParameterValue("@Hdr_ID", Session("Hdr_ID"))
             'Me.CrystalReportSource2.ReportDocument.SetParameterValue("@prhdr_id", Session("prhdr_id"))
 
-
-
-            rpt.FileName = Server.MapPath("rpt_Canvass_Resolution.rpt")
+            rpt.FileName = Server.MapPath("rpt_Canvass_Resolution_v2.rpt")
             rpt.SetDatabaseLogon(objDerived.username, objDerived.Password)
             rpt.SetParameterValue(0, Me.Session("Hdr_ID"))
             AddTrace("Session('Hdr_ID'): " & Session("Hdr_ID"))
@@ -42,12 +39,13 @@ Partial Class bidding_rpt_CanvassAwards
             AddTrace("Session('prhdr_id'): " & Session("prhdr_id"))
             Me.CrystalReportViewer1.ReportSource = rpt
         End If
-
     End Sub
+
     Protected Sub Page_Unload(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Unload
         rpt.Close()
         rpt.Dispose()
     End Sub
+
     Protected Sub lnkBtnBack_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles lnkBtnBack.Click
         If Session("Page") = "BID" Then
             Me.Page.Response.Redirect("~/bidding/t_CanvassAwards.aspx")
@@ -74,7 +72,5 @@ Partial Class bidding_rpt_CanvassAwards
         "console.log('" & safeMessage & "');",
         True)
     End Sub
-
-
 
 End Class
