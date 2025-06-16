@@ -79,6 +79,7 @@ Partial Class MainReports_Procurement_Reports
         rpt2.Close()
         rpt2.Dispose()
     End Sub
+
     Public Sub CAFOA2()
         Me.CAFOA.ToolPanelView = CrystalDecisions.Web.ToolPanelViewType.None
         'Me.RPT_CAFOA.Report.FileName = "rpt_CAFOA.rpt"

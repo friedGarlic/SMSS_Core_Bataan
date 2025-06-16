@@ -34,7 +34,7 @@ Partial Class procurement_rpt_purchase_request_pop_up
                 'Me.CrystalReportSource2.ReportDocument.SetDatabaseLogon(objDerived.username, objDerived.Password)
                 'Me.CrystalReportSource2.ReportDocument.SetParameterValue("@prhdr_id", Session("prhdr_id"))
 
-                rpt_PR.FileName = Server.MapPath("rpt_purchase_request_Short.rpt")
+                rpt_PR.FileName = Server.MapPath("rpt_purchase_request_Short_v1.rpt")
                 rpt_PR.SetDatabaseLogon(objDerived.username, objDerived.Password)
                 rpt_PR.SetParameterValue(0, Me.Session("prhdr_id"))
                 Me.CrystalReportViewer2.ReportSource = rpt_PR
@@ -86,7 +86,7 @@ Partial Class procurement_rpt_purchase_request_pop_up
                 Me.CrystalReportViewer2.ReportSource = rpt_PR
 
             Else
-                rpt_PR.FileName = Server.MapPath("rpt_purchase_request.rpt")
+                rpt_PR.FileName = Server.MapPath("rpt_purchase_request_v2.rpt")
                 rpt_PR.SetDatabaseLogon(objDerived.username, objDerived.Password)
                 rpt_PR.SetParameterValue(0, Me.Session("prhdr_id"))
                 Me.CrystalReportViewer2.ReportSource = rpt_PR
@@ -107,7 +107,7 @@ Partial Class procurement_rpt_purchase_request_pop_up
                 rpt_PR.SetParameterValue(0, Me.Session("prhdr_id"))
                 Me.CrystalReportViewer2.ReportSource = rpt_PR
             Else
-                rpt_PR.FileName = Server.MapPath("rpt_purchase_request_Short.rpt")
+                rpt_PR.FileName = Server.MapPath("rpt_purchase_request_Short_v1.rpt")
                 rpt_PR.SetDatabaseLogon(objDerived.username, objDerived.Password)
                 rpt_PR.SetParameterValue(0, Me.Session("prhdr_id"))
                 Me.CrystalReportViewer2.ReportSource = rpt_PR
