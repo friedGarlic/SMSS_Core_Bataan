@@ -192,9 +192,10 @@
                                     </asp:BoundField>
                                     <asp:BoundField DataField="RespCenter" HeaderText="RespCenter" Visible="False"></asp:BoundField>
                                     
-                                    <asp:BoundField DataField="Invoice_No" HeaderText="Invoice No.">
+                                    <asp:BoundField DataField="DReceiptNo" HeaderText="Delivery Receipt No.">
                                         <ItemStyle HorizontalAlign="Center" Width="80px"></ItemStyle>
                                     </asp:BoundField>
+
                                 </Columns>
 
                                 <PagerStyle HorizontalAlign="Center"></PagerStyle>
@@ -207,10 +208,64 @@
 
                     <tr>
                         <td style="height: 26px">
-                            <asp:Button ID="btnReturn" runat="server" Enabled="False" OnClick="btnReturn_Click" OnClientClick="StartProgressBar();" Text="RETURN" CssClass="CSButton" Width="150px" />
+                            <asp:Button ID="btnReturn" runat="server" Visible="True" Enabled="False" OnClick="btnReturn_Click" OnClientClick="StartProgressBar();" Text="RETURN" CssClass="CSButton" Width="150px" />
                             <cc1:ConfirmButtonExtender ID="ConfirmButtonExtender5" runat="server" TargetControlID="btnReturn" ConfirmText="Are you sure you want to return this transaction?"></cc1:ConfirmButtonExtender>
                         </td>
                     </tr>
+
+
+
+
+                         <tr>
+                            <td class="DivTitle" style="width: 98%; height: 26px;">
+                                <strong>
+                                    <asp:Label ID="Label4" runat="server" Text="Details"></asp:Label>
+                                </strong>
+                            </td>
+                      </tr>
+                      <tr align="center">
+                          <td>
+                              <table>
+                                  <tbody>
+                                      <tr>
+                                          <td class="column_RightBold">Supplier Name :</td>
+                                          <td class="column_Left" style="width:250px"><asp:TextBox ID="txtSupplierName" CssClass="txtbox_Var" runat="server" Width="200px"></asp:TextBox></td>
+
+                                          <td class="column_RightBold">Invoice Number :</td>
+                                          <td class="column_Left"><asp:TextBox ID="txtInvoiceNumber" CssClass="txtbox_Var" runat="server" AutoPostBack="true" OnTextChanged="txtInvoiceNumber_TextChanged"></asp:TextBox></td>
+
+                                      </tr>
+                                       <tr>
+                                          <td class="column_RightBold">PO Number :</td>
+                                          <td class="column_Left" style="width:250px"><asp:TextBox ID="txtPoNumber" CssClass="txtbox_Var" runat="server"></asp:TextBox></td>
+
+                                          <td class="column_RightBold" style="width:200px">Invoice Date :</td>
+                                          <td class="column_Left">
+                                              <asp:TextBox ID="txtInvoiceDate" CssClass="txtbox_Var" runat="server"></asp:TextBox>&nbsp;(MM/DD/YYYY)
+                                              <cc1:CalendarExtender ID="CalendarExtender2" runat="server" TargetControlID="txtInvoiceDate" PopupButtonID="txtbox_Var"></cc1:CalendarExtender>
+                                          </td>
+
+                                      </tr>
+                                       <tr>
+                                          <td class="column_RightBold">PO Date :</td>
+                                          <td class="column_Left" style="width:250px">
+                                              <asp:TextBox ID="txtPodate" CssClass="txtbox_Var" runat="server"></asp:TextBox>&nbsp;(MM/DD/YYYY)
+                                              <cc1:CalendarExtender ID="CalendarExtender1" runat="server" TargetControlID="txtPodate" PopupButtonID="txtbox_Var"></cc1:CalendarExtender>
+                                          </td>
+
+                                          <td class="column_RightBold" style="width:200px">Remarks :</td>
+                                          <td class="column_Left" style="width:250px"><asp:TextBox ID="txtRemakrs" CssClass="txtbox_Var" runat="server" Width="250px"></asp:TextBox></td>
+
+                                      </tr>
+                                  </tbody>
+                              </table>
+                          </td>
+                      </tr>
+
+
+
+
+
                     <tr>
                         <td class="DivTitle" style="width: 98%; height: 26px;">
                             <strong>
@@ -224,7 +279,7 @@
 
 
 
-                            <asp:GridView ID="grdInspection" runat="server" Width="100%" SkinID="GridViewAA">
+                            <asp:GridView ID="grdInspection" runat="server" Width="100%" SkinID="GridViewAA"  DataKeyNames="Item_ID, Received_ID, Received_Dtl_ID">
                                 <PagerSettings FirstPageText="First" LastPageText="Last" Mode="NextPreviousFirstLast" NextPageText="Next" PreviousPageText="Previous"></PagerSettings>
 
                                 <EmptyDataRowStyle BorderColor="Gray" BorderStyle="Solid"></EmptyDataRowStyle>
@@ -261,9 +316,14 @@
                                         <EditItemTemplate>
                                             <asp:TextBox runat="server" Text='<%# Bind("Qty_Inspecting") %>' ID="TextBox4"></asp:TextBox>
                                         </EditItemTemplate>
-                                        <ItemTemplate>
-                                            <asp:TextBox ID="txtActQty" runat="server" Width="50px" AutoPostBack="True" CssClass="txtbox_Amt" Text='<%# Bind("Qty_Inspecting") %>' Visible='<%# bind("isVisible") %>' OnTextChanged="txtActQty_TextChanged" Enabled="false"></asp:TextBox>
+                                       <ItemTemplate>
+                                            <asp:TextBox ID="txtActQty" runat="server" Width="50px" AutoPostBack="True" CssClass="txtbox_Amt" 
+                                                Text='<%# Bind("Qty_Inspecting") %>' Visible='<%# Bind("isVisible") %>' 
+                                                OnTextChanged="txtActQty_TextChanged" Enabled="false"></asp:TextBox>
+
+                                            <asp:HiddenField ID="hdnCurrentQty" runat="server" Value='<%# Bind("Qty_Inspecting") %>' />
                                         </ItemTemplate>
+
 
                                         <ItemStyle HorizontalAlign="Center"></ItemStyle>
                                     </asp:TemplateField>
@@ -323,9 +383,9 @@
                     <tr>
 
                         <td>
-                            <asp:Button ID="returnItemBtn" runat="server" Enabled="False" OnClick="btnReturnItem_Click" OnClientClick="StartProgressBar();" Text="RETURN ITEM" CssClass="CSButton" Width="150px" />
-                            <cc1:ConfirmButtonExtender ID="ConfirmButtonExtender1" runat="server" TargetControlID="btnReturn" ConfirmText="Are you sure you want to return this transaction?"></cc1:ConfirmButtonExtender>
-                        </td>
+                            <asp:Button ID="returnItemBtn" runat="server" Enabled="False" Visible="False" OnClick="btnReturnItem_Click" OnClientClick="StartProgressBar();" Text="RETURN ITEM" CssClass="CSButton" Width="150px" />
+                           <cc1:ConfirmButtonExtender ID="ConfirmButtonExtender1" runat="server" TargetControlID="returnItemBtn" ConfirmText="Are you sure you want to return this transaction?"></cc1:ConfirmButtonExtender>
+
                     </tr>
                     <tr>
                         <td class="DivTitle" style="width: 98%; height: 26px;">
@@ -1084,9 +1144,15 @@
                                         <cc1:CalendarExtender ID="CalendarExtender3" runat="server" TargetControlID="txtDate" PopupButtonID="txtbox_Var"></cc1:CalendarExtender>
                                     </td>
                                     <td class="column_RightBold">Received By : &nbsp;</td>
-                                    <td class="column_Left">
+                                  <%--  <td class="column_Left">
                                         <asp:TextBox ID="txtReceivedBy" CssClass="txtbox_Var" runat="server" ReadOnly="true" Width="200px"></asp:TextBox>
+                                    </td>--%>
+
+                                    <td class="column_Left">
+                                        <asp:DropDownList ID="ddReceivedBy" runat="server" CssClass="txtbox_Var" Width="200px"></asp:DropDownList>
                                     </td>
+
+
                                 </tr>
                                 <tr>
                                     <td class="column_RightBold">Inspector 1 :&nbsp; </td>

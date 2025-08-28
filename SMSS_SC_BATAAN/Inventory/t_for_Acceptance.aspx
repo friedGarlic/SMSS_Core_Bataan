@@ -139,7 +139,7 @@
                     <tr>
                         <td>
                             <asp:GridView ID="grdAIR" runat="server" Width="100%" OnSelectedIndexChanged="grdAIR_SelectedIndexChanged"
-                                SkinID="GridViewAA" AllowPaging="True" DataKeyNames="POHdr_ID,PO_No,PO_Date,ContractPrice,SuppName,RC_ID,Function_ID,RC_Name,Function_Desc,GA_ID,Supplier_Id,pre_procurement_hdr_id,Received_ID"
+                                SkinID="GridViewAA" AllowPaging="True" DataKeyNames="POHdr_ID,PO_No,PO_Date,ContractPrice,SuppName,RC_ID,Function_ID,RC_Name,Function_Desc,GA_ID,Supplier_Id,pre_procurement_hdr_id, Received_ID, Invoice_No"
                                 OnRowDataBound="grdAIR_RowDataBound" OnPageIndexChanging="grdAIR_PageIndexChanging" Font-Size="8pt" EmptyDataText="No Data Found.">
                                 <PagerSettings FirstPageText="First" LastPageText="Last" Mode="NextPreviousFirstLast" NextPageText="Next" PreviousPageText="Previous"></PagerSettings>
 
@@ -169,6 +169,15 @@
                                     <asp:BoundField DataField="OBR_No" HeaderText="OBR No.">
                                         <ItemStyle HorizontalAlign="Center" Width="130px"></ItemStyle>
                                     </asp:BoundField>
+
+                                     <asp:BoundField DataField="DReceiptNo" HeaderText="Delivery ReceiptNo No.">
+                                        <ItemStyle HorizontalAlign="Center" Width="130px"></ItemStyle>
+                                    </asp:BoundField>
+
+                                    <asp:BoundField DataField="Invoice_No" HeaderText="Invoice No.">
+                                        <ItemStyle HorizontalAlign="Center" Width="130px"></ItemStyle>
+                                    </asp:BoundField>
+
                                     <asp:BoundField DataField="dvno" HeaderText="DV No." Visible="False">
                                         <ItemStyle Width="70px"></ItemStyle>
                                     </asp:BoundField>
@@ -192,7 +201,7 @@
                     </tr>
                     <tr>
                         <td>
-                            <asp:Button ID="btnReturn" runat="server" Enabled="False" OnClick="btnReturn_Click" OnClientClick="StartProgressBar();" Text="RETURN" CssClass="CSButton" Width="150px" />
+                            <asp:Button ID="btnReturn" runat="server" Visible ="False" Enabled="False" OnClick="btnReturn_Click" OnClientClick="StartProgressBar();" Text="RETURN" CssClass="CSButton" Width="150px" />
                             <cc1:ConfirmButtonExtender ID="ConfirmButtonExtender5" runat="server" TargetControlID="btnReturn" ConfirmText="Are you sure you want to return this transaction?"></cc1:ConfirmButtonExtender>
                         </td>
                     </tr>
@@ -246,7 +255,7 @@
                             </table>
                         </td>
                     </tr>
-
+                    
 
                     <tr>
                         <td class="DivTitle" style="width: 98%; height: 26px;">
@@ -257,7 +266,7 @@
                     </tr>
                     <tr>
                         <td>
-                            <asp:GridView ID="grdInspection" runat="server" Width="100%" SkinID="GridViewAA">
+                            <asp:GridView ID="grdInspection" runat="server" Width="100%" SkinID="GridViewAA" DataKeyNames="Item_ID">
                                 <PagerSettings FirstPageText="First" LastPageText="Last" Mode="NextPreviousFirstLast" NextPageText="Next" PreviousPageText="Previous"></PagerSettings>
 
                                 <EmptyDataRowStyle BorderColor="Gray" BorderStyle="Solid"></EmptyDataRowStyle>
