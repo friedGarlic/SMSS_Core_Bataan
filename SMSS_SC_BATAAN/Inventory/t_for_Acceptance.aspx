@@ -1129,21 +1129,20 @@
                                     <td class="column_RightBold">Date : </td>
                                     <td class="column">
                                         <asp:TextBox ID="txtAcceptDate" CssClass="txtbox_Var" runat="server"></asp:TextBox>
-
                                         &nbsp;<asp:ImageButton ID="ImageButton4" runat="server" Width="20px" ImageUrl="~/images/Calendar_scheduleHS.png" Height="15px"></asp:ImageButton>
                                         &nbsp;<span class="CalendarFormat">(MM/DD/YYYY)</span>
-
                                     </td>
                                 </tr>
+
                                 <tr>
                                     <td class="column_RightBold">Accepted By :</td>
                                     <td class="column_Left">
                                         <asp:DropDownList ID="ddAcceptedBy" runat="server" Width="98%" CssClass="drpdownCSS"></asp:DropDownList></td>
-
-                                    <caption>
-                                        &nbsp;</caption>
+                                    <caption>&nbsp;</caption>
+                                </tr>
                         </td>
                     </tr>
+
                     <tr>
                         <td class="column_RightBold">Delivery Status :</td>
                         <td class="column_Left">

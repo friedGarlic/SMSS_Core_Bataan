@@ -4,7 +4,6 @@ Imports System.Configuration
 Imports System.Data.SqlClient
 
 
-
 Partial Class Inventory_t_for_Acceptance
     Inherits System.Web.UI.Page
     Dim msg As New MsgeBox
@@ -20,6 +19,7 @@ Partial Class Inventory_t_for_Acceptance
     Dim rcv_dtl As New Receiving.t_receiving_dtl
     Private objMotorInfo As New ConsolidatedPropertySaving.TbMotor_Info_Acceptance
     Private objMotorDtl As New ConsolidatedPropertySaving.TbMotor_Dtl
+
 #Region "BaseDAL"
     Dim AIR_Hdr As New t_inspection_and_acceptance_hdr
     Dim AIR_Dtl As New t_inspection_and_acceptance_dtl
@@ -2240,13 +2240,17 @@ Partial Class Inventory_t_for_Acceptance
         True)
     End Sub
 
-
+   
 
     Protected Sub btnSave_Click(sender As Object, e As EventArgs)
 
+        If ddAcceptedBy.SelectedValue = "Select" Then
+            MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Please select \'Accepted By\'.")
+            Exit Sub
+        End If
+
         ' --- TRACER: Check if any row is selected in grdAIR ---
         'Try
-
 
         If grdAIR.SelectedIndex < 0 OrElse grdAIR.SelectedDataKey Is Nothing Then
             AddTrace("No row is currently selected in grdAIR. Exiting.")
@@ -2271,6 +2275,9 @@ Partial Class Inventory_t_for_Acceptance
                 Exit Sub
             End If
         End If
+
+
+
 
         Dim poHdrIdVal As String = grdAIR.SelectedDataKey("POHdr_ID").ToString()
         AddTrace("poHdrIdVal: " & poHdrIdVal)
