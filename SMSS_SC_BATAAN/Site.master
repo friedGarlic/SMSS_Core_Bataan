@@ -1,0 +1,96 @@
+﻿<%@ Master Language="VB" CodeFile="Site.master.vb" Inherits="Site" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head id="Head1" runat="server">
+    <title>Web System Manager</title>
+    <link href="Styles.css" rel="stylesheet" type="text/css" />
+    <script language="JavaScript">
+    
+    javascript:window.history.forward(1);
+    
+</script>
+</head>
+<body>
+    <div id="wrapper">
+
+        <form id="form1" runat="server">
+        
+            <div id="header">
+                <span class="PageTitle">Web Systems Manager</span><br />
+                
+                <span class="breadcrumb">
+                    <asp:SiteMapPath ID="SiteMapPath1" runat="server">
+                    </asp:SiteMapPath>
+                </span>
+            </div>
+        
+            <div id="content">
+                <asp:ScriptManager ID="ScriptManager1" runat="server">
+                </asp:ScriptManager>
+                <table width ="100%" cellpadding ="0" cellspacing ="3">
+                    <tr>
+                        <td style="height: 18px">
+                            <span style="font-size: 10pt">Logged Date and Time:
+                                <asp:Label ID="lblDate" runat="server"></asp:Label></span></td>
+                    </tr>
+                    <tr>
+                        <td style="border-bottom:dotted 1px #666666;">
+                            &nbsp;
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>
+                            <asp:contentplaceholder id="MainContent" runat="server">
+                              <!-- Page-specific content will go here... -->
+                            </asp:contentplaceholder>                           
+                        </td>
+                    </tr>
+                </table>
+                
+            </div>
+            
+            <div id="navigation">
+                <asp:ContentPlaceHolder ID="LoginContent" runat="server">
+                            Welcome back,<br />
+                    <asp:Label ID="lblUser" runat="server" Text=""></asp:Label><br />
+                    <br />
+                    <asp:LinkButton ID="lnkUpdate" runat="server">Update your settings</asp:LinkButton><br />
+                    <br />
+                    <asp:LinkButton ID="lnkLogOut" runat="server">Logout</asp:LinkButton></asp:ContentPlaceHolder>
+                <br />
+                 <br />
+                <ul>
+                    <li>
+                        <asp:HyperLink runat="server" ID="lnkHome" NavigateUrl="~/Default.aspx">Home</asp:HyperLink><asp:Repeater runat="server" ID="menu" DataSourceID="SiteMapDataSource1">
+                        <ItemTemplate>
+                            <li>
+                                <asp:HyperLink ID="lnkMenuItem" runat="server" NavigateUrl='<%# Eval("Url") %>'><%# Eval("Title") %></asp:HyperLink>
+                                
+                                <asp:Repeater ID="submenu" runat="server" DataSource="<%# CType(Container.DataItem, SiteMapNode).ChildNodes %>">
+                                    <HeaderTemplate>
+                                        <ul>
+                                    </HeaderTemplate>
+                                    <ItemTemplate>
+                                        <li>
+                                            <asp:HyperLink ID="lnkMenuItem" runat="server" NavigateUrl='<%# Eval("Url") %>'><%# Eval("Title") %></asp:HyperLink>
+                                        </li>
+                                    </ItemTemplate>
+                                    <FooterTemplate>
+                                        </ul>
+                                    </FooterTemplate>
+                                </asp:Repeater>
+                            </li>
+                        </ItemTemplate>
+                    </asp:Repeater>
+                    </li>  
+                </ul>
+
+                <asp:SiteMapDataSource ID="SiteMapDataSource1" runat="server" ShowStartingNode="false" />
+            </div>
+        </form>
+    </div>
+</body>
+</html>

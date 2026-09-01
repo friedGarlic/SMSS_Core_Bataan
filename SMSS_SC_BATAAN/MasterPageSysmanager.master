@@ -1,0 +1,88 @@
+<%@ Master Language="VB" CodeFile="MasterPageSysmanager.master.vb" Inherits="MasterPageSysmanager" %>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head id="Head1" runat="server">
+    <meta http-equiv="Page-Enter" content="revealtrans(duration=0.0)">
+    <meta http-equiv="Page-Exit" content="revealtrans(duration=0.0)">
+    <link href="Styles.css" rel="stylesheet" type="text/css" />
+     <link href="../StyleSheet.css" rel="stylesheet" type="text/css" />
+    <link href="StyleSheet.css" rel="stylesheet" type="text/css" />
+</head>
+
+  <body bgproperties="fixed" topmargin="0" leftmargin="0" style="background-image: url(images/bg.gif)">
+
+    
+
+        <form id="form1" runat="server">
+        <center>
+         <div style="background-image:url(images/smsbanner.gif); width:900px; height:170px">
+     <div style="left: 0px; position: relative; top: 134px; text-align: left">
+         &nbsp;
+     </div>
+ </div>
+
+               <div  id="page-body" style="width: 900px; text-align: left;" class="body2">
+                <span class="PageTitle">Web Systems Manager</span><div id="content" style="text-align: left">
+                <asp:ScriptManager ID="ScriptManager1" runat="server">
+                </asp:ScriptManager>
+                <table width ="100%" cellpadding ="0" cellspacing ="3" class="text">
+                    <tr>
+                        <td>
+                            Welcome back,</td>
+                        <td style="height: 18px">
+                            <span style="font-size: 10pt">Logged Date and Time:
+                                <asp:Label ID="lblDate" runat="server"></asp:Label>
+                                |
+                                <asp:LinkButton ID="LinkButton1" runat="server">Logout</asp:LinkButton></span></td>
+                    </tr>
+                    <tr>
+                        <td style="border-bottom: #666666 1px dotted">
+                    <asp:Label ID="lblUser" runat="server" Text=""></asp:Label></td>
+                        <td style="border-bottom:dotted 1px #666666;">
+                            &nbsp;
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td id="navigation " style="vertical-align: top; text-align: left">
+                        <asp:HyperLink runat="server" ID="lnkHome" NavigateUrl="~/Default.aspx" Visible="False">Home</asp:HyperLink>
+                            <br />
+                            <asp:Repeater runat="server" ID="menu" DataSourceID="SiteMapDataSource1">
+                        <ItemTemplate>
+                            <li>
+                                <asp:HyperLink ID="lnkMenuItem" runat="server" NavigateUrl='<%# Eval("Url") %>'><%# Eval("Title") %></asp:HyperLink>
+                                
+                                <asp:Repeater ID="submenu" runat="server" DataSource="<%# CType(Container.DataItem, SiteMapNode).ChildNodes %>">
+                                    <HeaderTemplate>
+                                        <ul>
+                                    </HeaderTemplate>
+                                    <ItemTemplate>
+                                        <li>
+                                            <asp:HyperLink ID="lnkMenuItem" runat="server" NavigateUrl='<%# Eval("Url") %>'><%# Eval("Title") %></asp:HyperLink>
+                                        </li>
+                                    </ItemTemplate>
+                                    <FooterTemplate>
+                                        </ul>
+                                    </FooterTemplate>
+                                </asp:Repeater>
+                            </li>
+                        </ItemTemplate>
+                    </asp:Repeater>
+
+                <asp:SiteMapDataSource ID="SiteMapDataSource1" runat="server" ShowStartingNode="false" />
+            </td>
+                        <td>
+                            <asp:contentplaceholder id="MainContent" runat="server">
+                              <!-- Page-specific content will go here... -->
+                            </asp:contentplaceholder>                           
+                        </td>
+                    </tr>
+                </table>
+                </div>
+            </div>
+             </center>
+        </form>
+    
+</body>
+</html>

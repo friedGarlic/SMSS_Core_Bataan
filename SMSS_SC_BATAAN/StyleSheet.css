@@ -1,0 +1,1504 @@
+﻿
+
+body {
+   background:white;
+   margin:0px;
+   height:auto;
+}
+
+
+.header
+{
+	background-image:url(image/mainpage/headerm.jpg);
+	height:120px;
+	width:800px
+}
+.afterheader
+{
+	background-image:url(images/afterheader.jpg);
+	height:25px;
+	width:800px
+}
+.SelectedItem
+        {
+            background: #ffb703;
+        }
+
+.image1
+{
+	background-image:url(images/tab_body.jpg);
+	height:auto;
+	width:auto;
+	background-repeat:repeat-x
+	
+}
+.footer
+{
+	background-image:url(images/mainpage/footer.jpg);
+	height:40px;
+	width:auto;
+	background-repeat:repeat-x
+       
+}
+.cursor1
+{
+   cursor:pointer; 
+}
+.l1
+{
+	font-size: 8pt;
+	color: black;
+	font-family: Tahoma, Arial, 'Times New Roman';
+	
+}
+
+.textimage
+{
+	font-size: 8pt;
+	font-family: Arial;
+	text-align: right;
+}
+
+.textimage1
+{
+	font-size: 8pt;
+	font-family: Arial;
+	text-align: left;
+}
+
+.textimage2
+{
+	font-size: 8pt;
+	font-family: Arial;
+	text-align: center;
+}
+
+.image2border
+{
+	font-size: 8pt;
+	font-family: Arial;
+	text-align: center;
+	border-bottom: #0066ff 1px solid;
+	border-left: #0066ff 1px solid;
+	border-top: #0066ff 1px solid;
+	border-right: #0066ff 1px solid;
+}
+
+.panel
+{ 
+text-align:center;
+}
+
+.textGrdHeader
+{ 
+font-size:10pt;
+font-family: VERDANA, Arial, 'Times New Roman'; 
+text-align:center;
+}
+
+
+.text
+{ 
+	font-size:10pt;
+	font-family: VERDANA, Arial, 'Times New Roman'; 
+	text-align:justify;
+}
+
+.text1
+{ 
+	font-size:10pt;
+	font-family: Arial, 'Times New Roman'; 
+	text-align:justify;
+}
+
+.textgrid
+{ 
+	font-size:10pt;
+	font-family: VERDANA, Arial, 'Times New Roman'; 
+	text-align:center;
+}
+
+.text2
+{ 
+	font-size:7pt;
+	font-family: Arial, 'Times New Roman'; 
+}
+
+.ddropbox
+{ 
+	font-size:10pt;
+	font-family: VERDANA, Arial, 'Times New Roman'; 
+	text-align:left
+}
+
+.ddropbox1
+{ 
+	font-size:9pt;
+	font-family: Arial, 'Times New Roman'; 
+	text-align:left;
+	border-style:solid;
+	border-color:#c0c0c0;
+	border-width:1px; 
+}
+
+.lblText
+{ 
+	font-size:10pt;
+	font-family: VERDANA, Arial, 'Times New Roman'; 
+	text-align:right;
+}
+
+
+.text1
+{ 
+	font-size:9pt;
+	font-family:Arial; 
+	font-style:normal;
+	text-align:right;
+}
+
+
+
+.text1Home
+{
+	font-size: 9pt;
+	font-family: Arial;
+	font-style: normal;
+	text-align: right;
+	color: powderblue;
+	font-weight: bold;
+}
+
+.text2Home
+{
+	font-size: 9pt;
+	font-family: Arial;
+	font-style: normal;
+	text-align: left;
+	color: powderblue;
+}
+
+.text2
+{ 
+	font-size:9pt;
+	font-family: VERDANA, Arial, 'Times New Roman'; 
+	font-style:normal;
+	text-align:left;
+}
+
+.text3
+{
+	font-size: 10pt;
+	font-family: Arial;
+	font-style: normal;
+	text-align: left;
+}
+
+.text4
+{
+	text-align: right;
+	font-family: Arial;
+	font-size: 10pt;
+}
+
+.text4Bold {
+    text-align: right;
+    font-family: Arial;
+    font-size: 9pt;
+    font-weight: bold;
+}
+
+.text5Bold
+{
+	text-align: left;
+	font-family: Arial;
+	font-size: 9pt;
+	font-weight: bold;
+}
+
+.text6Bold
+{
+	text-align: center;
+	font-family: Arial;
+	font-size: 10pt;
+	font-weight: bold;
+}
+
+.text5
+{
+	text-align: left;
+	font-family: Arial;
+	font-size: 10pt;
+}
+
+.text12
+{
+	text-align: left;
+	font-family: Verdana;
+	font-size: 10pt;
+}
+
+.text6
+{
+	text-align: center;
+	font-family: Arial;
+	font-size: 9pt;
+}
+
+.text7
+{
+	text-align: center;
+}
+
+.ledgergridview
+{
+	font-family: Arial;
+	font-size: 9pt;
+}
+
+
+
+.modalBackground 
+{
+background-color:Gray;
+filter:alpha(opacity=70);
+opacity:0.7;
+}
+
+.PopUpPanel
+{
+	display:none;
+}
+
+.panelMain
+{ 
+	background-color:antiquewhite ;
+	border-color:Black;
+	width:500px;
+}
+
+
+.MainHeader
+{
+	background-image: url(images/bannerBG_black.jpg);
+	background-repeat: repeat-x;
+	height:auto;
+	width:100%;
+	margin:0px; 
+}
+
+.L1
+
+
+.L1
+{
+	font-size:8pt;
+	font-family:Tahoma, Arial, Times New Roman;
+	color:Black;
+	background-color:Transparent;
+}
+
+}
+
+-size:8pt;
+	font-family:Tahoma, Arial, Times New Roman;
+	color:Gray ;
+}
+
+.L3
+{
+	font-weight:bold ;
+	font-family:Tahoma, Arial, Times New Roman;
+	color:Blue;
+}
+
+.L4
+{
+	text-align:right ;
+	font-weight:bold ;
+	font-family:Tahoma, Arial, Times New Roman;
+	color:black;
+}
+
+.Button
+{
+	font-size: 8pt;
+	font-family: Tahoma, Arial, Times New Roman;
+	color: Black;
+	cursor: hand;
+}
+
+.ButtonExit
+{
+	font-size: 8pt;
+	font-family: Tahoma, Arial, Times New Roman;
+	color: Black;
+	cursor: hand;
+	background-image:url(images/exit_22x22.png);
+	background-repeat:no-repeat;
+	background-color:Transparent;
+}
+
+.ButtonRefresh
+{
+	font-size: 8pt;
+	font-family: Tahoma, Arial, Times New Roman;
+	color: Black;
+	cursor: hand;
+	background-image:url(images/view-refresh_22x22.png);
+	background-repeat:no-repeat;
+	background-color:Transparent;
+}
+
+.ButtonSearch
+{
+	font-size: 8pt;
+	font-family: Tahoma, Arial, Times New Roman;
+	color: Black;
+	cursor: hand;
+	background-image:url(images/folder-saved-search_22x22.png);
+	background-repeat:no-repeat;
+	background-color:Transparent;
+}
+
+.ButtonNew
+{
+	font-size: 8pt;
+	font-family: Tahoma, Arial, Times New Roman;
+	color: Black;
+	cursor: hand;
+	background-image:url(images/add_group_22x22.png);
+	background-repeat:no-repeat;
+	background-color:Transparent
+}
+
+.ButtonEdit
+{
+	font-size: 8pt;
+	font-family: Tahoma, Arial, Times New Roman;
+	color: Black;
+	cursor: hand;
+	background-image:url(images/edit_22x22.png);
+	background-repeat:no-repeat;
+	background-color:Transparent
+}
+
+.ButtonSave
+{
+	font-size: 8pt;
+	font-family: Tahoma, Arial, Times New Roman;
+	color: Black;
+	cursor: hand;
+	background-image:url(images/save_all_22x22.png);
+	background-repeat:no-repeat;
+	background-color:Transparent
+}
+
+.ButtonDelete
+{
+	font-size: 8pt;
+	font-family: Tahoma, Arial, Times New Roman;
+	color: Black;
+	cursor: hand;
+	background-image:url(images/delete_user_22x22.png);
+	background-repeat:no-repeat;
+	background-color:Transparent
+}
+
+.ButtonCancel
+{
+	font-size: 8pt;
+	font-family: Tahoma, Arial, Times New Roman;
+	color: Black;
+	cursor: hand;
+	background-image:url(images/cancel_22x22.png);
+	background-repeat:no-repeat;
+	background-color:Transparent
+}
+
+.ButtonAdd
+{
+	font-size: 8pt;
+	font-family: Tahoma, Arial, Times New Roman;
+	color: Black;
+	cursor: hand;
+	background-image:url(images/list-add_22x22.png);
+	background-repeat:no-repeat;
+	background-color:Transparent
+}
+
+.divPanel
+{
+	border-style:solid;
+	border-width:1px;
+	border-color:Gray;
+	
+}
+
+.footer
+{
+	background-image: url(images/bg-menu-main.png);
+	background-repeat: repeat-x;
+	width: auto;
+	height: 50px;
+	font-size:8pt;
+	font-family:Tahoma, Arial, Times New Roman;
+	color:white;
+}
+
+.rightfooter
+{
+	background-image: url(images/Footer_left.jpg);
+	background-repeat:no-repeat;
+	width: auto;
+	height: 50px;
+}
+
+.centerfooter
+{
+	background-image: url(images/bottom.jpg);
+	background-repeat: repeat-x;
+	height: 44px;
+	vertical-align:middle;
+	width :900px;
+}
+
+.center
+{
+	background-image: url(images/Bg2.jpg);
+	background-repeat: repeat-y;
+	text-align:center;
+	width: 900px;
+	width: 900px;
+	height: auto;
+}
+
+.top
+{
+	background-image: url(images/menubar1.jpg);
+	background-repeat: repeat-x;
+	width: auto;
+	height: 54px;
+}
+
+.top2
+{
+	background-image: url(images/HRMSMenuButtons/Normal/HRMSMenu2Sliced_10.jpg);
+	background-repeat: repeat-x;
+	width: auto;
+	height: 36px;
+	/*margin:0px;
+	border-bottom-style:solid;
+	border-width:0px;
+	background-color:Gray*/
+}
+
+.header2
+{
+	background-image: url(images/banner_top.jpg);
+	width: 911px;
+	height:93px;
+	background-repeat:no-repeat;
+}
+
+.Onlineheader
+{
+	background-image: url(images/Final-HRMS-Home-Page-Hover_.jpg);
+	width: 911px;
+	height:93px;
+	background-repeat:no-repeat;
+}
+
+.Link1
+{
+	font-size: 8pt;
+	font-family: Tahoma, Arial, Times New Roman;
+	text-align: center;
+	color:#FC0;
+}
+
+.ListSearchExtenderPrompt
+{
+	font-style:italic;
+	color:Black;
+	background-color:white;
+	font-size: 10pt;
+}
+
+.PictureConfirm
+{ 
+	background-image:url(images/information.png);
+}
+	
+.collapsePanel 
+{
+	background-image: url(images/RedTV/Body_red.jpg);
+	background-repeat:repeat-y;
+	height:auto;
+	text-align:justify;
+	/*background-color:white;
+	/*overflow:hidden;*/
+}
+
+.collapsePanel2 {
+	background-image: url(images/BlueTV/Blue_Body.jpg);
+	background-repeat:repeat-y;
+	height:auto;
+	text-align:justify;
+	/*background-color:white;
+	/*overflow:hidden;*/
+}
+
+.collapsePanel3{
+	background-image: url(images/GreenTV/Green_Body.jpg);
+	background-repeat:repeat-y;
+	height:auto;
+	text-align:justify;
+	/*background-color:white;
+	/*overflow:hidden;*/
+}
+.collapsePanel4{
+	background-image: url(images/YellowTV/Yellow_Body.jpg);
+	background-repeat:repeat-y;
+	height:auto;
+	text-align:justify;
+	/*background-color:white;
+	/*overflow:hidden;*/
+}
+.collapsePanel5{
+	background-image: url(images/MaroonTV/Maroon_Body.jpg);
+	background-repeat:repeat-y;
+	height:auto;
+	text-align:justify;
+	/*background-color:white;
+	/*overflow:hidden;*/
+}
+
+.collapsePanelHeader{
+	width:240px;
+	height:37px;
+	text-align:left ;
+		/*background-image: url(images/collapseImages/xptitle2_s.gif);
+	background-repeat:repeat-y;*/
+	/*background-color:Gray; color:#FFF;
+	font-weight:bold;*/
+	
+}	
+.header1 {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	font-weight: bold;
+	color: #006699;
+}
+ #UpdateProgress1 {
+   background-color:#CF4342;
+   color:#fff;
+   top:0px;
+   right:0px;
+   position:fixed;
+ }
+
+#UpdateProgress1 img {
+   vertical-align:middle;
+   margin:2px;
+ }
+/*.modalBackground {
+	background-color:Gray;
+	filter:alpha(opacity=70);
+	opacity:0.7;
+}*/
+.tableMidTop
+{
+	background-image: url(images/tabBottom/tab_bottom_02.gif);
+	}
+.tableTopLeft
+{
+	background-image: url(images/tabBottom/tab_top_01.gif);
+	}
+.tableTopRight
+{
+	background-image: url(images/tabBottom/tab_top_03.gif);
+	}
+.tableBelowLeft
+{
+	background-image: url(images/tabBottom/tab_bottom_01.gif);
+	}
+.tableBelowRight
+{
+	background-image: url(images/tabBottom/tab_bottom_04.gif);
+	}
+.resize 
+{
+	 background-image: url(images/img01.gif);
+width: 200px;
+height : auto;
+}
+
+
+/*
+
+}*/
+
+.body2 
+{
+	
+  background-image:url(images/img01.png);
+ background-attachment:fixed;
+  background:white;
+   margin:0px;
+   height:auto;
+   width:1000px;
+}
+.modal
+{
+	
+	display:none ;
+	
+	}
+	
+	
+	
+.panelpopupControl{
+background-color:White;
+position:absolute;
+visibility:hidden;
+}
+
+.testmodalBackground
+
+{
+background-color:Gray;
+filter:alpha(opacity=70);
+opacity:0.7;
+}
+
+
+.HeaderFreez
+{
+   position:relative ;
+   top:expression(this.offsetParent.scrollTop);
+   z-index: 10;
+}
+.maskededitfocus
+{
+ color:Blue
+ 
+}
+.maskediterror
+{
+	
+	 color:Red
+	
+}
+
+.panelscrollbar
+{
+scrollbar-base-color:white;
+scrollbar-arrow-color: #FFFFFF;
+}
+
+ 
+.highlight
+{
+	background-color: lemonchiffon;
+	border-right: crimson thin solid;
+	border-top: crimson thin solid;
+	border-left: crimson thin solid;
+	border-bottom: crimson thin solid;
+}
+.GroupPanel, .GroupPanel Fieldset Legend
+{
+color: black;
+}
+
+.flyOutDiv  
+
+ {  
+
+      display: none;  
+
+
+left:50%;
+right:50%;
+     width: 400px;  
+
+    /* z-index: 3;  position: absolute;  */
+
+background-color:Gray;
+filter:alpha(opacity=0);
+opacity:0.7;
+
+
+      /*opacity: 0;  
+
+      filter:(progid:DXImageTransform.Microsoft.Alpha(opacity=0));   */
+
+      font-size: 14px;  
+
+      border: solid 1px #CCCCCC;  
+
+      background-color: #FFFFFF;  
+
+    
+
+ }  
+
+    
+
+ .flyOutDivCloseX  
+
+ {  
+
+  background-color: #666666;  
+
+  color: #FFFFFF;  
+
+  text-align: center;  
+
+  font-weight: bold;  
+
+  text-decoration: none;  
+
+  border: outset thin #FFFFFF;  
+
+  padding: 5px;   
+
+ }  
+
+
+.collapsePanel {
+      width: 98%;
+     background-color:white;
+      overflow:hidden;
+      font-size:10pt;
+font-family: VERDANA, Arial, 'Times New Roman'; 
+text-align:justify
+}
+ 
+.collapsePanelHeader{   
+      width:90%;            
+      font-size:10pt;
+      font-family: VERDANA, Arial, 'Times New Roman'; 
+      color: Black;
+      background-color: #507CD1;
+           cursor: pointer; 
+      
+}
+
+.watermark
+{
+	background-color:#FFC0C0;
+
+}
+.bg
+{
+	background: url(images/bg.gif);
+	background-attachment: fixed;  
+	
+}
+.head1
+{
+BORDER-RIGHT: gray 1px solid; BORDER-TOP: gray 1px solid; FONT-WEIGHT: bold; FONT-SIZE: 12pt; VERTICAL-ALIGN: middle; BORDER-LEFT: gray 1px solid; COLOR: dimgray; BORDER-BOTTOM: gray 1px solid; HEIGHT: 10px; TEXT-ALIGN: left
+}
+
+.grid-viewGL
+{
+	padding: 0;
+	margin: 0;
+	font-family: Arial;
+	font-size: 10pt;
+	text-align: center;
+	vertical-align: middle;
+}
+
+  /* background-color: #EFF3FB;*/
+.grid-viewGL tr.normal 
+{
+   color: black;
+   height: 25px;
+   vertical-align: middle;
+   text-align: center;
+   background-color: #EFF3FB;
+}
+
+.grid-viewGL tr.alternate
+{
+   color: black;
+   background-color:white;
+   height: 25px;
+   vertical-align: middle;
+   text-align: center;
+} 
+
+  .grid-viewGL tr:hover 
+{ 
+   color: black;
+    background-color:#ffffcc ;
+    font-weight: normal;/*bold;*/
+ }
+
+  .grid-viewGL tr:last-child 
+{
+   color: black;
+     background-color:#2977dc ;
+    font-weight: normal;/*bold;*/
+}
+
+.grid-view
+{
+	padding: 0;
+	margin: 0;
+	border: 1px solid #333;
+	font-family: "Verdana, Arial, Helvetica, sans-serif, Trebuchet MS";
+	font-size: 0.9em;
+	text-align: center;
+	vertical-align: middle;
+}
+
+  /* background-color: #EFF3FB;*/
+.grid-view tr.normal 
+{
+   color: black;
+   height: 25px;
+   vertical-align: middle;
+   text-align: center;
+   background-color: #EFF3FB;
+}
+
+.grid-view tr.alternate
+{
+   color: black;
+   background-color:white;
+   height: 25px;
+   vertical-align: middle;
+   text-align: center;
+} 
+
+ /*.grid-view tr.normal:hover, .grid-view tr.alternate:hover*/
+ /* background-color:#ffffcc ; */
+ 
+ 
+  .grid-view tr:hover 
+{ 
+   color: black;
+    background-color:#ffffcc ;
+    font-weight: normal;/*bold;*/
+ 
+}
+
+  .grid-view tr:last-child 
+{
+   color: black;
+     background-color:#2977dc ;
+    font-weight: normal;/*bold;*/
+}
+/*Next Grid*/
+.grid-view1
+{
+   padding: 0;
+   margin: 0;
+   border: 1px solid #333;
+   font-family: "Verdana, Arial, Helvetica, sans-serif, Trebuchet MS";
+  font-size:0.8em;
+}
+
+  /* background-color: #EFF3FB;*/
+.grid-view1 tr.normal 
+{
+   color: black;
+   height: 25px;
+   vertical-align: middle;
+   text-align: center;
+   background-color: #EFF3FB;
+}
+
+.grid-view1 tr.alternate
+{
+   color: black;
+   background-color:white;
+   height: 25px;
+   vertical-align: middle;
+   text-align: center;
+} 
+
+ /*.grid-view tr.normal:hover, .grid-view tr.alternate:hover*/
+ /* background-color:#ffffcc ; */
+ 
+
+  .grid-view1 tr:hover 
+{
+   color: black;
+     background-color:#ffffcc ;
+  /*bold;*/
+}
+
+/*code project*/
+  .Initial
+  {
+    display: block;
+    padding: 4px 4px 4px 4px;
+    float: left;
+    background: url(images/hover/ui-bg_flat_45_0078ae_40x100.png) #0078ae repeat-x 50% 50%;/*url("../Images/InitialImage.png") no-repeat right top;*/
+    color: white;
+   
+  }
+  /* font-weight: bold;*/
+  .Initial:hover
+  {
+    color: black;
+    background: #f8da4e url(images/hover/ui-bg_flat_75_f8da4e_40x100.png) 50% 50% repeat-x/*url("../Images/SelectedButton.png") no-repeat right top;*/
+  }
+  .Clicked
+  {
+    float: left;
+    display: block;
+    background: url(images/hover/ui-bg_flat_50_f7c02f_40x100.png) #f7c02f repeat-x 50% 50%;
+      padding: 4px 4px 4px 4px;
+    color: black;
+   
+    
+  }
+  /* font-weight: bold;*/
+
+
+/*change #F7B64A into #3d96f4 */
+
+/* for Long Gridview*/
+.grid-view2
+{
+	padding: 0;
+	margin: 0;
+	border: 1px solid #333;
+	font-family: "Verdana, Arial, Helvetica, sans-serif, Trebuchet MS";
+	font-size: 0.8em;
+}
+
+  /* background-color: #EFF3FB;*/
+.grid-view2 tr.normal 
+{
+   color: black;
+   height: 25px;
+   vertical-align: middle;
+   text-align: center;
+   background-color: #EFF3FB;
+}
+
+.grid-view2 tr.alternate
+{
+   color: black;
+   background-color:white;
+   height: 25px;
+   vertical-align: middle;
+   text-align: center;
+} 
+
+ /*.grid-view tr.normal:hover, .grid-view tr.alternate:hover*/
+ /* background-color:#ffffcc ; */
+ 
+ 
+  .grid-view2 tr:hover 
+{
+   color: black;
+     background-color:#ffffcc ;
+    font-weight: normal;/*bold;*/
+}
+
+
+  .grid-view2 tr:last-child 
+{
+   color: black;
+     background-color:#2977dc ;
+    font-weight: normal;/*bold;*/
+}
+
+
+
+.txtboxcenter
+{
+	border-style: solid;
+	border-color: #c0c0c0;
+	border-width: 1px;
+	text-align: center;
+}
+
+.txtboxAmount
+{
+	border-style: solid;
+	border-color: #c0c0c0;
+	border-width: 1px;
+	text-align: right;
+}
+	
+		
+.txtboxinUpload
+{
+	border-style: solid;
+	border-color: #c0c0c0;
+	border-width: 1px;
+	text-align: left;
+	font-family: Arial;
+	font-size: 8pt;
+}
+
+
+.Close
+{
+	background-image: url(images/modalpopup_04.png);
+	background-attachment: fixed;
+	background-repeat: no-repeat;
+}
+
+
+
+/* for Gridview*/
+.GridHeaderAlignment
+{
+	text-align: center;
+}
+
+.InspectionAccptPANEL
+{
+	border-bottom: royalblue 1px solid;
+	border-left: royalblue 1px solid;
+	border-top: royalblue 1px solid;
+	border-right: royalblue 1px solid;
+	text-align: center;
+}
+
+
+.strip
+{
+	background-color:#2977dc;
+	color:White;
+	font-family:Arial; 
+	font-size:11pt;
+	width:1000px;
+	height:20px;
+	font-weight:bold;
+	text-align:left;
+	padding: 3px;
+}
+
+.title
+{
+	border-bottom: gray 2px solid;
+	text-align: left;
+	width: 100%;
+	font-family: Arial;
+	color: black;
+	font-size: 16px;
+	font-weight: bold;
+}
+
+.TitleBar
+{
+    background-color: #3a81df;
+    color: White;
+    font-family: Arial;
+    font-size: 11pt;
+    width: 100%;
+    height: 25px;
+    font-weight: bold;
+    text-align: left;
+    vertical-align: middle;
+    padding-left: 2px;
+}
+
+
+.panel_border
+{
+    border-bottom: #2977dc 1px solid;
+    border-left: #2977dc 1px solid;
+    border-top: #2977dc 1px solid;
+    border-right: #2977dc 1px solid;
+    text-align: center;
+    vertical-align: top;
+}
+
+.LedgerPANEL
+{
+	min-height: 100px;
+	max-height: 1000px;
+	border-bottom: gray 1px solid;
+	border-left: gray 1px solid;
+	border-top: gray 1px solid;
+	border-right: gray 1px solid;
+	width: 1000px;
+}
+
+.FieldBoder
+{
+	border-bottom: #2977dc 1px solid;
+	border-left: #2977dc 1px solid;
+	border-top: #2977dc 1px solid;
+	border-right: #2977dc 1px solid;
+}
+
+.txtboxinspection
+{
+	border-style: solid;
+	border-color: #c0c0c0;
+	border-width: 1px;
+	font-family: Arial;
+}
+
+.txtboxAmount
+{
+	border-style: solid;
+	border-color: #c0c0c0;
+	border-width: 1px;
+	text-align: right;
+}
+
+.PanelSize
+{
+    min-height: 60px;
+    max-height: 200px;
+    font-size: 10pt;
+    font-family: VERDANA, Arial, 'Times New Roman';
+    border-bottom: silver 1px solid;
+    border-left: silver 1px solid;
+    border-top: silver 1px solid;
+    border-right: silver 1px solid;
+    text-align: left;
+}
+
+
+
+.PanelSize_Popup
+{
+    min-height: 30px;
+    max-height: 500px;
+    font-size: 10pt;
+    font-family: VERDANA, Arial, 'Times New Roman';
+    border-bottom: silver 1px solid;
+    border-left: silver 1px solid;
+    border-top: silver 1px solid;
+    border-right: silver 1px solid;
+    text-align: left;
+}
+
+.GridRowBorder
+{
+	border-bottom: silver 1px solid;
+}
+
+
+
+
+
+
+
+
+
+/* The main calendar widget.  DIV containing a table. */
+
+div.calendar { position: relative; }
+
+.calendar, .calendar table {
+  border: 1px solid #556;
+  font-size: 11px;
+  color: #000;
+  cursor: default;
+  background: #eef;
+  font-family: tahoma,verdana,sans-serif;
+}
+
+/* Header part -- contains navigation buttons and day names. */
+
+.calendar .button { /* "<<", "<", ">", ">>" buttons have this class */
+  text-align: center;    /* They are the navigation buttons */
+  padding: 2px;          /* Make the buttons seem like they're pressing */
+}
+
+.calendar .nav {
+  background: #778 url(menuarrow.gif) no-repeat 100% 100%;
+}
+
+.calendar thead .title { /* This holds the current "month, year" */
+  font-weight: bold;      /* Pressing it will take you to the current date */
+  text-align: center;
+  background: #fff;
+  color: #000;
+  padding: 2px;
+}
+
+.calendar thead .headrow { /* Row <TR> containing navigation buttons */
+  background: #778;
+  color: #fff;
+}
+
+.calendar thead .daynames { /* Row <TR> containing the day names */
+  background: #bdf;
+}
+
+.calendar thead .name { /* Cells <TD> containing the day names */
+  border-bottom: 1px solid #556;
+  padding: 2px;
+  text-align: center;
+  color: #000;
+}
+
+.calendar thead .weekend { /* How a weekend day name shows in header */
+  color: #a66;
+}
+
+.calendar thead .hilite { /* How do the buttons in header appear when hover */
+  background-color: #aaf;
+  color: #000;
+  border: 1px solid #04f;
+  padding: 1px;
+}
+
+.calendar thead .active { /* Active (pressed) buttons in header */
+  background-color: #77c;
+  padding: 2px 0px 0px 2px;
+}
+
+/* The body part -- contains all the days in month. */
+
+.calendar tbody .day { /* Cells <TD> containing month days dates */
+  width: 2em;
+  color: #456;
+  text-align: right;
+  padding: 2px 4px 2px 2px;
+}
+.calendar tbody .day.othermonth {
+  font-size: 80%;
+  color: #bbb;
+}
+.calendar tbody .day.othermonth.oweekend {
+  color: #fbb;
+}
+
+.calendar table .wn {
+  padding: 2px 3px 2px 2px;
+  border-right: 1px solid #000;
+  background: #bdf;
+}
+
+.calendar tbody .rowhilite td {
+  background: #def;
+}
+
+.calendar tbody .rowhilite td.wn {
+  background: #eef;
+}
+
+.calendar tbody td.hilite { /* Hovered cells <TD> */
+  background: #def;
+  padding: 1px 3px 1px 1px;
+  border: 1px solid #bbb;
+}
+
+.calendar tbody td.active { /* Active (pressed) cells <TD> */
+  background: #cde;
+  padding: 2px 2px 0px 2px;
+}
+
+.calendar tbody td.selected { /* Cell showing today date */
+  font-weight: bold;
+  border: 1px solid #000;
+  padding: 1px 3px 1px 1px;
+  background: #fff;
+  color: #000;
+}
+
+.calendar tbody td.weekend { /* Cells showing weekend days */
+  color: #a66;
+}
+
+.calendar tbody td.today { /* Cell showing selected date */
+  font-weight: bold;
+  color: #00f;
+}
+
+.calendar tbody .disabled { color: #999; }
+
+.calendar tbody .emptycell { /* Empty cells (the best is to hide them) */
+  visibility: hidden;
+}
+
+.calendar tbody .emptyrow { /* Empty row (some months need less than 6 rows) */
+  display: none;
+}
+
+/* The footer part -- status bar and "Close" button */
+
+.calendar tfoot .footrow { /* The <TR> in footer (only one right now) */
+  text-align: center;
+  background: #556;
+  color: #fff;
+}
+
+.calendar tfoot .ttip { /* Tooltip (status bar) cell <TD> */
+  background: #fff;
+  color: #445;
+  border-top: 1px solid #556;
+  padding: 1px;
+}
+
+.calendar tfoot .hilite { /* Hover style for buttons in footer */
+  background: #aaf;
+  border: 1px solid #04f;
+  color: #000;
+  padding: 1px;
+}
+
+.calendar tfoot .active { /* Active (pressed) style for buttons in footer */
+  background: #77c;
+  padding: 2px 0px 0px 2px;
+}
+
+/* Combo boxes (menus that display months/years for direct selection) */
+
+.calendar .combo {
+  position: absolute;
+  display: none;
+  top: 0px;
+  left: 0px;
+  width: 4em;
+  cursor: default;
+  border: 1px solid #655;
+  background: #def;
+  color: #000;
+  font-size: 90%;
+  z-index: 100;
+}
+
+.calendar .combo .label,
+.calendar .combo .label-IEfix {
+  text-align: center;
+  padding: 1px;
+}
+
+.calendar .combo .label-IEfix {
+  width: 4em;
+}
+
+.calendar .combo .hilite {
+  background: #acf;
+}
+
+.calendar .combo .active {
+  border-top: 1px solid #46a;
+  border-bottom: 1px solid #46a;
+  background: #eef;
+  font-weight: bold;
+}
+
+.calendar td.time {
+  border-top: 1px solid #000;
+  padding: 1px 0px;
+  text-align: center;
+  background-color: #f4f0e8;
+}
+
+.calendar td.time .hour,
+.calendar td.time .minute,
+.calendar td.time .ampm {
+  padding: 0px 3px 0px 4px;
+  border: 1px solid #889;
+  font-weight: bold;
+  background-color: #fff;
+}
+
+.calendar td.time .ampm {
+  text-align: center;
+}
+
+.calendar td.time .colon {
+  padding: 0px 2px 0px 3px;
+  font-weight: bold;
+}
+
+.calendar td.time span.hilite {
+  border-color: #000;
+  background-color: #667;
+  color: #fff;
+}
+
+.calendar td.time span.active {
+  border-color: #f00;
+  background-color: #000;
+  color: #0f0;
+}
+
+.SpecificationPOPUP
+{
+    text-align: left;
+    background-color: #ff9900;
+    font-family: Arial;
+    color: #000000;
+    font-weight: bold;
+}
+
+.div_M
+{
+    width: 100%;
+    background-color: gainsboro;
+    text-align: center;
+}
+
+.div_M2
+{
+    width: 100%;
+    background-color: white;
+    text-align: center;
+}
+
+.div_M3
+{
+    width: 1000px;
+    background-color: white;
+    text-align: center;
+}
+
+.panel_border
+{
+    text-align: center;
+    border-bottom: royalblue 1px solid;
+    border-left: royalblue 1px solid;
+    border-top: royalblue 1px solid;
+    border-right: royalblue 1px solid;
+    vertical-align: top;
+}
+
+.TableHdr
+{
+    text-align: center;
+    background-color: silver;
+    font-family: Arial;
+    color: black;
+    font-size: 10pt;
+    vertical-align: middle;
+    font-weight: bold;
+}
+
+
+/*for notifications*/
+
+#message_box
+{
+    background-position: left top;
+    position: fixed;
+    bottom: 0px;
+    width: 250px;
+    height: 150px;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    background-repeat: no-repeat;
+    /* background-image: url('images/Background/noti.png'); */
+    padding-top: 10px;
+    padding-left: 15px;
+    right: 0px;
+}
+
+.LabelBorder
+{
+    border-top: silver 1px solid;
+    border-right: silver 1px solid;
+    border-bottom: silver 1px solid;
+    border-left: silver 1px solid;
+}
+

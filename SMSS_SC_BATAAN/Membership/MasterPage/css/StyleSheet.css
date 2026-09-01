@@ -1,0 +1,391 @@
+﻿body
+{
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: small;
+	line-height: 18px;
+	color: #333333;
+	background-image: url(../images/mainpage_back.jpg);
+	background-attachment: fixed;
+	background-repeat: repeat-x;
+
+
+}
+.CSButton {
+    text-align: center;
+    font-size: 9pt;
+    font-family: Arial;
+    height: 22px;
+    vertical-align: middle;
+    text-transform: uppercase;
+    font-weight: bold;
+    color: #0033cc;
+    padding: 0px;
+}
+
+ 
+.MainHeader
+{
+	background-image: url(images/bannerBG_black.jpg);
+	background-repeat: repeat-x;
+	height:auto;
+	width:100%;
+	margin:0px; 
+	}
+.L1
+{
+	font-size:8pt;
+	font-family:Tahoma, Arial, Times New Roman;
+	color:Black;
+	background-color:Transparent;
+
+}
+.L2
+{
+	font-size:8pt;
+	font-family:Tahoma, Arial, Times New Roman;
+	color:Gray ;
+
+}
+.L3
+{
+	 
+	 font-weight:bold ;
+	font-family:Tahoma, Arial, Times New Roman;
+	color:Blue;
+	
+}
+.L4
+{
+	  text-align:right ;
+	 font-weight:bold ;
+	font-family:Tahoma, Arial, Times New Roman;
+	color:black;
+	
+}
+.Button
+{
+	font-size: 8pt;
+	font-family: Tahoma, Arial, Times New Roman;
+	color: Black;
+	cursor: hand;
+}
+.ButtonExit
+{
+	font-size: 8pt;
+	font-family: Tahoma, Arial, Times New Roman;
+	color: Black;
+	cursor: hand;
+	background-image:url(images/exit_22x22.png);
+	background-repeat:no-repeat;
+	background-color:Transparent;
+	
+}
+.ButtonRefresh
+{
+	font-size: 8pt;
+	font-family: Tahoma, Arial, Times New Roman;
+	color: Black;
+	cursor: hand;
+	background-image:url(images/view-refresh_22x22.png);
+	background-repeat:no-repeat;
+	background-color:Transparent;
+	
+}
+.ButtonSearch
+{
+	font-size: 8pt;
+	font-family: Tahoma, Arial, Times New Roman;
+	color: Black;
+	cursor: hand;
+	background-image:url(images/folder-saved-search_22x22.png);
+	background-repeat:no-repeat;
+	background-color:Transparent;
+}
+.ButtonNew
+{
+	font-size: 8pt;
+	font-family: Tahoma, Arial, Times New Roman;
+	color: Black;
+	cursor: hand;
+	background-image:url(images/add_group_22x22.png);
+	background-repeat:no-repeat;
+	background-color:Transparent
+}
+.ButtonEdit
+{
+	font-size: 8pt;
+	font-family: Tahoma, Arial, Times New Roman;
+	color: Black;
+	cursor: hand;
+	background-image:url(images/edit_22x22.png);
+	background-repeat:no-repeat;
+	background-color:Transparent
+}
+.ButtonSave
+{
+	font-size: 8pt;
+	font-family: Tahoma, Arial, Times New Roman;
+	color: Black;
+	cursor: hand;
+	background-image:url(images/save_all_22x22.png);
+	background-repeat:no-repeat;
+	background-color:Transparent
+}
+.ButtonDelete
+{
+	font-size: 8pt;
+	font-family: Tahoma, Arial, Times New Roman;
+	color: Black;
+	cursor: hand;
+	background-image:url(images/delete_user_22x22.png);
+	background-repeat:no-repeat;
+	background-color:Transparent
+}
+.ButtonCancel
+{
+	font-size: 8pt;
+	font-family: Tahoma, Arial, Times New Roman;
+	color: Black;
+	cursor: hand;
+	background-image:url(images/cancel_22x22.png);
+	background-repeat:no-repeat;
+	background-color:Transparent
+}
+.ButtonAdd
+{
+	font-size: 8pt;
+	font-family: Tahoma, Arial, Times New Roman;
+	color: Black;
+	cursor: hand;
+	background-image:url(images/list-add_22x22.png);
+	background-repeat:no-repeat;
+	background-color:Transparent
+}
+.divPanel
+{
+	border-style:solid;
+	border-width:1px;
+	border-color:Gray
+}
+.footer
+{
+	background-image: url(images/bg-menu-main.png);
+	background-repeat: repeat-x;
+	width: auto;
+	height: 50px;
+	font-size:8pt;
+	font-family:Tahoma, Arial, Times New Roman;
+	color:white;
+}
+.rightfooter
+{
+	background-image: url(images/Footer_left.jpg);
+	background-repeat:no-repeat;
+	width: auto;
+	height: 50px;
+}
+.centerfooter
+{
+	background-image: url(images/bottom.jpg);
+	background-repeat: repeat-x;
+	height: 44px;
+	vertical-align:middle
+}
+.center
+{
+	background-image: url(images/Bg.jpg);
+	background-repeat: repeat-y;
+	text-align:center;
+	width: 900px;
+	width: 900px;
+	height: auto;
+	
+}
+.top
+{
+	background-image: url(images/menubar1.jpg);
+	background-repeat: repeat-x;
+	width: auto;
+	height: 54px;
+	/*margin:0px;
+	border-bottom-style:solid;
+	border-width:0px;
+	background-color:Gray*/
+}
+.top2
+{
+	background-image: url(images/HRMSMenuButtons/Normal/HRMSMenu2Sliced_10.jpg);
+	background-repeat: repeat-x;
+	width: auto;
+	height: 36px;
+	/*margin:0px;
+	border-bottom-style:solid;
+	border-width:0px;
+	background-color:Gray*/
+}
+.header
+{
+
+	background-image: url(images/banner_top.jpg);
+	width: 911px;
+	height:93px;
+	background-repeat:no-repeat;
+	
+}
+
+.Onlineheader
+{
+
+	background-image: url(images/Final-HRMS-Home-Page-Hover_.jpg);
+	width: 911px;
+	height:93px;
+	background-repeat:no-repeat;
+	
+}
+.Link1
+{
+	font-size: 8pt;
+	font-family: Tahoma, Arial, Times New Roman;
+	text-align: center;
+	color:#FC0;
+}
+.ListSearchExtenderPrompt
+{
+	font-style:italic;
+	color:Gray;
+	background-color:white;
+	font-size: 8pt;
+}
+.PictureConfirm
+{ background-image:url(images/information.png);
+	}
+	
+.collapsePanel {
+	background-image: url(images/RedTV/Body_red.jpg);
+	background-repeat:repeat-y;
+	height:auto;
+	text-align:justify;
+	/*background-color:white;
+	/*overflow:hidden;*/
+}
+.collapsePanel2 {
+	background-image: url(images/BlueTV/Blue_Body.jpg);
+	background-repeat:repeat-y;
+	height:auto;
+	text-align:justify;
+	/*background-color:white;
+	/*overflow:hidden;*/
+}
+.collapsePanel3{
+	background-image: url(images/GreenTV/Green_Body.jpg);
+	background-repeat:repeat-y;
+	height:auto;
+	text-align:justify;
+	/*background-color:white;
+	/*overflow:hidden;*/
+}
+.collapsePanel4{
+	background-image: url(images/YellowTV/Yellow_Body.jpg);
+	background-repeat:repeat-y;
+	height:auto;
+	text-align:justify;
+	/*background-color:white;
+	/*overflow:hidden;*/
+}
+.collapsePanel5{
+	background-image: url(images/MaroonTV/Maroon_Body.jpg);
+	background-repeat:repeat-y;
+	height:auto;
+	text-align:justify;
+	/*background-color:white;
+	/*overflow:hidden;*/
+}
+
+.collapsePanelHeader{
+	width:240px;
+	height:37px;
+	text-align:left ;
+		/*background-image: url(images/collapseImages/xptitle2_s.gif);
+	background-repeat:repeat-y;*/
+	/*background-color:Gray; color:#FFF;
+	font-weight:bold;*/
+	
+}	
+.header1 {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	font-weight: bold;
+	color: #006699;
+}
+ #UpdateProgress1 {
+   background-color:#CF4342;
+   color:#fff;
+   top:0px;
+   right:0px;
+   position:fixed;
+ }
+
+#UpdateProgress1 img {
+   vertical-align:middle;
+   margin:2px;
+ }
+.modalBackground {
+	background-color:Gray;
+	filter:alpha(opacity=70);
+	opacity:0.7;
+}
+
+.tableMidTop
+{
+	background-image: url(images/tabBottom/tab_bottom_02.jpg);
+	}
+.tableTopLeft
+{
+	background-image: url(images/tabBottom/tab_top_01.jpg);
+	}
+.tableTopRight
+{
+	background-image: url(images/tabBottom/tab_top_03.jpg);
+	}
+.tableBelowLeft
+{
+	background-image: url(images/tabBottom/tab_bottom_01.jpg);
+	}
+.tableBelowRight
+{
+	background-image: url(images/tabBottom/tab_bottom_04.jpg);
+	}
+.resize 
+{
+	 background-image: url(images/tabBottom/body_bg.jpg);
+width: 200px;
+height : auto;
+}
+.body2 {
+ background-image:url(images/tabBottom/body_bg.jpg);
+ background-attachment:fixed;
+}
+.ListSearchExtenderPrompt
+{
+	font-style:italic;
+	color:Gray;
+	background-color:white;
+	font-size: 8pt;
+}
+a { color: #22456F; text-decoration: none;}
+a:hover
+{
+	color: black;
+}
+H4
+{
+	text-align: center;
+	font-weight: bold;
+	color: #006633;
+	font-size: large;
+}
+
+.cssPager span 
+{ 
+	font-size:18px;
+}

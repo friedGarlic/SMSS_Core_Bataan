@@ -1,0 +1,811 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="c:\program files (x86)\microsoft visual studio\2017\professional\team tools\static analysis tools\fxcop\Xml\CodeAnalysisReport.xsl"?>
+<FxCopReport Version="15.0">
+ <Targets>
+  <Target Name="C:\Users\Geodata\AppData\Local\Temp\tmpF4D6.tmp.cadir\bin\App_Code.dll">
+   <Modules>
+    <Module Name="app_code.dll">
+     <Namespaces>
+      <Namespace Name="">
+       <Types>
+        <Type Name="AccessRule" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Messages>
+          <Message TypeName="TypesThatOwnDisposableFieldsShouldBeDisposable" Category="Microsoft.Design" CheckId="CA1001" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+           <Issue Name="DependsOnFix" Certainty="95" Level="CriticalError">Implement IDisposable on 'AccessRule' because it creates members of the following IDisposable types: 'DataTable'. If 'AccessRule' has previously shipped, adding new members that implement IDisposable to this type is considered a breaking change to existing consumers.</Issue>
+          </Message>
+         </Messages>
+         <Members>
+          <Member Name="#GetComponentId(System.String)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code" File="AccessRule.vb" Line="259">The query string passed to 'SqlCommand.New(String, SqlConnection)' in 'AccessRule.GetComponentId(String)' could contain the following variables 'homepage'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#GetMenuString(System.String)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code" File="AccessRule.vb" Line="271">The query string passed to 'SqlCommand.New(String, SqlConnection)' in 'AccessRule.GetMenuString(String)' could contain the following variables 'homepage'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+        <Type Name="BaseDAL" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Messages>
+          <Message TypeName="TypesThatOwnDisposableFieldsShouldBeDisposable" Category="Microsoft.Design" CheckId="CA1001" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+           <Issue Name="DependsOnFix" Certainty="95" Level="CriticalError">Implement IDisposable on 'BaseDAL' because it creates members of the following IDisposable types: 'SqlConnection', 'SqlCommand', 'SqlDataAdapter'. If 'BaseDAL' has previously shipped, adding new members that implement IDisposable to this type is considered a breaking change to existing consumers.</Issue>
+          </Message>
+         </Messages>
+         <Members>
+          <Member Name="#Execute(System.String,System.Data.CommandType,System.Data.SqlClient.SqlParameter[])" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code\BaseDAL" File="BaseDAL.vb" Line="261">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'BaseDAL.Execute(String, CommandType, SqlParameter())' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#Execute(System.String,System.String,System.Data.CommandType,System.Data.SqlClient.SqlParameter[])" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code\BaseDAL" File="BaseDAL.vb" Line="112">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'BaseDAL.Execute(String, String, CommandType, SqlParameter())' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#GetDataTable(System.String,System.Data.CommandType,System.Data.SqlClient.SqlParameter[])" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code\BaseDAL" File="BaseDAL.vb" Line="210">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'BaseDAL.GetDataTable(String, CommandType, SqlParameter())' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#GetRecords(System.Data.SqlClient.SqlParameter[],System.Data.DataSet,System.String,System.Data.CommandType)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code\BaseDAL" File="BaseDAL.vb" Line="148">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'BaseDAL.GetRecords(SqlParameter(), DataSet, String, CommandType)' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#GetRecords(System.String,System.Data.CommandType,System.Data.SqlClient.SqlParameter[])" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code\BaseDAL" File="BaseDAL.vb" Line="178">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'BaseDAL.GetRecords(String, CommandType, SqlParameter())' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#GetRecordsByID(System.String,System.Data.CommandType,System.Data.SqlClient.SqlParameter[])" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code\BaseDAL" File="BaseDAL.vb" Line="76">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'BaseDAL.GetRecordsByID(String, CommandType, SqlParameter())' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#GetTable(System.String,System.Data.CommandType,System.Data.SqlClient.SqlParameter[])" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code\BaseDAL" File="BaseDAL.vb" Line="294">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'BaseDAL.GetTable(String, CommandType, SqlParameter())' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#GetValue(System.String,System.Data.CommandType)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code\BaseDAL" File="BaseDAL.vb" Line="233">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'BaseDAL.GetValue(String, CommandType)' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+        <Type Name="BaseDAL_SysMngr" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Messages>
+          <Message TypeName="TypesThatOwnDisposableFieldsShouldBeDisposable" Category="Microsoft.Design" CheckId="CA1001" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+           <Issue Name="DependsOnFix" Certainty="95" Level="CriticalError">Implement IDisposable on 'BaseDAL_SysMngr' because it creates members of the following IDisposable types: 'SqlConnection', 'SqlCommand', 'SqlDataAdapter'. If 'BaseDAL_SysMngr' has previously shipped, adding new members that implement IDisposable to this type is considered a breaking change to existing consumers.</Issue>
+          </Message>
+         </Messages>
+         <Members>
+          <Member Name="#Execute(System.String,System.Data.CommandType,System.Data.SqlClient.SqlParameter[])" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code" File="BaseDAL_SysMngr.vb" Line="294">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'BaseDAL_SysMngr.Execute(String, CommandType, SqlParameter())' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#Execute(System.String,System.String,System.Data.CommandType,System.Data.SqlClient.SqlParameter[])" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code" File="BaseDAL_SysMngr.vb" Line="71">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'BaseDAL_SysMngr.Execute(String, String, CommandType, SqlParameter())' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#GetDataTable(System.String,System.Data.CommandType,System.Data.SqlClient.SqlParameter[])" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code" File="BaseDAL_SysMngr.vb" Line="262">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'BaseDAL_SysMngr.GetDataTable(String, CommandType, SqlParameter())' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#GetRecords(System.String,System.Data.CommandType,System.Data.SqlClient.SqlParameter[])" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code" File="BaseDAL_SysMngr.vb" Line="138">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'BaseDAL_SysMngr.GetRecords(String, CommandType, SqlParameter())' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#GetRecordsByID(System.String,System.Data.CommandType,System.Data.SqlClient.SqlParameter[])" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code" File="BaseDAL_SysMngr.vb" Line="35">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'BaseDAL_SysMngr.GetRecordsByID(String, CommandType, SqlParameter())' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#GetTable(System.String,System.Data.CommandType,System.Data.SqlClient.SqlParameter[])" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code" File="BaseDAL_SysMngr.vb" Line="173">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'BaseDAL_SysMngr.GetTable(String, CommandType, SqlParameter())' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#GetUserID(System.String)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code" File="BaseDAL_SysMngr.vb" Line="319">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'BaseDAL_SysMngr.GetUserID(String)' could contain the following variables 'Strings.LCase(userName)'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#GetValue(System.String,System.Data.CommandType)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code" File="BaseDAL_SysMngr.vb" Line="230">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'BaseDAL_SysMngr.GetValue(String, CommandType)' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+        <Type Name="BaseDrpDwn+DropdownLoad" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Messages>
+          <Message TypeName="TypesThatOwnDisposableFieldsShouldBeDisposable" Category="Microsoft.Design" CheckId="CA1001" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+           <Issue Name="DependsOnFix" Certainty="95" Level="CriticalError">Implement IDisposable on 'BaseDrpDwn.DropdownLoad' because it creates members of the following IDisposable types: 'DataSet'. If 'BaseDrpDwn.DropdownLoad' has previously shipped, adding new members that implement IDisposable to this type is considered a breaking change to existing consumers.</Issue>
+          </Message>
+         </Messages>
+        </Type>
+        <Type Name="bBaseDAL" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Messages>
+          <Message TypeName="TypesThatOwnDisposableFieldsShouldBeDisposable" Category="Microsoft.Design" CheckId="CA1001" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+           <Issue Name="DependsOnFix" Certainty="95" Level="CriticalError">Implement IDisposable on 'bBaseDAL' because it creates members of the following IDisposable types: 'SqlConnection', 'SqlCommand', 'SqlDataAdapter'. If 'bBaseDAL' has previously shipped, adding new members that implement IDisposable to this type is considered a breaking change to existing consumers.</Issue>
+          </Message>
+         </Messages>
+         <Members>
+          <Member Name="#Execute(System.String,System.Data.CommandType,System.Data.SqlClient.SqlParameter[])" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code\BaseDAL" File="bBaseDAL.vb" Line="261">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'bBaseDAL.Execute(String, CommandType, SqlParameter())' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#Execute(System.String,System.String,System.Data.CommandType,System.Data.SqlClient.SqlParameter[])" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code\BaseDAL" File="bBaseDAL.vb" Line="112">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'bBaseDAL.Execute(String, String, CommandType, SqlParameter())' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#GetDataTable(System.String,System.Data.CommandType,System.Data.SqlClient.SqlParameter[])" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code\BaseDAL" File="bBaseDAL.vb" Line="210">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'bBaseDAL.GetDataTable(String, CommandType, SqlParameter())' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#GetRecords(System.Data.SqlClient.SqlParameter[],System.Data.DataSet,System.String,System.Data.CommandType)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code\BaseDAL" File="bBaseDAL.vb" Line="148">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'bBaseDAL.GetRecords(SqlParameter(), DataSet, String, CommandType)' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#GetRecords(System.String,System.Data.CommandType,System.Data.SqlClient.SqlParameter[])" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code\BaseDAL" File="bBaseDAL.vb" Line="178">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'bBaseDAL.GetRecords(String, CommandType, SqlParameter())' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#GetRecordsByID(System.String,System.Data.CommandType,System.Data.SqlClient.SqlParameter[])" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code\BaseDAL" File="bBaseDAL.vb" Line="76">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'bBaseDAL.GetRecordsByID(String, CommandType, SqlParameter())' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#GetTable(System.String,System.Data.CommandType,System.Data.SqlClient.SqlParameter[])" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code\BaseDAL" File="bBaseDAL.vb" Line="294">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'bBaseDAL.GetTable(String, CommandType, SqlParameter())' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#GetValue(System.String,System.Data.CommandType)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code\BaseDAL" File="bBaseDAL.vb" Line="233">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'bBaseDAL.GetValue(String, CommandType)' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+        <Type Name="DataSet1" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Messages>
+          <Message TypeName="ImplementISerializableCorrectly" Category="Microsoft.Usage" CheckId="CA2240" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="NonBreaking">
+           <Issue Certainty="60" Level="Error">Add an implementation of GetObjectData to type 'DataSet1'.</Issue>
+          </Message>
+         </Messages>
+        </Type>
+        <Type Name="DataSet1+Barcode_TableDataTable" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Messages>
+          <Message TypeName="ImplementISerializableCorrectly" Category="Microsoft.Usage" CheckId="CA2240" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="NonBreaking">
+           <Issue Certainty="60" Level="Error">Add an implementation of GetObjectData to type 'DataSet1.Barcode_TableDataTable'.</Issue>
+          </Message>
+         </Messages>
+        </Type>
+        <Type Name="DerivedDal" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Members>
+          <Member Name="#GetImageValue(System.String,System.Data.CommandType)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code\BaseDAL" File="DerivedDal.vb" Line="79">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'DerivedDal.GetImageValue(String, CommandType)' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+        <Type Name="ManageButtons" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Members>
+          <Member Name="#LoadSubMenu(System.Int32,System.Web.UI.MasterPage)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Do not dispose objects multiple times" Category="Microsoft.Usage" CheckId="CA2202" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code" File="ManageButtons.vb" Line="141">Object 'conn' can be disposed more than once in method 'ManageButtons.LoadSubMenu(Integer, MasterPage)'. To avoid generating a System.ObjectDisposedException you should not call Dispose more than one time on an object.: Lines: 141</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+       </Types>
+      </Namespace>
+      <Namespace Name="BaseDLL">
+       <Types>
+        <Type Name="BaseDAL" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Messages>
+          <Message TypeName="TypesThatOwnDisposableFieldsShouldBeDisposable" Category="Microsoft.Design" CheckId="CA1001" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+           <Issue Name="DependsOnFix" Certainty="95" Level="CriticalError">Implement IDisposable on 'BaseDAL' because it creates members of the following IDisposable types: 'SqlConnection', 'SqlCommand', 'SqlDataAdapter'. If 'BaseDAL' has previously shipped, adding new members that implement IDisposable to this type is considered a breaking change to existing consumers.</Issue>
+          </Message>
+         </Messages>
+         <Members>
+          <Member Name="#Execute(System.String,System.Data.CommandType,System.Data.SqlClient.SqlParameter[])" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code" File="BaseDAL.vb" Line="255">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'BaseDAL.Execute(String, CommandType, SqlParameter())' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#Execute(System.String,System.String,System.Data.CommandType,System.Data.SqlClient.SqlParameter[])" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code" File="BaseDAL.vb" Line="225">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'BaseDAL.Execute(String, String, CommandType, SqlParameter())' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#FillEntity(System.String,System.Data.CommandType,System.Data.SqlClient.SqlParameter[])" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code" File="BaseDAL.vb" Line="370">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'BaseDAL.FillEntity(String, CommandType, SqlParameter())' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#GetDataTable(System.String,System.Data.CommandType,System.Data.SqlClient.SqlParameter[])" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code" File="BaseDAL.vb" Line="191">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'BaseDAL.GetDataTable(String, CommandType, SqlParameter())' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#GetDataTableSysmanager(System.String,System.Data.CommandType,System.Data.SqlClient.SqlParameter[])" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code" File="BaseDAL.vb" Line="124">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'BaseDAL.GetDataTableSysmanager(String, CommandType, SqlParameter())' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#GetDataTableV2(System.String,System.Data.CommandType,System.Data.SqlClient.SqlParameter[])" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code" File="BaseDAL.vb" Line="88">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'BaseDAL.GetDataTableV2(String, CommandType, SqlParameter())' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#GetRecords(System.String,System.Data.CommandType,System.Data.SqlClient.SqlParameter[])" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code" File="BaseDAL.vb" Line="336">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'BaseDAL.GetRecords(String, CommandType, SqlParameter())' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#GetRecordsByID(System.String,System.Data.CommandType,System.Data.SqlClient.SqlParameter[])" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code" File="BaseDAL.vb" Line="302">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'BaseDAL.GetRecordsByID(String, CommandType, SqlParameter())' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#GetRecordsSysmanager(System.String,System.Data.CommandType,System.Data.SqlClient.SqlParameter[])" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code" File="BaseDAL.vb" Line="157">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'BaseDAL.GetRecordsSysmanager(String, CommandType, SqlParameter())' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#GetValue(System.String,System.Data.CommandType)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code" File="BaseDAL.vb" Line="279">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'BaseDAL.GetValue(String, CommandType)' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+        <Type Name="BaseDALImport" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Messages>
+          <Message TypeName="TypesThatOwnDisposableFieldsShouldBeDisposable" Category="Microsoft.Design" CheckId="CA1001" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+           <Issue Name="DependsOnFix" Certainty="95" Level="CriticalError">Implement IDisposable on 'BaseDALImport' because it creates members of the following IDisposable types: 'SqlConnection', 'SqlCommand', 'SqlDataAdapter'. If 'BaseDALImport' has previously shipped, adding new members that implement IDisposable to this type is considered a breaking change to existing consumers.</Issue>
+          </Message>
+         </Messages>
+         <Members>
+          <Member Name="#Execute(System.String,System.Data.CommandType,System.Data.SqlClient.SqlParameter[])" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code\BaseDAL" File="BaseDALImport.vb" Line="153">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'BaseDALImport.Execute(String, CommandType, SqlParameter())' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#Execute(System.String,System.String,System.Data.CommandType,System.Data.SqlClient.SqlParameter[])" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code\BaseDAL" File="BaseDALImport.vb" Line="122">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'BaseDALImport.Execute(String, String, CommandType, SqlParameter())' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#GetDataTable(System.String,System.Data.CommandType,System.Data.SqlClient.SqlParameter[])" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code\BaseDAL" File="BaseDALImport.vb" Line="89">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'BaseDALImport.GetDataTable(String, CommandType, SqlParameter())' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#GetRecords(System.String,System.Data.CommandType,System.Data.SqlClient.SqlParameter[])" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code\BaseDAL" File="BaseDALImport.vb" Line="236">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'BaseDALImport.GetRecords(String, CommandType, SqlParameter())' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#GetRecordsByID(System.String,System.Data.CommandType,System.Data.SqlClient.SqlParameter[])" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code\BaseDAL" File="BaseDALImport.vb" Line="201">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'BaseDALImport.GetRecordsByID(String, CommandType, SqlParameter())' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#GetValue(System.String,System.Data.CommandType)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code\BaseDAL" File="BaseDALImport.vb" Line="178">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'BaseDALImport.GetValue(String, CommandType)' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#SaveData(System.String,System.Data.CommandType,System.Data.SqlClient.SqlParameter[])" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\App_Code\BaseDAL" File="BaseDALImport.vb" Line="268">The query string passed to 'SqlCommand.CommandText.Set(String)' in 'BaseDALImport.SaveData(String, CommandType, SqlParameter())' could contain the following variables 'strCmd'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+       </Types>
+      </Namespace>
+     </Namespaces>
+    </Module>
+   </Modules>
+  </Target>
+  <Target Name="C:\Users\Geodata\AppData\Local\Temp\tmpF4D6.tmp.cadir\bin\App_Web_0jdqexka.dll">
+   <Modules>
+    <Module Name="app_web_0jdqexka.dll">
+     <Namespaces>
+      <Namespace Name="">
+       <Types>
+        <Type Name="t_purchase_request_v2" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Members>
+          <Member Name="#CreateFile(System.String,System.String,System.String)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\procurement" File="t_purchase_request_v2.aspx.vb" Line="2269">The query string passed to 'SqlCommand.New(String, SqlConnection)' in 't_purchase_request_v2.CreateFile(String, String, String)' could contain the following variables 'cmdstr'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+       </Types>
+      </Namespace>
+     </Namespaces>
+    </Module>
+   </Modules>
+  </Target>
+  <Target Name="C:\Users\Geodata\AppData\Local\Temp\tmpF4D6.tmp.cadir\bin\App_Web_1lwt5oeo.dll">
+   <Modules>
+    <Module Name="app_web_1lwt5oeo.dll">
+     <Namespaces>
+      <Namespace Name="">
+       <Types>
+        <Type Name="Roles_AccessRules" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Members>
+          <Member Name="#getApplicationId(System.String)" Kind="Method" Static="False" Accessibility="Private" ExternallyVisible="False">
+           <Messages>
+            <Message TypeName="Do not dispose objects multiple times" Category="Microsoft.Usage" CheckId="CA2202" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\Roles" File="AccessRules.aspx.vb" Line="32">Object 'conn' can be disposed more than once in method 'Roles_AccessRules.getApplicationId(String)'. To avoid generating a System.ObjectDisposedException you should not call Dispose more than one time on an object.: Lines: 32</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#getRoleId(System.String)" Kind="Method" Static="False" Accessibility="Private" ExternallyVisible="False">
+           <Messages>
+            <Message TypeName="Do not dispose objects multiple times" Category="Microsoft.Usage" CheckId="CA2202" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\Roles" File="AccessRules.aspx.vb" Line="185">Object 'conn' can be disposed more than once in method 'Roles_AccessRules.getRoleId(String)'. To avoid generating a System.ObjectDisposedException you should not call Dispose more than one time on an object.: Lines: 185</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+       </Types>
+      </Namespace>
+     </Namespaces>
+    </Module>
+   </Modules>
+  </Target>
+  <Target Name="C:\Users\Geodata\AppData\Local\Temp\tmpF4D6.tmp.cadir\bin\App_Web_3tk2htx5.dll">
+   <Modules>
+    <Module Name="app_web_3tk2htx5.dll">
+     <Namespaces>
+      <Namespace Name="">
+       <Types>
+        <Type Name="t_inspection_and_acceptance_v2" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Members>
+          <Member Name="#btnAddlist_Click1(System.Object,System.EventArgs)" Kind="Method" Static="False" Accessibility="Family" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Do not dispose objects multiple times" Category="Microsoft.Usage" CheckId="CA2202" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\procurement" File="t_inspection_and_acceptance_v2.aspx.vb" Line="7201">Object 'fs' can be disposed more than once in method 't_inspection_and_acceptance_v2.btnAddlist_Click1(Object, EventArgs)'. To avoid generating a System.ObjectDisposedException you should not call Dispose more than one time on an object.: Lines: 7201</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#btnAttachdoc2_Click(System.Object,System.EventArgs)" Kind="Method" Static="False" Accessibility="Family" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Do not dispose objects multiple times" Category="Microsoft.Usage" CheckId="CA2202" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\procurement" File="t_inspection_and_acceptance_v2.aspx.vb" Line="7129">Object 'fs' can be disposed more than once in method 't_inspection_and_acceptance_v2.btnAttachdoc2_Click(Object, EventArgs)'. To avoid generating a System.ObjectDisposedException you should not call Dispose more than one time on an object.: Lines: 7129</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#btnOfficeAttchDoc_Click(System.Object,System.EventArgs)" Kind="Method" Static="False" Accessibility="Family" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Do not dispose objects multiple times" Category="Microsoft.Usage" CheckId="CA2202" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\procurement" File="t_inspection_and_acceptance_v2.aspx.vb" Line="7296">Object 'fs' can be disposed more than once in method 't_inspection_and_acceptance_v2.btnOfficeAttchDoc_Click(Object, EventArgs)'. To avoid generating a System.ObjectDisposedException you should not call Dispose more than one time on an object.: Lines: 7296</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+       </Types>
+      </Namespace>
+     </Namespaces>
+    </Module>
+   </Modules>
+  </Target>
+  <Target Name="C:\Users\Geodata\AppData\Local\Temp\tmpF4D6.tmp.cadir\bin\App_Web_csy5vusd.dll">
+   <Modules>
+    <Module Name="app_web_csy5vusd.dll">
+     <Namespaces>
+      <Namespace Name="">
+       <Types>
+        <Type Name="t_list_of_property_barcode" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Members>
+          <Member Name="#btnAddDoc_Click(System.Object,System.EventArgs)" Kind="Method" Static="False" Accessibility="Family" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Do not dispose objects multiple times" Category="Microsoft.Usage" CheckId="CA2202" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\Inventory" File="t_list_of_property_barcode.aspx.vb" Line="711">Object 'fs' can be disposed more than once in method 't_list_of_property_barcode.btnAddDoc_Click(Object, EventArgs)'. To avoid generating a System.ObjectDisposedException you should not call Dispose more than one time on an object.: Lines: 711</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+       </Types>
+      </Namespace>
+     </Namespaces>
+    </Module>
+   </Modules>
+  </Target>
+  <Target Name="C:\Users\Geodata\AppData\Local\Temp\tmpF4D6.tmp.cadir\bin\App_Web_fp0bzafl.dll">
+   <Modules>
+    <Module Name="app_web_fp0bzafl.dll">
+     <Namespaces>
+      <Namespace Name="">
+       <Types>
+        <Type Name="Inventory_RIS" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Members>
+          <Member Name="#btnAddDoc_Click(System.Object,System.EventArgs)" Kind="Method" Static="False" Accessibility="Family" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Do not dispose objects multiple times" Category="Microsoft.Usage" CheckId="CA2202" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\Inventory" File="t_RequisitionAndIssunace.aspx.vb" Line="1183">Object 'fs' can be disposed more than once in method 'Inventory_RIS.btnAddDoc_Click(Object, EventArgs)'. To avoid generating a System.ObjectDisposedException you should not call Dispose more than one time on an object.: Lines: 1183</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+       </Types>
+      </Namespace>
+     </Namespaces>
+    </Module>
+   </Modules>
+  </Target>
+  <Target Name="C:\Users\Geodata\AppData\Local\Temp\tmpF4D6.tmp.cadir\bin\App_Web_gak2mkdx.dll">
+   <Modules>
+    <Module Name="app_web_gak2mkdx.dll">
+     <Namespaces>
+      <Namespace Name="">
+       <Types>
+        <Type Name="Barcode_PopUp" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Members>
+          <Member Name="#GetData(System.String)" Kind="Method" Static="False" Accessibility="Private" ExternallyVisible="False">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\Inventory" File="Barcode_PopUp.aspx.vb" Line="25">The query string passed to 'SqlCommand.New(String)' in 'Barcode_PopUp.GetData(String)' could contain the following variables 'query'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+       </Types>
+      </Namespace>
+     </Namespaces>
+    </Module>
+   </Modules>
+  </Target>
+  <Target Name="C:\Users\Geodata\AppData\Local\Temp\tmpF4D6.tmp.cadir\bin\App_Web_gqlyk3ff.dll">
+   <Modules>
+    <Module Name="app_web_gqlyk3ff.dll">
+     <Namespaces>
+      <Namespace Name="">
+       <Types>
+        <Type Name="Barcode_PopUp" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Members>
+          <Member Name="#GetData(System.String)" Kind="Method" Static="False" Accessibility="Private" ExternallyVisible="False">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\procurement" File="Barcode_PopUp.aspx.vb" Line="25">The query string passed to 'SqlCommand.New(String)' in 'Barcode_PopUp.GetData(String)' could contain the following variables 'query'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+       </Types>
+      </Namespace>
+     </Namespaces>
+    </Module>
+   </Modules>
+  </Target>
+  <Target Name="C:\Users\Geodata\AppData\Local\Temp\tmpF4D6.tmp.cadir\bin\App_Web_kq0tptmk.dll">
+   <Modules>
+    <Module Name="app_web_kq0tptmk.dll">
+     <Namespaces>
+      <Namespace Name="">
+       <Types>
+        <Type Name="logaudit_ManageLogTable" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Members>
+          <Member Name="#ExecuteSQLStmt(System.String,System.String)" Kind="Method" Static="False" Accessibility="Private" ExternallyVisible="False">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\AuditTrail" File="ManageLogTable.aspx.vb" Line="156">The query string passed to 'SqlCommand.New(String, SqlConnection)' in 'logaudit_ManageLogTable.ExecuteSQLStmt(String, String)' could contain the following variables 'sql'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#getApplicationId()" Kind="Method" Static="False" Accessibility="Private" ExternallyVisible="False">
+           <Messages>
+            <Message TypeName="Do not dispose objects multiple times" Category="Microsoft.Usage" CheckId="CA2202" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\AuditTrail" File="ManageLogTable.aspx.vb" Line="262">Object 'conn' can be disposed more than once in method 'logaudit_ManageLogTable.getApplicationId()'. To avoid generating a System.ObjectDisposedException you should not call Dispose more than one time on an object.: Lines: 262</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#LoadFields(System.Int64)" Kind="Method" Static="False" Accessibility="Private" ExternallyVisible="False">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\AuditTrail" File="ManageLogTable.aspx.vb" Line="118">The query string passed to 'SqlCommand.New(String, SqlConnection)' in 'logaudit_ManageLogTable.LoadFields(Long)' could contain the following variables 'Conversions.ToString(tableID)'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#subSaveLogTables()" Kind="Method" Static="False" Accessibility="Private" ExternallyVisible="False">
+           <Messages>
+            <Message TypeName="Do not dispose objects multiple times" Category="Microsoft.Usage" CheckId="CA2202" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\AuditTrail" File="ManageLogTable.aspx.vb" Line="187">Object 'conn' can be disposed more than once in method 'logaudit_ManageLogTable.subSaveLogTables()'. To avoid generating a System.ObjectDisposedException you should not call Dispose more than one time on an object.: Lines: 187</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+       </Types>
+      </Namespace>
+     </Namespaces>
+    </Module>
+   </Modules>
+  </Target>
+  <Target Name="C:\Users\Geodata\AppData\Local\Temp\tmpF4D6.tmp.cadir\bin\App_Web_louldolp.dll">
+   <Modules>
+    <Module Name="app_web_louldolp.dll">
+     <Namespaces>
+      <Namespace Name="">
+       <Types>
+        <Type Name="bidding_t_DocumentAttachment" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Members>
+          <Member Name="#CreateFile(System.String,System.String,System.String)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\bidding" File="t_DocumentAttachment.aspx.vb" Line="187">The query string passed to 'SqlCommand.New(String, SqlConnection)' in 'bidding_t_DocumentAttachment.CreateFile(String, String, String)' could contain the following variables 'cmdstr'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+       </Types>
+      </Namespace>
+     </Namespaces>
+    </Module>
+   </Modules>
+  </Target>
+  <Target Name="C:\Users\Geodata\AppData\Local\Temp\tmpF4D6.tmp.cadir\bin\App_Web_lwal4dgd.dll">
+   <Modules>
+    <Module Name="app_web_lwal4dgd.dll">
+     <Namespaces>
+      <Namespace Name="">
+       <Types>
+        <Type Name="t_purchase_request_v2_RepQueries" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Members>
+          <Member Name="#btnAddlist_Click(System.Object,System.EventArgs)" Kind="Method" Static="False" Accessibility="Family" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Do not dispose objects multiple times" Category="Microsoft.Usage" CheckId="CA2202" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\Reports and Query" File="t_purchase_request_v2_RepQueries.aspx.vb" Line="2129">Object 'fs' can be disposed more than once in method 't_purchase_request_v2_RepQueries.btnAddlist_Click(Object, EventArgs)'. To avoid generating a System.ObjectDisposedException you should not call Dispose more than one time on an object.: Lines: 2129</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+       </Types>
+      </Namespace>
+     </Namespaces>
+    </Module>
+   </Modules>
+  </Target>
+  <Target Name="C:\Users\Geodata\AppData\Local\Temp\tmpF4D6.tmp.cadir\bin\App_Web_s0cyutpq.dll">
+   <Modules>
+    <Module Name="app_web_s0cyutpq.dll">
+     <Namespaces>
+      <Namespace Name="">
+       <Types>
+        <Type Name="Inventory_t_InventoryTaking" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Members>
+          <Member Name="#Upload(System.Object,System.EventArgs)" Kind="Method" Static="False" Accessibility="Family" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Do not dispose objects multiple times" Category="Microsoft.Usage" CheckId="CA2202" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\Inventory" File="t_InventoryTaking.aspx.vb" Line="93">Object 'con' can be disposed more than once in method 'Inventory_t_InventoryTaking.Upload(Object, EventArgs)'. To avoid generating a System.ObjectDisposedException you should not call Dispose more than one time on an object.: Lines: 93</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+       </Types>
+      </Namespace>
+     </Namespaces>
+    </Module>
+   </Modules>
+  </Target>
+  <Target Name="C:\Users\Geodata\AppData\Local\Temp\tmpF4D6.tmp.cadir\bin\App_Web_zcja55m5.dll">
+   <Modules>
+    <Module Name="app_web_zcja55m5.dll">
+     <Namespaces>
+      <Namespace Name="">
+       <Types>
+        <Type Name="t_purchase_order_v2" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Members>
+          <Member Name="#btnAddlist_Click(System.Object,System.EventArgs)" Kind="Method" Static="False" Accessibility="Family" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Do not dispose objects multiple times" Category="Microsoft.Usage" CheckId="CA2202" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\procurement" File="t_purchase_order_v2.aspx.vb" Line="872">Object 'fs' can be disposed more than once in method 't_purchase_order_v2.btnAddlist_Click(Object, EventArgs)'. To avoid generating a System.ObjectDisposedException you should not call Dispose more than one time on an object.: Lines: 872</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#btnAddlist_Click1(System.Object,System.EventArgs)" Kind="Method" Static="False" Accessibility="Family" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="Do not dispose objects multiple times" Category="Microsoft.Usage" CheckId="CA2202" Status="Active" Created="2022-06-06 05:11:03Z" FixCategory="DependsOnFix">
+             <Issue Certainty="75" Level="Warning" Path="D:\SMSS CORE\SMSS%20Premium%20Integrated\SMSS_SC_BATAAN\procurement" File="t_purchase_order_v2.aspx.vb" Line="1080">Object 'fs' can be disposed more than once in method 't_purchase_order_v2.btnAddlist_Click1(Object, EventArgs)'. To avoid generating a System.ObjectDisposedException you should not call Dispose more than one time on an object.: Lines: 1080</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+       </Types>
+      </Namespace>
+     </Namespaces>
+    </Module>
+   </Modules>
+  </Target>
+ </Targets>
+ <Rules>
+  <Rule TypeName="Do not dispose objects multiple times" Category="Microsoft.Usage" CheckId="CA2202">
+   <Name>Do not dispose objects multiple times</Name>
+   <Description>A correctly implemented Dispose method can be called multiple times without throwing an exception. However, this is not guaranteed and to avoid generating a System.ObjectDisposedException you should not call Dispose more than one time on an object.</Description>
+   <Resolution Name="Default">Object {0} can be disposed more than once in method {1}. To avoid generating a System.ObjectDisposedException you should not call Dispose more than one time on an object.: Lines: 2129</Resolution>
+   <Owner>RuleOwner</Owner>
+   <Url>http://msdn.microsoft.com/library/ms182334.aspx</Url>
+   <Email />
+   <MessageLevel Certainty="75">Warning</MessageLevel>
+   <File Name="dataflowrules.dll" Version="15.0.0.0" />
+  </Rule>
+  <Rule TypeName="ImplementISerializableCorrectly" Category="Microsoft.Usage" CheckId="CA2240">
+   <Name>Implement ISerializable correctly</Name>
+   <Description>If a type is assignable to ISerializable, it should implement GetObjectData. For unsealed types, the GetObjectData method should be callable and overridable by derived types.</Description>
+   <Resolution Name="Default">Add an implementation of GetObjectData to type {0}.</Resolution>
+   <Owner />
+   <Url>http://msdn.microsoft.com/library/ms182342.aspx</Url>
+   <Email>[none]</Email>
+   <MessageLevel Certainty="60">Error</MessageLevel>
+   <File Name="usagerules.dll" Version="15.0.0.0" />
+  </Rule>
+  <Rule TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100">
+   <Name>Review SQL queries for security vulnerabilities</Name>
+   <Description>A SQL command string built from user input is vulnerable to SQL injection attacks. Microsoft SQL Server and other database servers support stored procedures and parameterized SQL queries, which reduce the risk of injection attacks.</Description>
+   <Resolution Name="WithNonLiterals">The query string passed to {0} in {1} could contain the following variables {2}. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Resolution>
+   <Owner>RuleOwner</Owner>
+   <Url>http://msdn.microsoft.com/library/ms182310.aspx</Url>
+   <Email />
+   <MessageLevel Certainty="75">Warning</MessageLevel>
+   <File Name="dataflowrules.dll" Version="15.0.0.0" />
+  </Rule>
+  <Rule TypeName="TypesThatOwnDisposableFieldsShouldBeDisposable" Category="Microsoft.Design" CheckId="CA1001">
+   <Name>Types that own disposable fields should be disposable</Name>
+   <Description>Types that declare disposable members should also implement IDisposable. If the type does not own any unmanaged resources, do not implement a finalizer on it.</Description>
+   <Resolution Name="DependsOnFix">Implement IDisposable on {0} because it creates members of the following IDisposable types: {1}. If {0} has previously shipped, adding new members that implement IDisposable to this type is considered a breaking change to existing consumers.</Resolution>
+   <Owner />
+   <Url>http://msdn.microsoft.com/library/ms182172.aspx</Url>
+   <Email>[none]</Email>
+   <MessageLevel Certainty="95">CriticalError</MessageLevel>
+   <File Name="designrules.dll" Version="15.0.0.0" />
+  </Rule>
+ </Rules>
+ <Localized>
+  <String Key="Category">Category</String>
+  <String Key="Certainty">Certainty</String>
+  <String Key="CollapseAll">Collapse All</String>
+  <String Key="CheckId">Check Id</String>
+  <String Key="Error">Error</String>
+  <String Key="Errors">error(s)</String>
+  <String Key="ExpandAll">Expand All</String>
+  <String Key="Help">Help</String>
+  <String Key="Line">Line</String>
+  <String Key="Messages">message(s)</String>
+  <String Key="LocationNotStoredInPdb">[Location not stored in Pdb]</String>
+  <String Key="Project">Project</String>
+  <String Key="Resolution">Resolution</String>
+  <String Key="Rule">Rule</String>
+  <String Key="RuleFile">Rule File</String>
+  <String Key="RuleDescription">Rule Description</String>
+  <String Key="Source">Source</String>
+  <String Key="Status">Status</String>
+  <String Key="Target">Target</String>
+  <String Key="Warning">Warning</String>
+  <String Key="Warnings">warning(s)</String>
+  <String Key="ReportTitle">Code Analysis Report</String>
+ </Localized>
+</FxCopReport>

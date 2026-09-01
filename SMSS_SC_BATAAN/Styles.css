@@ -1,0 +1,274 @@
+﻿/* 
+   The below CSS file was built using samples + techniques described by Rachel Andrew in her book:
+   The CSS Anthology: 101 Essential Tips, Tricks & Hacks
+*/
+
+/* Overall Page */
+
+body {
+	margin: 0;
+	padding-bottom: 2em;
+	background-color: #FFFFFF;
+	color: #000000;
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	/*border-top: 2px solid #B51032;*/
+}
+
+/* Header Section */
+
+#header {
+	border-top: 3px solid #507CD1;
+	border-bottom: 1px dotted #507CD1;
+	height: 3em;
+}
+#header .title {
+	font: 190% Arial, Helvetica, Georgia, "Times New Roman", Times, serif;
+	color: black;
+	background-color: transparent;
+	float: left;
+	margin-right: 2em;
+	margin-top: 0.3em;
+	margin-left: .8em;
+}
+
+#header a:link, a:visited  {
+	color: #B51032;
+}
+
+/* Navigation position:absolute;*/
+
+#navigation {
+	width: 200px;
+	top: 5em;
+	left: 1em;
+	width: 13em;	
+	
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size:90%;
+}
+#navigation ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+#navigation li {
+	border-bottom: 1px solid #507CD1;
+}
+#navigation li a  {
+	display: block;
+	padding: 5px 5px 5px 0.5em;
+	border-left: 12px solid #507CD1;
+	border-right: 1px solid #507CD1;
+	background-color: #507CD1;
+	color: #FFFFFF;
+	text-decoration: none;
+}
+#navigation li a:hover {
+	background-color:#507CD1;
+	color: #FFFFFF;
+}
+#navigation ul ul {
+	margin-left: 12px;
+}
+#navigation ul ul li {
+	border-bottom: 1px solid #507CD1;
+	margin:0;
+	background-color: #507CD1;
+	color: #711515;
+}
+#navigation ul ul a:link, #navigation ul ul a:visited {
+	background-color: #EFF3FB;
+	color: #507CD1;
+}
+#navigation ul ul a:hover {
+	
+	color: Black;
+}
+#header .breadcrumb {
+	font: 90% Arial, Helvetica, Georgia, "Times New Roman", Times, serif;
+	color: black;
+	background-color: transparent;
+	float: right;
+	margin-right: 2em;
+	margin-top: 0.8em;
+	font-weight:bold;
+}
+
+
+/* Main Content */
+
+#content 
+{
+	margin-top:1em;
+	margin-left: 16em;
+	margin-right: 2em;
+}
+h1 {
+	font: 150% Arial, Helvetica, Georgia, "Times New Roman", Times, serif;
+}
+#content p {
+	font-size: 80%;
+	line-height: 1.6em; 
+}
+
+#content ul {
+	font-size: 80%;
+	line-height: 1.6em; 
+}
+
+
+#centered
+{
+	text-align:center;
+}
+
+.text
+{ 
+font-size:10pt;
+font-family: VERDANA, Arial, 'Times New Roman'; 
+text-align:justify
+}
+
+flyOutDiv  
+
+ {  
+
+      display: none;  
+
+
+left:50%;
+right:50%;
+     width: 400px;  
+
+    /* z-index: 3;  position: absolute;  */
+
+background-color:Gray;
+filter:alpha(opacity=0);
+opacity:0.7;
+
+
+      /*opacity: 0;  
+
+      filter:(progid:DXImageTransform.Microsoft.Alpha(opacity=0));   */
+
+      font-size: 14px;  
+
+      border: solid 1px #CCCCCC;  
+
+      background-color: #FFFFFF;  
+
+    
+
+ }  
+
+    
+
+ .flyOutDivCloseX  
+
+ {  
+
+  background-color: #666666;  
+
+  color: #FFFFFF;  
+
+  text-align: center;  
+
+  font-weight: bold;  
+
+  text-decoration: none;  
+
+  border: outset thin #FFFFFF;  
+
+  padding: 5px;   
+
+ }  
+
+.bg
+{
+	background: url(images/bg.gif);
+	background-attachment: fixed;  
+	
+}
+.head1
+{
+BORDER-RIGHT: gray 1px solid; BORDER-TOP: gray 1px solid; FONT-WEIGHT: bold; FONT-SIZE: 12pt; VERTICAL-ALIGN: middle; BORDER-LEFT: gray 1px solid; COLOR: dimgray; BORDER-BOTTOM: gray 1px solid; HEIGHT: 10px; TEXT-ALIGN: left
+}
+.smallfont
+{
+	font-size: 7pt;
+	font-family: Verdana;
+}
+
+.modalBackground 
+{
+background-color:Gray;
+filter:alpha(opacity=70);
+opacity:0.7;
+}
+
+
+.TitleRow
+{
+	background-color: #2977dc;
+	color: White;
+	font-family: Verdana;
+	font-size: 11pt;
+	width: 100%;
+	height: 20px;
+	font-weight: bold;
+	text-align: left;
+	padding: 3px;
+}
+
+.text1
+{
+	text-align: right;
+	font-family: Arial;
+	font-size: 12pt;
+}
+
+.text1Bold
+{
+	text-align: right;
+	font-family: Arial;
+	font-size: 12pt;
+	font-weight: bold;
+}
+
+
+.text2
+{
+	text-align: left;
+	font-family: Arial;
+	font-size: 12pt;
+}
+
+.text2Bold
+{
+	text-align: left;
+	font-family: Arial;
+	font-size: 12pt;
+	font-weight: bold;
+}
+
+.text3
+{
+    text-align: center;
+    font-family: Arial;
+    font-size: 12pt;
+    vertical-align: middle;
+}
+
+.div_Master1
+{
+    width: 1015px;
+    text-align: center;
+    background-color: white;
+}
+
+
+.div_Master2 {
+    width: 100%;
+    text-align: center;
+    background-color: white;
+}
