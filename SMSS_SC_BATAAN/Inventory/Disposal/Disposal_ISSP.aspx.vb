@@ -39,6 +39,8 @@ Partial Class Inventory_Disposal_Disposal_ISSP
 
             grdISSP.Columns(7).Visible = False
 
+
+
             txtDeadlineSub.Text = Date.Today.ToShortDateString
             txtBidDate.Text = Date.Today.ToShortDateString
 
@@ -104,6 +106,14 @@ Partial Class Inventory_Disposal_Disposal_ISSP
                 btnSave.Enabled = False
             End If
         Next
+
+        If gvr IsNot Nothing Then
+            Dim rowIndex As Integer = gvr.RowIndex
+
+            Dim iirupHdrID As Object = grdISSP.DataKeys(rowIndex)("IIRUPHdr_ID")
+
+            iirupHdrID = Session("IIRUPHdr_ID")
+        End If
 
     End Sub
     Private Sub btnSave_Click(sender As Object, e As EventArgs) Handles btnSave.Click
