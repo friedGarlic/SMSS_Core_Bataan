@@ -23,31 +23,48 @@
                 <td style="width:1%"></td>
             </tr>
 
-            <tr>
-                <td style="width:1%"></td>
-                <td style="width:98%" align="center">
-                    <div style="max-width:850px; max-height:1300px; background-color:#808080; text-align:center; vertical-align:middle; overflow:scroll">
-                        <table width="100%">
-                            <tr>
-                                <td style="width:100%;height:5px"></td>
-                            </tr>
+<tr>
+    <td style="width:1%"></td>
+    <td style="width:98%" align="center">
+        <!-- Button row – upper left -->
+        <div style="text-align:left; padding-bottom:5px; margin-left:70px;">
+            <asp:Button ID="btnExportPDF" runat="server" Width="20%" Text="Export to PDF" CssClass="CSButton" OnClick="btnExportPDF_Click" />
+        </div>
 
-                            <tr>
-                                <td style="width:100%" align="center">
-                                    <CR:CrystalReportViewer ID="RISConsoReport" runat="server" AutoDataBind="true" HasToggleGroupTreeButton="False" HasCrystalLogo="False" BackColor="#ffffff" BestFitPage="true" />
-                                    <CR:CrystalReportSource ID="CrystalReportSource1" runat="server">
-                                    </CR:CrystalReportSource>
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td style="width:100%;height:5px"></td>
-                            </tr>
-                        </table>
-                    </div>
-                </td>
-                <td style="width:1%"></td>
-            </tr>
+        <!-- Report viewer container (scrollable) -->
+        <div style="max-width:850px; max-height:1300px; background-color:#808080; text-align:center; vertical-align:middle; overflow:scroll">
+            <table width="100%">
+                <tr>
+                    <td style="width:100%;height:5px"></td>
+                </tr>
+                <tr>
+                    <td style="width:100%" align="center">
+                        <CR:CrystalReportViewer ID="RISConsoReport" 
+                            runat="server" 
+                            AutoDataBind="true" 
+                            HasToggleGroupTreeButton="False" 
+                            HasCrystalLogo="False" 
+                            BackColor="#ffffff" 
+                            BestFitPage="true" 
+                            DisplayToolbar="True" 
+                            PrintMode="ActiveX" 
+                            EnableExportButton="True" 
+                            EnablePrintButton="True" 
+                            EnableParameterPrompt="False" 
+                            HasExportButton="True" 
+                            HasPrintButton="True" />
+                        <CR:CrystalReportSource ID="CrystalReportSource1" runat="server">
+                        </CR:CrystalReportSource>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width:100%;height:5px"></td>
+                </tr>
+            </table>
+        </div>
+    </td>
+    <td style="width:1%"></td>
+</tr>
         </table>
     </div>
 </asp:Content>
