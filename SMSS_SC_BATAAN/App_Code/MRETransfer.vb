@@ -116,6 +116,27 @@ Public Class MRETransfer
     End Property
 
 
+    Private pOriginallyFrom As Nullable(Of Integer)
+    Public Property OriginallyFrom() As Nullable(Of Integer)
+        Get
+            Return pOriginallyFrom
+        End Get
+        Set(ByVal value As Nullable(Of Integer))
+            pOriginallyFrom = value
+        End Set
+    End Property
+
+    Private pOriginallyFromDeptID As Nullable(Of Integer)
+    Public Property OriginallyFromDeptID() As Nullable(Of Integer)
+        Get
+            Return pOriginallyFromDeptID
+        End Get
+        Set(ByVal value As Nullable(Of Integer))
+            pOriginallyFromDeptID = value
+        End Set
+    End Property
+
+
 #End Region
 
     Public Sub saveMRETransfer()
@@ -135,6 +156,8 @@ Public Class MRETransfer
         objDerived.cmd.Parameters.AddWithValue("@TransferTo", TransferTo)
         objDerived.cmd.Parameters.AddWithValue("@DepartmentID", DepartmentID)
         objDerived.cmd.Parameters.AddWithValue("@Remarks", Remarks)
+        objDerived.cmd.Parameters.AddWithValue("@OriginallyFrom", OriginallyFrom)
+        objDerived.cmd.Parameters.AddWithValue("@OriginallyFromDeptID", OriginallyFromDeptID)
         objDerived.cmd.Parameters.Add("@CurrID", SqlDbType.BigInt).Direction = ParameterDirection.Output
 
         i = objDerived.Execute(
@@ -163,6 +186,8 @@ Public Class MRETransfer
         objDerived.cmd.Parameters.AddWithValue("@TransferTo", TransferTo)
         objDerived.cmd.Parameters.AddWithValue("@DepartmentID", DepartmentID)
         objDerived.cmd.Parameters.AddWithValue("@Remarks", Remarks)
+        objDerived.cmd.Parameters.AddWithValue("@OriginallyFrom", OriginallyFrom)
+        objDerived.cmd.Parameters.AddWithValue("@OriginallyFromDeptID", OriginallyFromDeptID)
         objDerived.cmd.Parameters.Add("@CurrID", SqlDbType.BigInt).Direction = ParameterDirection.Output
 
         i = objDerived.Execute(
