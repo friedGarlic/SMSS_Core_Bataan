@@ -9,209 +9,112 @@
     <asp:ScriptManager ID="ScriptManager1" runat="server">
     </asp:ScriptManager>
 
-<script type="text/javascript">
+    <script type="text/javascript">
 
-    Sys.Application.add_load(function () {
+        Sys.Application.add_load(function () {
 
 
-        InitializeAccountAutocomplete(
+            InitializeAccountAutocomplete(
             '<%= ddProperty.ClientID %>',
-            'txtProperty',
+                'txtProperty',
             '<%= ddProperty.UniqueID %>'
-        );
-
-
-        InitializeAccountAutocomplete(
-            '<%= ddSupplies.ClientID %>',
-            '<%= txtSupplies.ClientID %>',
-            '<%= ddSupplies.UniqueID %>'
-        );
-
-
-    });
-
-
-
-    function InitializeAccountAutocomplete(dropdownID, textboxID, uniqueID) {
-
-
-        var d = $('#' + dropdownID);
-        var t = $('#' + textboxID);
-
-
-        if (d.length === 0 || t.length === 0)
-            return;
-
-
-
-        var data = [];
-
-
-        d.find('option').each(function () {
-
-
-            var value = $(this).val();
-            var text = $(this).text();
-
-
-            if ($.trim(value) !== "") {
-
-
-                data.push({
-
-                    label: text,
-                    value: value
-
-                });
-
-
-            }
-
-
-        });
-
-
-
-        if (t.data("ui-autocomplete")) {
-
-            t.autocomplete("destroy");
-
-        }
-
-
-
-        function SelectItem(item) {
-
-
-            t.val(item.label);
-
-            d.val(item.value);
-
-
-
-            StartProgressBar();
-
-
-
-            __doPostBack(
-                uniqueID,
-                ''
             );
 
 
-        }
-
-
-
-
-        t.autocomplete({
-
-            source: data,
-
-            minLength: 0,
-
-
-            select: function (e, ui) {
-
-
-                SelectItem(ui.item);
-
-
-                return false;
-
-
-            }
+            InitializeAccountAutocomplete(
+            '<%= ddSupplies.ClientID %>',
+            '<%= txtSupplies.ClientID %>',
+            '<%= ddSupplies.UniqueID %>'
+            );
 
 
         });
 
 
 
-        t.off('.accountSearch');
+        function InitializeAccountAutocomplete(dropdownID, textboxID, uniqueID) {
+
+
+            var d = $('#' + dropdownID);
+            var t = $('#' + textboxID);
+
+
+            if (d.length === 0 || t.length === 0)
+                return;
 
 
 
-        t.on(
-            'focus.accountSearch',
-            function () {
+            var data = [];
 
 
-                $(this).autocomplete(
-                    "search",
-                    ""
-                );
+            d.find('option').each(function () {
 
 
-            }
-        );
+                var value = $(this).val();
+                var text = $(this).text();
 
 
-
-        t.on(
-            'keydown.accountSearch',
-            function (e) {
+                if ($.trim(value) !== "") {
 
 
-                if (e.keyCode === 13 || e.which === 13) {
+                    data.push({
 
-
-                    e.preventDefault();
-
-                    e.stopPropagation();
-
-
-
-                    var enteredText =
-                        $.trim(t.val()).toLowerCase();
-
-
-
-                    var selectedItem = null;
-
-
-
-                    $.each(data, function(index,item){
-
-
-                        if (
-                            $.trim(item.label).toLowerCase()
-                            ===
-                            enteredText
-                        )
-                        {
-
-
-                            selectedItem = item;
-
-                            return false;
-
-                        }
-
+                        label: text,
+                        value: value
 
                     });
 
 
-
-                    if(selectedItem !== null)
-                    {
+                }
 
 
-                        SelectItem(selectedItem);
+            });
 
 
-                    }
-                    else
-                    {
+
+            if (t.data("ui-autocomplete")) {
+
+                t.autocomplete("destroy");
+
+            }
 
 
-                        t.autocomplete(
-                            "search",
-                            t.val()
-                        );
+
+            function SelectItem(item) {
 
 
-                    }
+                t.val(item.label);
 
+                d.val(item.value);
+
+
+
+                StartProgressBar();
+
+
+
+                __doPostBack(
+                    uniqueID,
+                    ''
+                );
+
+
+            }
+
+
+
+
+            t.autocomplete({
+
+                source: data,
+
+                minLength: 0,
+
+
+                select: function (e, ui) {
+
+
+                    SelectItem(ui.item);
 
 
                     return false;
@@ -220,47 +123,139 @@
                 }
 
 
+            });
+
+
+
+            t.off('.accountSearch');
+
+
+
+            t.on(
+                'focus.accountSearch',
+                function () {
+
+
+                    $(this).autocomplete(
+                        "search",
+                        ""
+                    );
+
+
+                }
+            );
+
+
+
+            t.on(
+                'keydown.accountSearch',
+                function (e) {
+
+
+                    if (e.keyCode === 13 || e.which === 13) {
+
+
+                        e.preventDefault();
+
+                        e.stopPropagation();
+
+
+
+                        var enteredText =
+                            $.trim(t.val()).toLowerCase();
+
+
+
+                        var selectedItem = null;
+
+
+
+                        $.each(data, function (index, item) {
+
+
+                            if (
+                                $.trim(item.label).toLowerCase()
+                                ===
+                                enteredText
+                            ) {
+
+
+                                selectedItem = item;
+
+                                return false;
+
+                            }
+
+
+                        });
+
+
+
+                        if (selectedItem !== null) {
+
+
+                            SelectItem(selectedItem);
+
+
+                        }
+                        else {
+
+
+                            t.autocomplete(
+                                "search",
+                                t.val()
+                            );
+
+
+                        }
+
+
+
+                        return false;
+
+
+                    }
+
+
+                }
+            );
+
+
+
+            // synchronize textbox after postback
+
+            var selectedValue = d.val();
+
+
+            if (
+                selectedValue !== null &&
+                selectedValue !== ""
+            ) {
+
+
+                var selectedText =
+                    d.find('option:selected').text();
+
+
+
+                t.val(selectedText);
+
+
             }
-        );
+            else {
 
 
-
-        // synchronize textbox after postback
-
-        var selectedValue = d.val();
+                t.val("");
 
 
-        if(
-            selectedValue !== null &&
-            selectedValue !== ""
-        )
-        {
+            }
 
-
-            var selectedText =
-                d.find('option:selected').text();
-
-
-
-            t.val(selectedText);
-
-
-        }
-        else
-        {
-
-
-            t.val("");
 
 
         }
 
 
-
-    }
-
-
-</script>
+    </script>
 
 
 
@@ -302,35 +297,24 @@
                                     <table style="width: 100%">
                                         <tbody>
                                             <tr>
-                                                <tr>
-                                                    <td style="width: 100%" align="center">
-                                                        <span class="column_RightBold">Department :</span>
-                                                        <asp:DropDownList ID="ddDepartment" runat="server" Width="350px" CssClass="drpdownCSS">
-                                                        </asp:DropDownList>
-
-                                                        &nbsp;&nbsp; <!-- spacing -->
-
-                                                     <%-- <span class="column_RightBold">General Account :</span>
+                                                <td align="center" style="width: 100%"><span class="column_RightBold">Department :</span>
+                                                    <asp:DropDownList ID="ddDepartment" runat="server" CssClass="drpdownCSS" Width="350px">
+                                                    </asp:DropDownList>
+                                                    &nbsp;&nbsp;
+                                                    <!-- spacing -->
+                                                    <%-- <span class="column_RightBold">General Account :</span>
                                                         <asp:DropDownList ID="ddSupplies" runat="server" Width="350px" CssClass="drpdownCSS"
                                                             OnSelectedIndexChanged="ddSupplies_SelectedIndexChanged" AutoPostBack="True">
-                                                        </asp:DropDownList>--%>
-
-
-                                                      <span class="column_RightBold">General Account :</span>
-                                                        <asp:DropDownList ID="ddSupplies" runat="server"
-                                                            OnSelectedIndexChanged="ddSupplies_SelectedIndexChanged" AutoPostBack="True"
-                                                            Style="display:none">
-                                                        </asp:DropDownList>
-
-                                                        <input type="text" id="txtSupplies" runat="server" class="drpdownCSS" 
-                                                            style="width:350px;" placeholder="Select" />
-
-                                                    </td>
-                                                </tr>
+                                                        </asp:DropDownList>--%><span class="column_RightBold">General Account :</span>
+                                                    <asp:DropDownList ID="ddSupplies" runat="server" AutoPostBack="True" OnSelectedIndexChanged="ddSupplies_SelectedIndexChanged" Style="display: none">
+                                                    </asp:DropDownList>
+                                                    <input type="text" id="txtSupplies" runat="server" class="drpdownCSS"
+                                                        style="width: 350px;" placeholder="Select" />
+                                                </td>
 
                                                 <tr>
                                                     <td style="width: 100%" align="center">
-                                                         <span class="column_RightBold">Search : </span>
+                                                        <span class="column_RightBold">Search : </span>
                                                         <asp:DropDownList ID="ddSuppliesSearch" runat="server" CssClass="drpdownCSS" Width="150px">
                                                             <asp:ListItem Selected="True" Value="1">Description</asp:ListItem>
                                                             <asp:ListItem Value="2">Item Code</asp:ListItem>
@@ -342,201 +326,201 @@
                                                 </tr>
 
 
-                                            <tr>
-                                                <td style="width: 100%" class="DivTitle">Requisition and Issuance Slip</td>
-                                            </tr>
-                                            <tr>
-                                                <td style="width: 100%" align="center">
-                                                    <asp:GridView ID="gvSupplyList" runat="server" Width="95%" Font-Size="8pt" CssClass="text" SkinID="GridViewAA"
-                                                        OnSelectedIndexChanged="gvSupplyList_SelectedIndexChanged"   DataKeyNames="RC_ID,GA_ID,Function_ID,POHdr_ID,PO_No,Item_ID,Item_Desc,Unit,Description,Balance,cost,stockID" AllowPaging="True"
-                                                        OnRowDataBound="gvSupplyList_RowDataBound" EmptyDataText="No Data Found." OnPageIndexChanging="gvSupplyList_PageIndexChanging1">
-                                                        <Columns>
-                                                            <asp:TemplateField HeaderText=" ">
-                                                              <ItemTemplate>
-                                                                <asp:CheckBox ID="chkSelect" runat="server" AutoPostBack="true"
-                                                                              OnCheckedChanged="chkSelect_CheckedChanged" />
-                                                              </ItemTemplate>
-                                                              <ItemStyle HorizontalAlign="Center" Width="5%" />
-                                                            </asp:TemplateField>
+                                                <tr>
+                                                    <td style="width: 100%" class="DivTitle">Requisition and Issuance Slip</td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="width: 100%" align="center">
+                                                        <asp:GridView ID="gvSupplyList" runat="server" Width="95%" Font-Size="8pt" CssClass="text" SkinID="GridViewAA"
+                                                            OnSelectedIndexChanged="gvSupplyList_SelectedIndexChanged" DataKeyNames="RC_ID,GA_ID,Function_ID,POHdr_ID,PO_No,Item_ID,Item_Desc,Unit,Description,Balance,cost,stockID" AllowPaging="True"
+                                                            OnRowDataBound="gvSupplyList_RowDataBound" EmptyDataText="No Data Found." OnPageIndexChanging="gvSupplyList_PageIndexChanging1">
+                                                            <Columns>
+                                                                <asp:TemplateField HeaderText=" ">
+                                                                    <ItemTemplate>
+                                                                        <asp:CheckBox ID="chkSelect" runat="server" AutoPostBack="true"
+                                                                            OnCheckedChanged="chkSelect_CheckedChanged" />
+                                                                    </ItemTemplate>
+                                                                    <ItemStyle HorizontalAlign="Center" Width="5%" />
+                                                                </asp:TemplateField>
 
 
-                                                            <asp:BoundField DataField="PO_No" HeaderText="PO Number">
-                                                                <ItemStyle HorizontalAlign="Center" Width="10%"></ItemStyle>
-                                                            </asp:BoundField>
+                                                                <asp:BoundField DataField="PO_No" HeaderText="PO Number">
+                                                                    <ItemStyle HorizontalAlign="Center" Width="10%"></ItemStyle>
+                                                                </asp:BoundField>
 
-                                                            <asp:BoundField DataField="Item_Code" HeaderText="Item Code">
-                                                                <ItemStyle HorizontalAlign="Center" Width="10%"></ItemStyle>
-                                                            </asp:BoundField>
-                                                            <asp:BoundField DataField="Item_Desc" HeaderText="Description">
-                                                                <ItemStyle HorizontalAlign="Left" Width="40%"></ItemStyle>
-                                                            </asp:BoundField>
-                                                            <asp:BoundField DataField="Unit" HeaderText="Unit">
-                                                                <ItemStyle HorizontalAlign="Center" Width="10%"></ItemStyle>
-                                                            </asp:BoundField>
-                                                            <asp:BoundField DataField="Balance" HeaderText="Available Qty">
-                                                                <ItemStyle HorizontalAlign="Center" Width="10%"></ItemStyle>
-                                                            </asp:BoundField>
-                                                            <asp:BoundField DataField="RC_Name" HeaderText="Department">
-                                                                <ItemStyle HorizontalAlign="Left" Width="30%"></ItemStyle>
-                                                            </asp:BoundField>
-                                                          
-                                                        </Columns>
-                                                    </asp:GridView>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td style="width: 100%; height: 10px"></td>
-                                            </tr>
-                                            <tr>
-                                                <td style="width: 100%" class="DivTitle">Details</td>
-                                            </tr>
+                                                                <asp:BoundField DataField="Item_Code" HeaderText="Item Code">
+                                                                    <ItemStyle HorizontalAlign="Center" Width="10%"></ItemStyle>
+                                                                </asp:BoundField>
+                                                                <asp:BoundField DataField="Item_Desc" HeaderText="Description">
+                                                                    <ItemStyle HorizontalAlign="Left" Width="40%"></ItemStyle>
+                                                                </asp:BoundField>
+                                                                <asp:BoundField DataField="Unit" HeaderText="Unit">
+                                                                    <ItemStyle HorizontalAlign="Center" Width="10%"></ItemStyle>
+                                                                </asp:BoundField>
+                                                                <asp:BoundField DataField="Balance" HeaderText="Available Qty">
+                                                                    <ItemStyle HorizontalAlign="Center" Width="10%"></ItemStyle>
+                                                                </asp:BoundField>
+                                                                <asp:BoundField DataField="RC_Name" HeaderText="Department">
+                                                                    <ItemStyle HorizontalAlign="Left" Width="30%"></ItemStyle>
+                                                                </asp:BoundField>
 
-                                            <tr>
-                                                <td style="width: 100%" align="center">
-                                                    <table style="width: 90%">
-                                                        <tbody>
-                                                            <tr>
-                                                                <td style="width: 20%" class="column_RightBold">RIS Number : </td>
-                                                                <td style="width: 80%" class="column_Left">
-                                                                    <asp:TextBox runat="server" ID="txtCategoryCode" Width="40px" Visible="false" CssClass="txtbox_Var"></asp:TextBox>
-                                                                    <asp:DropDownList runat="server" ID="drpCategoryCode" Width="50px" CssClass="drpdownCSS">
-                                                                        <asp:ListItem Value="1" Text="OTS"></asp:ListItem>
-                                                                        <asp:ListItem Value="2" Text="OS"></asp:ListItem>
-                                                                        <asp:ListItem Value="3" Text="JS"></asp:ListItem>
-                                                                        <asp:ListItem Value="4" Text="MS"></asp:ListItem>
-                                                                        <asp:ListItem Value="5" Text="DS"></asp:ListItem>
-                                                                        <asp:ListItem Value="6" Text="LS"></asp:ListItem>
-                                                                        <asp:ListItem Value="7" Text="MDS"></asp:ListItem>
-                                                                    </asp:DropDownList>
-                                                                    &nbsp;<span class="column_RightBold">-</span>
-                                                                    &nbsp;<asp:TextBox ID="txtRIS" runat="server" Width="100px" ReadOnly="true" CssClass="txtbox_Var"></asp:TextBox>
-                                                                    &nbsp;<span class="column_RightBold">Date :</span>
-                                                                    &nbsp;<asp:TextBox ID="txtdate" runat="server" Width="100px" CssClass="txtbox_Date" AutoPostBack="true" OnTextChanged="txtdate_TextChanged"></asp:TextBox>
-                                                                    &nbsp;<asp:ImageButton ID="ImageButton1" runat="server" Width="20px" ImageUrl="~/images/Calendar_scheduleHS.png" Height="15px"></asp:ImageButton>
-                                                                    &nbsp;<span class="CalendarFormat">(MM/DD/YYYY)</span>
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td style="width: 20%" class="column_RightBold">Department :</td>
-                                                                <td style="width: 80%" class="column_Left">
-                                                                    <asp:DropDownList ID="drpdept" runat="server" Width="60%" CssClass="drpdownCSS" AutoPostBack="True"></asp:DropDownList></td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td style="width: 20%" class="column_RightBold">Function : </td>
-                                                                <td style="width: 80%" class="column_Left">
-                                                                    <asp:DropDownList ID="drpFunction" runat="server" Width="60%" CssClass="drpdownCSS" AutoPostBack="True"></asp:DropDownList></td>
-                                                            </tr>
-                                                           <tr>
-    <td style="width: 20%" class="column_RightBold">Requested By :</td>
-    <td style="width: 80%" class="column_Left">
-        <asp:TextBox ID="txtRequestedBy" runat="server" Width="60%" CssClass="txtbox_Var"></asp:TextBox>
-    </td>
-</tr>
+                                                            </Columns>
+                                                        </asp:GridView>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="width: 100%; height: 10px"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="width: 100%" class="DivTitle">Details</td>
+                                                </tr>
 
-                                                           <tr>
-                                                                <td style="width: 20%" class="column_RightBold">Approved By :</td>
-                                                                <td style="width: 80%" class="column_Left">
-                                                                    <asp:DropDownList ID="ddApprovedBy" runat="server" Width="60%" CssClass="drpdownCSS" OnSelectedIndexChanged="ddApprovedBy_SelectedIndexChanged" AutoPostBack="True"></asp:DropDownList></td>
-                                                            </tr>
+                                                <tr>
+                                                    <td style="width: 100%" align="center">
+                                                        <table style="width: 90%">
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td style="width: 20%" class="column_RightBold">RIS Number : </td>
+                                                                    <td style="width: 80%" class="column_Left">
+                                                                        <asp:TextBox runat="server" ID="txtCategoryCode" Width="40px" Visible="false" CssClass="txtbox_Var"></asp:TextBox>
+                                                                        <asp:DropDownList runat="server" ID="drpCategoryCode" Width="50px" CssClass="drpdownCSS">
+                                                                            <asp:ListItem Value="1" Text="OTS"></asp:ListItem>
+                                                                            <asp:ListItem Value="2" Text="OS"></asp:ListItem>
+                                                                            <asp:ListItem Value="3" Text="JS"></asp:ListItem>
+                                                                            <asp:ListItem Value="4" Text="MS"></asp:ListItem>
+                                                                            <asp:ListItem Value="5" Text="DS"></asp:ListItem>
+                                                                            <asp:ListItem Value="6" Text="LS"></asp:ListItem>
+                                                                            <asp:ListItem Value="7" Text="MDS"></asp:ListItem>
+                                                                        </asp:DropDownList>
+                                                                        &nbsp;<span class="column_RightBold">-</span>
+                                                                        &nbsp;<asp:TextBox ID="txtRIS" runat="server" Width="100px" ReadOnly="true" CssClass="txtbox_Var"></asp:TextBox>
+                                                                        &nbsp;<span class="column_RightBold">Date :</span>
+                                                                        &nbsp;<asp:TextBox ID="txtdate" runat="server" Width="100px" CssClass="txtbox_Date" AutoPostBack="true" OnTextChanged="txtdate_TextChanged"></asp:TextBox>
+                                                                        &nbsp;<asp:ImageButton ID="ImageButton1" runat="server" Width="20px" ImageUrl="~/images/Calendar_scheduleHS.png" Height="15px"></asp:ImageButton>
+                                                                        &nbsp;<span class="CalendarFormat">(MM/DD/YYYY)</span>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td style="width: 20%" class="column_RightBold">Department :</td>
+                                                                    <td style="width: 80%" class="column_Left">
+                                                                        <asp:DropDownList ID="drpdept" runat="server" Width="60%" CssClass="drpdownCSS" AutoPostBack="True"></asp:DropDownList></td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td style="width: 20%" class="column_RightBold">Function : </td>
+                                                                    <td style="width: 80%" class="column_Left">
+                                                                        <asp:DropDownList ID="drpFunction" runat="server" Width="60%" CssClass="drpdownCSS" AutoPostBack="True"></asp:DropDownList></td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td style="width: 20%" class="column_RightBold">Requested By :</td>
+                                                                    <td style="width: 80%" class="column_Left">
+                                                                        <asp:TextBox ID="txtRequestedBy" runat="server" Width="60%" CssClass="txtbox_Var"></asp:TextBox>
+                                                                    </td>
+                                                                </tr>
 
-                                                           <tr>
-    <td style="width: 20%" class="column_RightBold">Issued By :</td>
-    <td style="width: 80%" class="column_Left">
-        <asp:TextBox ID="txtIssuedBy" runat="server" Width="60%" CssClass="txtbox_Var"></asp:TextBox>
-    </td>
-</tr>
-                                                           <tr>
-    <td style="width: 20%" class="column_RightBold">Received By : </td>
-    <td style="width: 80%" class="column_Left">
-        <asp:TextBox ID="txtReceivedBy" runat="server" Width="60%" CssClass="txtbox_Var"></asp:TextBox>
-    </td>
-</tr>
-                                                            <tr>
-                                                                <td style="width: 20%" class="column_RightBold">Purpose : </td>
-                                                                <td style="width: 80%" class="column_Left">
-                                                                    <asp:TextBox ID="txtremarks" runat="server" Width="60%" CssClass="txtbox_Remarks" SkinID="text" Height="50px" TextMode="MultiLine"></asp:TextBox></td>
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                    <cc1:CalendarExtender ID="CalendarExtender5" runat="server" TargetControlID="txtdate" Enabled="True" PopupButtonID="ImageButton1"></cc1:CalendarExtender>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td style="width: 100%" align="center">
-                                                    <asp:Button ID="btnADD" OnClick="btnADD_Click" runat="server" CssClass="CSButton" Width="150px" Text="ADD ITEM" Enabled="False" SkinID="ButtonImage"></asp:Button>
+                                                                <tr>
+                                                                    <td style="width: 20%" class="column_RightBold">Approved By :</td>
+                                                                    <td style="width: 80%" class="column_Left">
+                                                                        <asp:DropDownList ID="ddApprovedBy" runat="server" Width="60%" CssClass="drpdownCSS" OnSelectedIndexChanged="ddApprovedBy_SelectedIndexChanged" AutoPostBack="True"></asp:DropDownList></td>
+                                                                </tr>
 
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td style="width: 100%" class="DivTitle">List of Items</td>
-                                            </tr>
-                                            <tr>
-                                                <td style="width: 100%" align="center">
-                                                    <asp:UpdatePanel ID="UpdatePanel5" runat="server">
-                                                        <ContentTemplate>
-                                                            <asp:Panel ID="Panel2" runat="server" Width="98%" Font-Bold="True" CssClass="PanelSize" BorderStyle="Solid" BorderColor="Silver" BorderWidth="1px" HorizontalAlign="Center" ScrollBars="Vertical">
-                                                                <asp:GridView ID="gvbody" runat="server" Width="100%" SkinID="GridViewAA" EmptyDataText="No Data Found." AutoGenerateColumns="False" PageSize="20" ShowFooter="True">
-                                                                    <Columns>
-                                                                        <asp:BoundField DataField="item_desc" HeaderText="Description">
-                                                                            <ItemStyle HorizontalAlign="Left" Width="30%"></ItemStyle>
-                                                                        </asp:BoundField>
+                                                                <tr>
+                                                                    <td style="width: 20%" class="column_RightBold">Issued By :</td>
+                                                                    <td style="width: 80%" class="column_Left">
+                                                                        <asp:TextBox ID="txtIssuedBy" runat="server" Width="60%" CssClass="txtbox_Var"></asp:TextBox>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td style="width: 20%" class="column_RightBold">Received By : </td>
+                                                                    <td style="width: 80%" class="column_Left">
+                                                                        <asp:TextBox ID="txtReceivedBy" runat="server" Width="60%" CssClass="txtbox_Var"></asp:TextBox>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td style="width: 20%" class="column_RightBold">Purpose : </td>
+                                                                    <td style="width: 80%" class="column_Left">
+                                                                        <asp:TextBox ID="txtremarks" runat="server" Width="60%" CssClass="txtbox_Remarks" SkinID="text" Height="50px" TextMode="MultiLine"></asp:TextBox></td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                        <cc1:CalendarExtender ID="CalendarExtender5" runat="server" TargetControlID="txtdate" Enabled="True" PopupButtonID="ImageButton1"></cc1:CalendarExtender>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="width: 100%" align="center">
+                                                        <asp:Button ID="btnADD" OnClick="btnADD_Click" runat="server" CssClass="CSButton" Width="150px" Text="ADD ITEM" Enabled="False" SkinID="ButtonImage"></asp:Button>
 
-                                                                        <asp:BoundField DataField="Description" HeaderText="Unit">
-                                                                            <HeaderStyle HorizontalAlign="Center"></HeaderStyle>
-                                                                            <ItemStyle HorizontalAlign="Center" Width="10%"></ItemStyle>
-                                                                        </asp:BoundField>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="width: 100%" class="DivTitle">List of Items</td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="width: 100%" align="center">
+                                                        <asp:UpdatePanel ID="UpdatePanel5" runat="server">
+                                                            <ContentTemplate>
+                                                                <asp:Panel ID="Panel2" runat="server" Width="98%" Font-Bold="True" CssClass="PanelSize" BorderStyle="Solid" BorderColor="Silver" BorderWidth="1px" HorizontalAlign="Center" ScrollBars="Vertical">
+                                                                    <asp:GridView ID="gvbody" runat="server" Width="100%" SkinID="GridViewAA" EmptyDataText="No Data Found." AutoGenerateColumns="False" PageSize="20" ShowFooter="True">
+                                                                        <Columns>
+                                                                            <asp:BoundField DataField="item_desc" HeaderText="Description">
+                                                                                <ItemStyle HorizontalAlign="Left" Width="30%"></ItemStyle>
+                                                                            </asp:BoundField>
 
-                                                                        <asp:BoundField DataField="qty" HeaderText="Available Qty">
-                                                                            <HeaderStyle HorizontalAlign="Center"></HeaderStyle>
-                                                                            <ItemStyle HorizontalAlign="Center" Width="10%"></ItemStyle>
-                                                                        </asp:BoundField>
+                                                                            <asp:BoundField DataField="Description" HeaderText="Unit">
+                                                                                <HeaderStyle HorizontalAlign="Center"></HeaderStyle>
+                                                                                <ItemStyle HorizontalAlign="Center" Width="10%"></ItemStyle>
+                                                                            </asp:BoundField>
 
-                                                                        <asp:TemplateField HeaderText="Quantity">
-                                                                            <ItemTemplate>
-                                                                                <asp:TextBox ID="txtqty" runat="server" Width="90%" Text='<%# Bind("qty2") %>' CssClass="txtbox_Amt" AutoPostBack="True" OnTextChanged="txtqty_TextChanged1"></asp:TextBox>
-                                                                                <cc1:FilteredTextBoxExtender ID="FilteredTextBoxExtender1" runat="server" TargetControlID="txtqty" ValidChars="0123456789."></cc1:FilteredTextBoxExtender>
-                                                                            </ItemTemplate>
-                                                                            <HeaderStyle HorizontalAlign="Center"></HeaderStyle>
-                                                                            <ItemStyle HorizontalAlign="Center" Width="10%"></ItemStyle>
-                                                                        </asp:TemplateField>
+                                                                            <asp:BoundField DataField="qty" HeaderText="Available Qty">
+                                                                                <HeaderStyle HorizontalAlign="Center"></HeaderStyle>
+                                                                                <ItemStyle HorizontalAlign="Center" Width="10%"></ItemStyle>
+                                                                            </asp:BoundField>
 
-                                                                        <asp:TemplateField HeaderText="Remarks">
-                                                                            <ItemTemplate>
-                                                                                <asp:TextBox ID="txtRemarks" runat="server" Width="90%" CssClass="txtbox_Remarks"></asp:TextBox>
-                                                                            </ItemTemplate>
-                                                                            <ItemStyle HorizontalAlign="Center" Width="20%"></ItemStyle>
-                                                                        </asp:TemplateField>
+                                                                            <asp:TemplateField HeaderText="Quantity">
+                                                                                <ItemTemplate>
+                                                                                    <asp:TextBox ID="txtqty" runat="server" Width="90%" Text='<%# Bind("qty2") %>' CssClass="txtbox_Amt" AutoPostBack="True" OnTextChanged="txtqty_TextChanged1"></asp:TextBox>
+                                                                                    <cc1:FilteredTextBoxExtender ID="FilteredTextBoxExtender1" runat="server" TargetControlID="txtqty" ValidChars="0123456789."></cc1:FilteredTextBoxExtender>
+                                                                                </ItemTemplate>
+                                                                                <HeaderStyle HorizontalAlign="Center"></HeaderStyle>
+                                                                                <ItemStyle HorizontalAlign="Center" Width="10%"></ItemStyle>
+                                                                            </asp:TemplateField>
 
-                                                                        <asp:BoundField DataField="Cost" DataFormatString="{0:N}" HeaderText="Unit Cost" HtmlEncode="False">
-                                                                            <ItemStyle HorizontalAlign="Right" Width="10%"></ItemStyle>
-                                                                        </asp:BoundField>
+                                                                            <asp:TemplateField HeaderText="Remarks">
+                                                                                <ItemTemplate>
+                                                                                    <asp:TextBox ID="txtRemarks" runat="server" Width="90%" CssClass="txtbox_Remarks"></asp:TextBox>
+                                                                                </ItemTemplate>
+                                                                                <ItemStyle HorizontalAlign="Center" Width="20%"></ItemStyle>
+                                                                            </asp:TemplateField>
 
-                                                                        <asp:BoundField DataField="total" DataFormatString="{0:N}" HeaderText="Total" HtmlEncode="False">
-                                                                            <FooterStyle HorizontalAlign="Right" Font-Bold="False"></FooterStyle>
-                                                                            <ItemStyle HorizontalAlign="Right" Width="10%"></ItemStyle>
-                                                                        </asp:BoundField>
+                                                                            <asp:BoundField DataField="Cost" DataFormatString="{0:N}" HeaderText="Unit Cost" HtmlEncode="False">
+                                                                                <ItemStyle HorizontalAlign="Right" Width="10%"></ItemStyle>
+                                                                            </asp:BoundField>
 
-                                                                    </Columns>
-                                                                </asp:GridView>
+                                                                            <asp:BoundField DataField="total" DataFormatString="{0:N}" HeaderText="Total" HtmlEncode="False">
+                                                                                <FooterStyle HorizontalAlign="Right" Font-Bold="False"></FooterStyle>
+                                                                                <ItemStyle HorizontalAlign="Right" Width="10%"></ItemStyle>
+                                                                            </asp:BoundField>
 
-                                                            </asp:Panel>
-                                                        </ContentTemplate>
-                                                    </asp:UpdatePanel>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td style="width: 100%" align="center">
-                                                    <asp:Button runat="server" ID="btnCopyValues" Width="150px" CssClass="CSButton" Text="Copy All Values" OnClientClick="StartProgressBar();" />
-                                                    &nbsp;<asp:Button ID="btnsave" runat="server" CssClass="CSButton" Width="150px" Text="SAVE" OnClientClick="StartProgressBar();" SkinID="ButtonImage" ValidationGroup="1"></asp:Button>
-                                                    &nbsp;<asp:Button ID="btnpreview" runat="server" CssClass="CSButton" Width="150px" CausesValidation="False" Text="PREVIEW RIS" Enabled="False" SkinID="ButtonImage"></asp:Button>
-                                                    &nbsp;<asp:Button ID="btnPreviewICS" OnClick="btnPreviewICS_Click" runat="server" CssClass="CSButton" CausesValidation="False" Text="PREVIEW ICS" Enabled="False" SkinID="ButtonImage"></asp:Button>
+                                                                        </Columns>
+                                                                    </asp:GridView>
 
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td style="width: 100%" align="center">
-                                                    <asp:Button ID="btnnew" runat="server" CausesValidation="False" Visible="False" Text="NEW" SkinID="ButtonImage"></asp:Button><asp:Button ID="btnopen" runat="server" CausesValidation="False" Visible="False" Text="OPEN" SkinID="ButtonImage"></asp:Button></td>
-                                            </tr>
+                                                                </asp:Panel>
+                                                            </ContentTemplate>
+                                                        </asp:UpdatePanel>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="width: 100%" align="center">
+                                                        <asp:Button runat="server" ID="btnCopyValues" Width="150px" CssClass="CSButton" Text="Copy All Values" OnClientClick="StartProgressBar();" />
+                                                        &nbsp;<asp:Button ID="btnsave" runat="server" CssClass="CSButton" Width="150px" Text="SAVE" OnClientClick="StartProgressBar();" SkinID="ButtonImage" ValidationGroup="1"></asp:Button>
+                                                        &nbsp;<asp:Button ID="btnpreview" runat="server" CssClass="CSButton" Width="150px" CausesValidation="False" Text="PREVIEW RIS" Enabled="False" SkinID="ButtonImage"></asp:Button>
+                                                        &nbsp;<asp:Button ID="btnPreviewICS" OnClick="btnPreviewICS_Click" runat="server" CssClass="CSButton" CausesValidation="False" Text="PREVIEW ICS" Enabled="False" SkinID="ButtonImage"></asp:Button>
+
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="width: 100%" align="center">
+                                                        <asp:Button ID="btnnew" runat="server" CausesValidation="False" Visible="False" Text="NEW" SkinID="ButtonImage"></asp:Button><asp:Button ID="btnopen" runat="server" CausesValidation="False" Visible="False" Text="OPEN" SkinID="ButtonImage"></asp:Button></td>
+                                                </tr>
                                         </tbody>
                                     </table>
 
@@ -639,7 +623,7 @@
                                     <table width="100%">
                                         <tr>
                                             <td style="width: 100%" align="center">
-                                               <%--<span class="column_RightBold">General Accounts : </span>
+                                                <%--<span class="column_RightBold">General Accounts : </span>
                                                 <asp:DropDownList ID="ddProperty" runat="server" CssClass="drpdownCSS" Width="320px"
                                                     OnSelectedIndexChanged="ddProperty_SelectedIndexChanged" AutoPostBack="True"></asp:DropDownList>--%>
 
@@ -649,22 +633,22 @@
                                                 <span class="column_RightBold">General Accounts : </span>
 
                                                 <!-- Hidden dropdown -->
-                                                <asp:DropDownList ID="ddProperty" runat="server" Style="display:none;"
+                                                <asp:DropDownList ID="ddProperty" runat="server" Style="display: none;"
                                                     OnSelectedIndexChanged="ddProperty_SelectedIndexChanged" AutoPostBack="True">
                                                 </asp:DropDownList>
 
                                                 <!-- Searchable input -->
                                                 <input type="text" id="txtProperty" class="drpdownCSS"
-                                                       style="width:320px;" placeholder="Select" />
-                                               
-                                                
-                                                
+                                                    style="width: 320px;" placeholder="Select" dir="rtl" />
+
+
+
                                                 <%--For Description Function--%>
                                                 &nbsp;<span class="column_RightBold">Description : </span>
                                                 &nbsp;<asp:TextBox ID="txtSearchProperty" runat="server" CssClass="txtbox_Var" Width="200px"></asp:TextBox>
                                                 &nbsp;<asp:Button ID="btnSearchProperty" OnClick="btnSearchProperty_Click" runat="server" CssClass="CSButton" Width="120px" Text="Search" OnClientClick="StartProgressBar();"></asp:Button>
 
-                                              
+
                                             </td>
                                         </tr>
                                         <tr>
@@ -762,8 +746,7 @@
                                                     CssClass="CSButton"
                                                     Width="150px"
                                                     Text="ADD"
-                                                    OnClientClick="StartProgressBar();">
-                                                </asp:Button>
+                                                    OnClientClick="StartProgressBar();"></asp:Button>
                                                 &nbsp;<asp:Button ID="btnPropNo" OnClick="btnPropNo_Click" runat="server" CssClass="CSButton" Width="150px" Text="EDIT PROPERTY NO."></asp:Button>
                                             </td>
                                         </tr>
@@ -840,8 +823,7 @@
                                                             </asp:DropDownList></td>
                                                     </tr>
 
-                                                  
-                                                    <tr>
+
 
                                                     <tr>
                                                         <td style="width: 15%" class="column_RightBold">Received From :</td>
@@ -851,10 +833,24 @@
                                                             </asp:DropDownList></td>
                                                         <td style="width: 15%" class="column_RightBold">Department Head :</td>
                                                         <td style="width: 35%" class="column_Left">
-                                                            <asp:DropDownList ID="ddByAcknowledgement" runat="server" Width="300px" CssClass="drpdownCSS" AppendDataBoundItems="True">
+                                                            <asp:DropDownList ID="ddByAcknowledgement" runat="server" Width="200px" CssClass="drpdownCSS" AppendDataBoundItems="True">
                                                                 <asp:ListItem>Select</asp:ListItem>
-                                                            </asp:DropDownList></td>
+                                                            </asp:DropDownList>
+                                                             <asp:CheckBox CssClass="rbCS_Horizontal" Text="OtherReceiver" Visible="true" ID="cbIsManual" runat="server" AutoPostBack="true"/>
+                                                        </td>
+                                                       
                                                     </tr>
+
+                                                    
+                                                    <tr>
+                                                        <td style="width: 15%" class="column_RightBold"></td>
+                                                        <td style="width: 35%" class="column_Left"></td>
+                                                            <td style="width: 15%" class="column_RightBold">Received By: </td>
+                                                            <td style="width: 35%" class="column_Left">
+                                                                <asp:DropDownList ID="ddReceivingDeptEmployee" CssClass="drpdownCSS" runat="server" Width="300px"></asp:DropDownList>
+                                                            </td>
+                                                    </tr>
+
                                                     <tr>
                                                         <td style="width: 15%" class="column_RightBold">Date : </td>
                                                         <td style="width: 35%" class="column_Left">
@@ -894,10 +890,10 @@
                                                 <asp:Button ID="btnsavedoc" OnClick="btnsavedoc_Click" runat="server" CssClass="CSButton" Width="150px" Text="SAVE" OnClientClick="StartProgressBar();" Enabled="False"></asp:Button>
                                                 &nbsp;<asp:Button ID="btncancelDoc" OnClick="btncancelDoc_Click" runat="server" CssClass="CSButton" Width="150px" Text="CANCEL" Enabled="False"></asp:Button>
                                                 &nbsp;<asp:Button ID="btnpreviewAreDoc" OnClick="btnpreviewAreDoc_Click" runat="server" CssClass="CSButton" Width="150px" Text="PREVIEW PARE" Enabled="False"></asp:Button>
-                                                 &nbsp;<asp:Button ID="btnPreviewICSPAR" OnClick="btnPreviewICS_Click" runat="server" CssClass="CSButton" Width="150px" Text="PREVIEW ICS" Enabled="False" ></asp:Button>
+                                                &nbsp;<asp:Button ID="btnPreviewICSPAR" OnClick="btnPreviewICS_Click" runat="server" CssClass="CSButton" Width="150px" Text="PREVIEW ICS" Enabled="False"></asp:Button>
                                                 &nbsp;<asp:Button ID="btnPreviewRIS" OnClick="btnPreviewRIS_Click" runat="server" CssClass="CSButton" Width="150px" Text="PREVIEW RIS" Enabled="False" Visible="false"></asp:Button>
-                                                 
-                                               
+
+
 
                                             </td>
                                         </tr>
@@ -946,7 +942,7 @@
                                                             </td>
                                                         </tr>
 
-                                                        <tr style="display:none" >
+                                                        <tr style="display: none">
                                                             <td style="width: 20%" class="column_RightBold">Purpose :</td>
                                                             <td style="width: 80%" class="column_Left">
                                                                 <asp:DropDownList ID="ddPurpose" runat="server" Width="50%" CssClass="drpdownCSS" OnSelectedIndexChanged="ddPurpose_SelectedIndexChanged" AutoPostBack="True">
@@ -989,7 +985,7 @@
                                         <asp:Label ID="Label1" runat="server" Width="86px" Text=" "></asp:Label>
                                     </asp:Panel>
 
-                  
+
                                     <cc1:ModalPopupExtender ID="ModalPopupExtender3" runat="server" BackgroundCssClass="modalBackground" TargetControlID="Label1" PopupControlID="popReturn" Enabled="True" DynamicServicePath="" CancelControlID="btnClose"></cc1:ModalPopupExtender>
 
 
@@ -1033,7 +1029,7 @@
 
 
 
-                                    <asp:Panel ID="Panel1" runat="server" Width="400px" Font-Bold="True" BorderWidth="2px" BorderStyle="Solid" Height="150px"  CssClass="Panel_Popup">
+                                    <asp:Panel ID="Panel1" runat="server" Width="400px" Font-Bold="True" BorderWidth="2px" BorderStyle="Solid" Height="150px" CssClass="Panel_Popup">
                                         <table style="width: 400px">
                                             <tbody>
                                                 <tr>

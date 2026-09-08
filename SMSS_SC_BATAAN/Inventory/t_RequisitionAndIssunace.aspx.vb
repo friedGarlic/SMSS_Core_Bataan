@@ -341,7 +341,9 @@ Partial Class Inventory_RIS
             ddProperty.DataBind()
             ddProperty.Items.Insert(0, "")
 
-
+            'Load Receivers
+            ddReceivingDeptEmployee.Items.Insert(0, "Select")
+            ddReceivingDeptEmployee.Enabled = False
 
             gvsearchProperty.DataSource = Createdatabalegvsearch(5)
             gvsearchProperty.DataBind()
@@ -442,6 +444,10 @@ Partial Class Inventory_RIS
         Session("PropSearch") = 0
         txtSearchProperty.Text = ""
         LoadPropertyDropDown()
+
+        'Dim ddPropertyID = ddProperty.SelectedItem.Value
+
+
     End Sub
     Protected Sub LoadPropertyDropDown()
         Ppropertylist = Me.objDerived.GetDataTable("Exec [AMS].[InventoryPropertyList_v2] '" & Session("GA_ID") & "'", CommandType.Text)
@@ -453,6 +459,8 @@ Partial Class Inventory_RIS
             gvsearchProperty.DataSource = Ppropertylist
             gvsearchProperty.DataBind()
         End If
+
+
 
         LoadPropertyList()
 
@@ -908,6 +916,31 @@ Partial Class Inventory_RIS
             Exit Sub
         End If
 
+
+        'One for all variable
+        Dim ddByAckonwledgeValueText As String = ddByAcknowledgement.SelectedValue.ToString
+        Dim ddByAckonwledgeValue As String = ddByAcknowledgement.SelectedItem.Value
+        Dim ddByDepartmentValueText As String = ddByDepartment.SelectedValue.ToString
+        Dim ddByDepartmentValue As String = ddByDepartment.SelectedItem.Value
+
+
+        If ddByAcknowledgement.SelectedIndex = -1 Or ddByAckonwledgeValue = "Select" Then
+            ddByAckonwledgeValueText = ddReceivingDeptEmployee.SelectedItem.Text
+            ddByAckonwledgeValue = ddReceivingDeptEmployee.SelectedItem.Value
+        Else
+            ddByAckonwledgeValueText = ddByAcknowledgement.SelectedValue.ToString
+            'ddByAckonwledgeValue same as initialized variable
+        End If
+
+
+        If ddByDepartment.SelectedIndex = -1 Or ddByDepartmentValueText = "Select" Then
+            ddByDepartmentValueText = ddReceivingDeptEmployee.SelectedItem.Text
+            ddByDepartmentValue = ddReceivingDeptEmployee.SelectedItem.Value
+        Else
+            ddByDepartmentValueText = ddByDepartment.SelectedValue.ToString
+            'ddByDepartmentValue same as initialized variable
+        End If
+
         If txtDateReceivedFrom.Text = "" Or txtDateReceivedBy.Text = "" Then
             MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel3, "Date are required fields.")
         Else
@@ -917,8 +950,11 @@ Partial Class Inventory_RIS
                 .MRE_Date = txtDateReceivedFrom.Text
                 .MRE_Date_Recieve = txtDateReceivedBy.Text
                 .Received_from = ddFromProperty.SelectedValue.ToString
-                .MRto = ddByAcknowledgement.SelectedValue.ToString
-                .Cancelled = False
+
+                'takes integer
+                .MRto = ddByAckonwledgeValue
+
+                    .Cancelled = False
                 .MRENumber = txtMRE.Text
 
                 '=== CHECK IF ALL ITEMS BELONGS TO ONE OFFICE OR NOT
@@ -938,7 +974,7 @@ Partial Class Inventory_RIS
                 Next
 
                 If Session("VariousDept") = 0 Then
-                    .RC_ID = ddByDepartment.SelectedValue 'dtissue2.Rows(0)("rc_id")
+                    .RC_ID = ddByDepartmentValue 'dtissue2.Rows(0)("rc_id")
                     .Func_ID = dtissue2.Rows(0)("function_id")
                 Else
                     .RC_ID = 0
@@ -980,9 +1016,13 @@ Partial Class Inventory_RIS
             hdr.RISDate = txtDateReceivedFrom.Text
             hdr.Purpose = ""
             hdr.Issued_By = objDerived.GetValue("SELECT Distinct full_name FROM HRMS.view_signatory WHERE empid = '" & ddFromProperty.SelectedValue.ToString & "'", CommandType.Text)
-            'hdr.Requested_By = objDerived.GetValue("SELECT Distinct full_name FROM HRMS.view_signatory WHERE empid = '" & ddByAcknowledgement.SelectedValue.ToString & "'", CommandType.Text)
-            hdr.Requested_By = objDerived.GetValue("SELECT Distinct full_name FROM HRMS.view_signatory WHERE deptid = " & ddByDepartment.SelectedItem.Value & " and division_key = 86 and isDeptHead = 'Yes'", CommandType.Text)
-            hdr.Received_By = objDerived.GetValue("SELECT Distinct full_name FROM HRMS.view_signatory WHERE empid = '" & ddByAcknowledgement.SelectedValue.ToString & "'", CommandType.Text)
+            'hdr.Requested_By = objDerived.GetValue("SELECT Distinct full_name FROM HRMS.view_signatory WHERE empid = '" & ddByAckonwledgeValue & "'", CommandType.Text)
+            hdr.Requested_By = objDerived.GetValue("SELECT Distinct full_name FROM HRMS.view_signatory WHERE deptid = " & ddByDepartmentValue & " and division_key = 86 and isDeptHead = 'Yes'", CommandType.Text)
+
+
+            hdr.Received_By = objDerived.GetValue("SELECT Distinct full_name FROM HRMS.view_signatory WHERE empid = '" & ddByAckonwledgeValue & "'", CommandType.Text)
+
+
             hdr.withICS = False
 
             If CheckBox3.Checked = True Then
@@ -1037,7 +1077,7 @@ Partial Class Inventory_RIS
                     .Dispose = False
                     .Repair = False
                     .Inspection = False
-                    .deptid = ddByDepartment.SelectedValue
+                    .deptid = ddByDepartmentValue
                     .UserID = Session("@UserName")
 
                     Dim dtReturn As New DataTable
@@ -1080,8 +1120,8 @@ Partial Class Inventory_RIS
                         .SerialNo = ""
                         .Trans_Type = "Issuance"
                         .Ref = txtMRE.Text
-                        .AccountablePerson = objDerived.GetValue("SELECT full_name FROM HRMS.view_signatory where empid ='" & ddByAcknowledgement.SelectedValue & "'", CommandType.Text)
-                        .Department = ddByDepartment.SelectedItem.Text
+                        .AccountablePerson = objDerived.GetValue("SELECT full_name FROM HRMS.view_signatory where empid ='" & ddByAckonwledgeValue & "'", CommandType.Text)
+                        .Department = ddByDepartmentValueText
                         .Position = ""
                         .AcceptedBy = ""
                         .InspectedBy = ""
@@ -1116,8 +1156,8 @@ Partial Class Inventory_RIS
                         .Trans_Type = "Issuance"
                         .Ref = txtMRE.Text
                         .Item_ID = dtissue2.Rows(i)("Item_ID")
-                        .AccountablePerson = objDerived.GetValue("SELECT full_name FROM HRMS.view_signatory where empid ='" & ddByAcknowledgement.SelectedValue & "'", CommandType.Text)
-                        .Department = ddByDepartment.SelectedItem.Text
+                        .AccountablePerson = objDerived.GetValue("SELECT full_name FROM HRMS.view_signatory where empid ='" & ddByAckonwledgeValue & "'", CommandType.Text)
+                        .Department = ddByDepartmentValueText
                         .Position = ""
                         .AcceptedBy = ""
                         .InspectedBy = ""
@@ -1186,24 +1226,24 @@ Partial Class Inventory_RIS
         CommandType.Text)
 
                 Dim issuedToName As String = objDerived.GetValue(
-        "SELECT DISTINCT full_name FROM HRMS.view_signatory WHERE empid = '" & ddByAcknowledgement.SelectedValue & "'",
+        "SELECT DISTINCT full_name FROM HRMS.view_signatory WHERE empid = '" & ddByAckonwledgeValue & "'",
         CommandType.Text)
 
                 Dim issuedToPos As String = objDerived.GetValue(
-        "SELECT DISTINCT position_desc FROM HRMS.view_signatory WHERE empid = '" & ddByAcknowledgement.SelectedValue & "'",
+        "SELECT DISTINCT position_desc FROM HRMS.view_signatory WHERE empid = '" & ddByAckonwledgeValue & "'",
         CommandType.Text)
 
                 Dim icsRCID As Integer = 0
                 Dim icsFunctionID As Integer = 0
 
                 If Session("VariousDept") IsNot Nothing AndAlso Session("VariousDept").ToString() = "0" Then
-                    icsRCID = CInt(ddByDepartment.SelectedValue)
+                    icsRCID = CInt(ddByDepartmentValue)
                     icsFunctionID = CInt(dtissue2.Rows(0)("function_id"))
                 End If
 
                 '=== SAVE ICS HEADER
                 With ICS_hdr
-                    .ICS_No = objDerived.GetValue("SELECT [AMS].[func_GenerateICS]('" & txtDateReceivedFrom.Text & "','" & ddByDepartment.SelectedValue & "')", CommandType.Text)
+                    .ICS_No = objDerived.GetValue("SELECT [AMS].[func_GenerateICS]('" & txtDateReceivedFrom.Text & "','" & ddByDepartmentValue & "')", CommandType.Text)
                     .Date_Acquired = txtDateReceivedFrom.Text
                     .RIS_no = Me.Session("ris_no")
                     .RC_ID = icsRCID
@@ -2444,6 +2484,12 @@ Partial Class Inventory_RIS
         ddByAcknowledgement.DataTextField = ("full_name")
         ddByAcknowledgement.DataValueField = ("empid")
         ddByAcknowledgement.DataBind()
+
+        ddReceivingDeptEmployee.DataSource = objDerived.GetDataTable("[AMS].[sp_SignatoryList] '','" & ddByDepartment.SelectedItem.Value & "'", CommandType.Text)
+        ddReceivingDeptEmployee.DataTextField = ("FullName")
+        ddReceivingDeptEmployee.DataValueField = ("EmpID")
+        ddReceivingDeptEmployee.DataBind()
+
     End Sub
 
     Protected Sub gvSupplyList_PageIndexChanging1(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewPageEventArgs)
@@ -2939,6 +2985,24 @@ Partial Class Inventory_RIS
 
 
 
+
+    Protected Sub cbIsManual_CheckedChanged(sender As Object, e As EventArgs) Handles cbIsManual.CheckedChanged
+
+        If cbIsManual.Checked = True Then
+
+            ddByAcknowledgement.Enabled = False
+            ddByAcknowledgement.SelectedIndex = 0
+
+            ddReceivingDeptEmployee.Enabled = True
+        Else
+            ddByAcknowledgement.Enabled = True
+
+            ddReceivingDeptEmployee.Enabled = False
+            ddReceivingDeptEmployee.SelectedIndex = 0
+
+        End If
+
+    End Sub
 End Class
 
 
