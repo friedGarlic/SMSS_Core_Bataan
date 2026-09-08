@@ -129,32 +129,51 @@ Partial Class Inventory_TransferApproval
         End Try
     End Sub
 
+
+
     Private Sub LoadTransferApprovalList(ByVal searchType As Integer, ByVal searchValue As String)
+        AddTrace("LoadTransferApprovalList called.")
         AddTrace("searchType: " & searchType)
-        AddTrace("searchValue:" & searchValue)
+        AddTrace("searchValue: " & If(String.IsNullOrEmpty(searchValue), "NULL/EMPTY", searchValue))
+
         Try
-            Dim dtTransferList As DataTable = objDerived.GetDataTable("EXEC AMS.sp_GetTransferApprovalList @SearchType = " & searchType & ", @SearchValue = '" & searchValue & "'", CommandType.Text)
-            If dtTransferList.Rows.Count > 0 Then
+            Dim dtTransferList As DataTable
+
+            ' Build the SQL command safely (but we are using a stored procedure)
+            Dim sql As String = "EXEC AMS.sp_GetTransferApprovalList @SearchType = " & searchType & ", @SearchValue = "
+
+            If String.IsNullOrEmpty(searchValue) Then
+                sql &= "NULL"
+            Else
+                sql &= "'" & searchValue.Replace("'", "''") & "'"
+            End If
+
+            AddTrace("Executing SQL: " & sql)
+
+            dtTransferList = objDerived.GetDataTable(sql, CommandType.Text)
+
+            If dtTransferList IsNot Nothing AndAlso dtTransferList.Rows.Count > 0 Then
                 grdPendingPRS.DataSource = dtTransferList
                 grdPendingPRS.DataBind()
-
-
+                AddTrace("Rows returned: " & dtTransferList.Rows.Count)
             Else
                 SetDefaultEmptyRows()
+                AddTrace("No rows returned, empty grid set.")
             End If
         Catch ex As Exception
+            AddTrace("Error in LoadTransferApprovalList: " & ex.Message)
             SetDefaultEmptyRows()
         End Try
 
-
+        ' Clear selection and property list
         grdPendingPRS.SelectedIndex = -1
-
         grListOfProperty.SelectedIndex = -1
         grListOfProperty.DataSource = Nothing
         grListOfProperty.DataBind()
-
-
     End Sub
+
+
+
 
     Private Sub LoadPropertyList(ByVal transferID As String)
 
@@ -217,17 +236,22 @@ Partial Class Inventory_TransferApproval
             ' Department search
             If drpDepartment.SelectedIndex > 0 Then
                 searchValue = drpDepartment.SelectedValue
+                AddTrace("Department search value: " & searchValue)
             Else
-                ' Load all if no department selected
                 searchValue = String.Empty
+                AddTrace("Department search: No department selected, loading all.")
             End If
         ElseIf searchType = 1 Then
             ' Date range search
-            If Not String.IsNullOrEmpty(txtDateFrom.Text.Trim()) AndAlso Not String.IsNullOrEmpty(txtDateto.Text.Trim()) Then
-                searchValue = String.Format("{0}|{1}", txtDateFrom.Text.Trim(), txtDateto.Text.Trim())
+            Dim fromDate As String = txtDateFrom.Text.Trim()
+            Dim toDate As String = txtDateto.Text.Trim()
+
+            If Not String.IsNullOrEmpty(fromDate) AndAlso Not String.IsNullOrEmpty(toDate) Then
+                searchValue = String.Format("{0}|{1}", fromDate, toDate)
+                AddTrace("Date search value: " & searchValue)
             Else
-                ' Load all if date range incomplete
                 searchValue = String.Empty
+                AddTrace("Date search: Incomplete date range, loading all.")
             End If
         End If
 
@@ -235,7 +259,6 @@ Partial Class Inventory_TransferApproval
         LoadTransferApprovalList(searchType, searchValue)
         btnApprove.Enabled = False
     End Sub
-
 
     ' ========================================
     ' GRIDVIEW EVENTS

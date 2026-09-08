@@ -852,6 +852,15 @@ Partial Class Inventory_RIS
         End If
 
 
+
+        Dim OriginallyFromDeptID As Integer = CInt(grListOfProperty.SelectedDataKey("rc_id"))
+
+        Dim OriginallyFrom As Integer = Val(objDerived.GetValue(
+            "SELECT TOP 1 MRto FROM AMS.MRE_Hdr " &
+            "WHERE MREHdr_ID = '" & grListOfProperty.SelectedDataKey("MREHdr_ID") & "'",
+            CommandType.Text))
+
+
         For i As Integer = 0 To dtissue2.Rows.Count - 1
 
             Dim PendingTransfer As Integer = Val(objDerived.GetValue(
@@ -879,6 +888,8 @@ Partial Class Inventory_RIS
                     .TransferTo = ddTransferTo.SelectedValue
                     .DepartmentID = CInt(ddTransferDepartment.SelectedValue)
                     .Remarks = txtReturnRemarks.Text
+                    .OriginallyFrom = OriginallyFrom
+                    .OriginallyFromDeptID = OriginallyFromDeptID
 
                 End With
 
@@ -954,7 +965,7 @@ Partial Class Inventory_RIS
                 'takes integer
                 .MRto = ddByAckonwledgeValue
 
-                    .Cancelled = False
+                .Cancelled = False
                 .MRENumber = txtMRE.Text
 
                 '=== CHECK IF ALL ITEMS BELONGS TO ONE OFFICE OR NOT
@@ -1171,6 +1182,7 @@ Partial Class Inventory_RIS
                         .CreditCost = CType(dtissue2.Rows(i)("Cost"), Decimal)
 
                         .BalanceUnit = objDerived.GetValue("SELECT AMS.m_Unit.Description FROM  AMS.m_Unit INNER JOIN  dbo.m_item ON AMS.m_Unit.Unit_ID = dbo.m_item.Unit_ID INNER JOIN AMS.Property ON dbo.m_item.Item_ID = AMS.Property.Item_ID where AMS.Property.Item_ID ='" & dtissue2.Rows(i)("Item_ID") & "'", CommandType.Text)
+                        .Property_ID = CLng(grdIssueItems.DataKeys(i)("Property_ID"))
 
                         Dim eQty As Integer
                         Dim eBalance As Decimal

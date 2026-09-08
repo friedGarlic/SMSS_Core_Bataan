@@ -51,8 +51,7 @@ Partial Class Reports_and_Query_t_rpt_RIS_Conso
         Me.CrystalReportSource1.ReportDocument.SetParameterValue("@MonthFrom", Session("RIS_MonthFrom"))
         Me.CrystalReportSource1.ReportDocument.SetParameterValue("@MonthTo", Session("RIS_MonthTo"))
 
-        ' DataBind the report viewer
-        Me.RISConsoReport.DataBind()
+
     End Sub
 
     Private Sub LoadReset()
@@ -79,8 +78,33 @@ Partial Class Reports_and_Query_t_rpt_RIS_Conso
         Me.CrystalReportSource1.ReportDocument.SetParameterValue("@MonthFrom", Session("Reset"))
         Me.CrystalReportSource1.ReportDocument.SetParameterValue("@MonthTo", Session("Reset"))
 
-        ' DataBind the report viewer
-        Me.RISConsoReport.DataBind()
+
+    End Sub
+
+    Protected Sub btnExportPDF_Click(sender As Object, e As EventArgs)
+        Try
+            ' Create a new ReportDocument instance and load the report
+            Dim rpt As New ReportDocument()
+            rpt.Load(Server.MapPath("~/Inventory/Inventory_RIS_Conso.rpt"))
+            rpt.SetDatabaseLogon(objDerived.username, objDerived.Password)
+
+            ' Set parameters (same as before)
+            rpt.SetParameterValue("@RC_ID", Session("RIS_RC_ID"))
+            rpt.SetParameterValue("@Cyear", Session("RIS_Year"))
+            rpt.SetParameterValue("@MonthFrom", Session("RIS_MonthFrom"))
+            rpt.SetParameterValue("@MonthTo", Session("RIS_MonthTo"))
+
+            ' Export to PDF and write to response
+            Dim stream As System.IO.Stream = rpt.ExportToStream(CrystalDecisions.Shared.ExportFormatType.PortableDocFormat)
+            Response.Clear()
+            Response.ContentType = "application/pdf"
+            Response.AddHeader("Content-Disposition", "attachment; filename=RIS_Conso_Report.pdf")
+            stream.CopyTo(Response.OutputStream)
+            Response.Flush()
+            Response.End()
+        Catch ex As Exception
+            'MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Export failed: " & ex.Message)
+        End Try
     End Sub
 
 End Class
