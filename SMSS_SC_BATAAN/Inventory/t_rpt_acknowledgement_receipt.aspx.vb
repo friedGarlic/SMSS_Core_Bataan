@@ -43,7 +43,8 @@ Partial Class t_rpt_acknowledgement_receipt
 
                 ' Correct the file path based on the actual directory structure
                 If drpPaperSize.SelectedItem.Text = "Short" Then
-                    reportFileName = Server.MapPath("~/Inventory/PARE_Short.rpt")
+                    'reportFileName = Server.MapPath("~/Inventory/PARE_Short.rpt")
+                    reportFileName = Server.MapPath("~/Inventory/rpt_PAR_v1.rpt")
                 Else
                     reportFileName = Server.MapPath("~/Inventory/PARE_Long.rpt")
                 End If
