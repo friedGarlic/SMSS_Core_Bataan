@@ -836,20 +836,23 @@
                                                             <asp:DropDownList ID="ddByAcknowledgement" runat="server" Width="200px" CssClass="drpdownCSS" AppendDataBoundItems="True">
                                                                 <asp:ListItem>Select</asp:ListItem>
                                                             </asp:DropDownList>
-                                                             <asp:CheckBox CssClass="rbCS_Horizontal" Text="OtherReceiver" Visible="true" ID="cbIsManual" runat="server" AutoPostBack="true"/>
+                                                            <asp:CheckBox CssClass="rbCS_Horizontal" Text="OtherReceiver" Visible="true" ID="cbIsManual" runat="server" AutoPostBack="true" />
                                                         </td>
-                                                       
+
                                                     </tr>
 
-                                                    
+
                                                     <tr>
                                                         <td style="width: 15%" class="column_RightBold"></td>
-                                                        <td style="width: 35%" class="column_Left"></td>
-                                                            <td style="width: 15%" class="column_RightBold">Received By: </td>
-                                                            <td style="width: 35%" class="column_Left">
-                                                                <asp:DropDownList ID="ddReceivingDeptEmployee" CssClass="drpdownCSS" runat="server" Width="300px"></asp:DropDownList>
-                                                            </td>
+                                                        <td style="width: 35%" class="column_Left">
+
+                                                        </td>
+                                                        <td style="width: 15%" class="column_RightBold">Received By: </td>
+                                                        <td style="width: 35%" class="column_Left">
+                                                            <asp:DropDownList ID="ddReceivingDeptEmployee" CssClass="drpdownCSS" runat="server" Width="300px"></asp:DropDownList>
+                                                        </td>
                                                     </tr>
+
 
                                                     <tr>
                                                         <td style="width: 15%" class="column_RightBold">Date : </td>
@@ -869,6 +872,14 @@
                                                         <td style="width: 15%" class="column_RightBold"></td>
                                                         <td style="width: 35%" class="column_Left"></td>
                                                     </tr>
+                                                    
+                                                    <tr>
+                                                        <td style="width: 15%" class="column_RightBold">Approved By: </td>
+                                                        <td class="column_Left" colspan="3">
+                                                            <asp:DropDownList runat="server" id="ddApprovedByPAR" CssClass="drpdownCSS" Width="300px"></asp:DropDownList>
+                                                        </td>
+                                                    </tr>
+
                                                     <tr>
                                                         <td style="width: 15%" class="column_RightBold">Remarks : </td>
                                                         <td class="column_Left" colspan="3">

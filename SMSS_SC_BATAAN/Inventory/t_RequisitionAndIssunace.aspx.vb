@@ -341,6 +341,13 @@ Partial Class Inventory_RIS
             ddProperty.DataBind()
             ddProperty.Items.Insert(0, "")
 
+
+            ddApprovedByPAR.DataSource = objDerived.GetDataTable("Exec ams.sp_SignatoryList '', 1", CommandType.Text)
+            ddApprovedByPAR.DataTextField = "FullName"
+            ddApprovedByPAR.DataValueField = "EmpID"
+            ddApprovedByPAR.DataBind()
+            ddApprovedByPAR.Items.Insert(0, "Select")
+
             'Load Receivers
             ddReceivingDeptEmployee.Items.Insert(0, "Select")
             ddReceivingDeptEmployee.Enabled = False
@@ -967,6 +974,7 @@ Partial Class Inventory_RIS
 
                 .Cancelled = False
                 .MRENumber = txtMRE.Text
+                .ApprovedBy_ID = ddApprovedByPAR.SelectedItem.Value
 
                 '=== CHECK IF ALL ITEMS BELONGS TO ONE OFFICE OR NOT
                 Dim xRC As Integer = 0
