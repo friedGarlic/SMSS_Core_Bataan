@@ -5,45 +5,79 @@ Partial Class Records_rpt_propertycard
     Private objDerived As New connectionreport
     Dim rpt As New ReportDocument
 
+    ' Page_Load is now intentionally empty.
+    ' The report binding happens in Page_Init so the CrystalReportViewer
+    ' can process pagination postbacks (Next Page, Previous Page, Print,
+    ' Export) against the SAME report instance it is navigating with.
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
 
-        rpt.FileName = Server.MapPath("rpt_PropertyCard_Rev.rpt")
+        ' Intentionally left blank.
+
+    End Sub
+
+    Protected Sub Page_Init(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Init
+
+        ' On the very first request, build the report and stash it in Session.
+        ' On every subsequent request (including pagination postbacks),
+        ' pull the SAME instance from Session — this preserves page state.
+        If Not IsPostBack Then
+
+            rpt = New ReportDocument()
+            rpt.Load(Server.MapPath("rpt_PropertyCard_Rev.rpt"))
+            rpt.SetParameterValue("@GA_ID", Me.Session("GA_ID"))
+            Session("PC_Report") = rpt
+
+        Else
+
+            rpt = CType(Session("PC_Report"), ReportDocument)
+
+            ' Session may have expired or been lost — rebuild as fallback.
+            If rpt Is Nothing Then
+
+                rpt = New ReportDocument()
+                rpt.Load(Server.MapPath("rpt_PropertyCard_Rev.rpt"))
+                rpt.SetParameterValue("@GA_ID", Me.Session("GA_ID"))
+                Session("PC_Report") = rpt
+
+            End If
+
+        End If
+
+        ' Re-apply database credentials on EVERY request.
+        ' Crystal Reports drops the runtime logon across postbacks;
+        ' re-applying here ensures no login prompt appears.
         rpt.SetDatabaseLogon(objDerived.username, objDerived.Password)
-        rpt.SetParameterValue("@GA_ID", Me.Session("GA_ID"))
+
+        ' Bind BEFORE the viewer processes its view state.
         Me.PropertyCardReports.ReportSource = rpt
 
     End Sub
     Protected Sub Page_Unload(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Unload
-        rpt.Close()
-        rpt.Dispose()
+        ' Intentionally left blank.
+        ' The ReportDocument lives in Session and must NOT be disposed
+        ' while the viewer still needs it for pagination.
     End Sub
 
     Protected Sub drpListofReport_SelectedIndexChanged(sender As Object, e As EventArgs)
-        If drpListofReport.selecteditem.text = "Consolidated" Then
-            'Me.PropertyCardReports.ReportSource = Me.CrystalReportSource1
-            'Me.PropertyCardReports.ToolPanelView = CrystalDecisions.Web.ToolPanelViewType.None
-            'Me.CrystalReportSource1.ReportDocument.SetDatabaseLogon(objDerived.username, objDerived.Password)
-            'Me.CrystalReportSource1.ReportDocument.SetParameterValue("@Item_ID", Session("Item_ID"))
-            'Me.CrystalReportSource1.ReportDocument.SetParameterValue("@status", Session("Donation_to_LGU"))
-            rpt.FileName = Server.MapPath("rpt_PropertyCard.rpt")
-            rpt.SetDatabaseLogon(objDerived.username, objDerived.Password)
+        If drpListofReport.SelectedItem.Text = "Consolidated" Then
+            rpt = New ReportDocument()
+            rpt.Load(Server.MapPath("rpt_PropertyCard.rpt"))
             rpt.SetParameterValue(0, Me.Session("Item_ID"))
             rpt.SetParameterValue(1, Me.Session("Donation_to_LGU"))
-            Me.PropertyCardReports.ReportSource = rpt
+            Session("PC_Report") = rpt
         Else
-            'Me.PropertyCardReports.ReportSource = Me.CrystalReportSource2
-            'Me.PropertyCardReports.ToolPanelView = CrystalDecisions.Web.ToolPanelViewType.None
-            'Me.CrystalReportSource2.ReportDocument.SetDatabaseLogon(objDerived.username, objDerived.Password)
-            'Me.CrystalReportSource2.ReportDocument.SetParameterValue("@Item_ID", Session("Item_ID"))
-            'Me.CrystalReportSource2.ReportDocument.SetParameterValue("@status", Session("Donation_to_LGU"))
-            'Me.CrystalReportSource2.ReportDocument.SetParameterValue("@property_no", Session("Propertyno"))
-            rpt.FileName = Server.MapPath("rpt_PropertyCard_Per_Item.rpt")
-            rpt.SetDatabaseLogon(objDerived.username, objDerived.Password)
+            rpt = New ReportDocument()
+            rpt.Load(Server.MapPath("rpt_PropertyCard_Per_Item.rpt"))
             rpt.SetParameterValue("@Item_ID", Me.Session("Item_ID"))
             rpt.SetParameterValue("@status", Me.Session("Donation_to_LGU"))
             rpt.SetParameterValue("@property_no", Me.Session("Propertyno"))
-            Me.PropertyCardReports.ReportSource = rpt
+            Session("PC_Report") = rpt
         End If
+
+        ' Re-apply logon before binding (same reason as in Page_Load)
+        rpt.SetDatabaseLogon(objDerived.username, objDerived.Password)
+
+        Me.PropertyCardReports.ReportSource = rpt
     End Sub
     Protected Sub LinkButton1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles LinkButton1.Click
         Me.Page.Response.Redirect("~/Records/PropertyCard_Rev.aspx")
