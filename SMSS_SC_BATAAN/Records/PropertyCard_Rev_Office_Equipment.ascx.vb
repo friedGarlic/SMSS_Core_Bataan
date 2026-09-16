@@ -1,5 +1,6 @@
 ﻿Imports System.Data
 Imports System.Web.UI.WebControls
+Imports System.Text.RegularExpressions
 
 Partial Class Records_PropertyCard_Rev_Office_Equipment
     Inherits System.Web.UI.UserControl
@@ -14,18 +15,17 @@ Partial Class Records_PropertyCard_Rev_Office_Equipment
         True)
     End Sub
 
-    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+    Protected Sub Page_Load(
+    ByVal sender As Object,
+    ByVal e As System.EventArgs) Handles Me.Load
+
         If Not Page.IsPostBack Then
             BindOfficeEquipmentGrid()
-            BindOfficeEquipmentsGrid()
-            BindOfficeEquipmentLedgerGrid()
-
-            Session("GA_ID") = 0
-            Session("SubClassificationID") = 0
-        Else
-            BindOfficeEquipmentGrid()
-            BindOfficeEquipmentsGrid()
+            BindEmptyOfficeEquipmentsGrid()
+            BindEmptyOfficeEquipmentLedgerGrid()
+            ClearOfficeEquipmentInformationForm()
         End If
+
     End Sub
 
     ' ============================
@@ -34,14 +34,85 @@ Partial Class Records_PropertyCard_Rev_Office_Equipment
     Public Sub RefreshGridData()
         BindOfficeEquipmentGrid()
 
-        If gvOfficeEquipmentLocationList.SelectedIndex >= 0 Then
+        Dim itemId As String =
+        If(Session("Item_ID"), "0").ToString()
+
+        If Not String.IsNullOrEmpty(itemId) AndAlso
+        itemId <> "0" Then
+
             BindOfficeEquipmentsGrid()
+            BindOfficeEquipmentLedgerGrid()
         Else
+            grdListOfOfficeEquipments.PageIndex = 0
+            grdListOfOfficeEquipments.SelectedIndex = -1
+
             BindEmptyOfficeEquipmentsGrid()
+            BindEmptyOfficeEquipmentLedgerGrid()
+            ClearOfficeEquipmentInformationForm()
         End If
 
-        BindOfficeEquipmentLedgerGrid()
     End Sub
+
+    ' ============================
+    ' LOAD ITEM FROM MAIN PAGE
+    ' ============================
+    Public Sub LoadSelectedItem(ByVal itemId As String)
+
+        If String.IsNullOrEmpty(itemId) OrElse itemId = "0" Then
+            Session("Item_ID") = 0
+            Session("Property_ID") = 0
+            Session("PropertyDetai_ID") = 0
+            Session("AcqCost") = 0
+
+            gvOfficeEquipmentLocationList.SelectedIndex = -1
+
+            grdListOfOfficeEquipments.PageIndex = 0
+            grdListOfOfficeEquipments.SelectedIndex = -1
+
+            txtOfficeEquipmentPropSearch.Text = ""
+
+            If ddlOfficeEquipmentSearchCriteria.Items.Count > 0 Then
+                ddlOfficeEquipmentSearchCriteria.SelectedIndex = 0
+            End If
+
+            BindEmptyOfficeEquipmentsGrid()
+            BindEmptyOfficeEquipmentLedgerGrid()
+            ClearOfficeEquipmentInformationForm()
+
+            Exit Sub
+        End If
+
+        Session("Item_ID") = itemId
+        Session("Property_ID") = 0
+        Session("PropertyDetai_ID") = 0
+        Session("AcqCost") = 0
+
+        ' The main gvItemList is now the primary item selector.
+        gvOfficeEquipmentLocationList.SelectedIndex = -1
+
+        ' Reset the previously selected Office Equipment property.
+        grdListOfOfficeEquipments.PageIndex = 0
+        grdListOfOfficeEquipments.SelectedIndex = -1
+
+        ' Reset search controls for the newly selected item.
+        txtOfficeEquipmentPropSearch.Text = ""
+
+        If ddlOfficeEquipmentSearchCriteria.Items.Count > 0 Then
+            ddlOfficeEquipmentSearchCriteria.SelectedIndex = 0
+        End If
+
+        ClearOfficeEquipmentInformationForm()
+
+        AddTrace(
+        "Office Equipment User Control Item_ID: " &
+        itemId
+    )
+
+        BindOfficeEquipmentsGrid()
+        BindOfficeEquipmentLedgerGrid()
+
+    End Sub
+
 
     ' ============================
     ' LOCATION GRIDVIEW FUNCTIONS
@@ -58,6 +129,13 @@ Partial Class Records_PropertyCard_Rev_Office_Equipment
         Else
             BindEmptyOfficeEquipmentGrid()
         End If
+
+        If gaId = 0 Then
+            BindEmptyOfficeEquipmentGrid()
+            Session("PropertyDetai_ID") = 0
+        End If
+
+
     End Sub
 
     Private Function GetOfficeEquipmentLocationData(ByVal subClassId As String, ByVal gaId As String) As DataTable
@@ -88,10 +166,12 @@ Partial Class Records_PropertyCard_Rev_Office_Equipment
 
     Private Function CreateOfficeEquipmentLocationSchema() As DataTable
         Dim dt As New DataTable()
-        dt.Columns.Add("Property_code", GetType(String))
+        dt.Columns.Add("Property_ID", GetType(String))
         dt.Columns.Add("item_particular_id", GetType(String))
         dt.Columns.Add("Item_ID", GetType(String))
-        dt.Columns.Add("DeclaredOwner", GetType(String))
+        dt.Columns.Add("Item_Code", GetType(String))
+        dt.Columns.Add("ItemDescription", GetType(String))
+        dt.Columns.Add("SerialNo", GetType(String))
         dt.Columns.Add("Barangay", GetType(String))
         dt.Columns.Add("Location", GetType(String))
         dt.Columns.Add("Area", GetType(String))
@@ -107,136 +187,220 @@ Partial Class Records_PropertyCard_Rev_Office_Equipment
         BindOfficeEquipmentGrid()
     End Sub
 
-    Protected Sub gvOfficeEquipmentLocationList_SelectedIndexChanged(sender As Object, e As EventArgs)
+    Protected Sub gvOfficeEquipmentLocationList_SelectedIndexChanged(
+    sender As Object,
+    e As EventArgs)
+
         If gvOfficeEquipmentLocationList.SelectedIndex >= 0 Then
-            Dim selectedItemId As String = gvOfficeEquipmentLocationList.SelectedDataKey("Item_ID")
-            Session("Item_ID") = selectedItemId
-            BindOfficeEquipmentsGrid()
 
-            Dim dt As DataTable = GetOfficeEquipmentLedgerData(Nothing)
+            Dim selectedItemId As String =
+            gvOfficeEquipmentLocationList.DataKeys(
+                gvOfficeEquipmentLocationList.SelectedIndex
+            ).Values("Item_ID").ToString()
 
-            If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
-                FormatOfficeLedgerTransType(dt)
+            Dim selectedAcqCost As String =
+            gvOfficeEquipmentLocationList.DataKeys(
+                gvOfficeEquipmentLocationList.SelectedIndex
+            ).Values("AcqCost").ToString()
 
-                grdOfficeEquipmentLedger.DataSource = dt
-                grdOfficeEquipmentLedger.DataBind()
-            Else
-                BindEmptyOfficeEquipmentLedgerGrid()
-            End If
+            LoadSelectedItem(selectedItemId)
+
+            ' Preserve the additional value previously stored by
+            ' the Office Equipment parent-grid selection.
+            Session("AcqCost") = selectedAcqCost
+
         End If
-    End Sub
-
-
-    Private Sub FormatOfficeLedgerTransType(ByVal dt As DataTable)
-
-        If dt Is Nothing Then
-            Exit Sub
-        End If
-
-        If Not dt.Columns.Contains("Trans_Type") Then
-            Exit Sub
-        End If
-
-        For Each row As DataRow In dt.Rows
-
-            If row.IsNull("Trans_Type") Then
-                Continue For
-            End If
-
-            Dim transType As String = row("Trans_Type").ToString().Trim()
-
-            If String.IsNullOrEmpty(transType) Then
-                Continue For
-            End If
-
-            ' Normalize all line-break formats first.
-            transType = transType.Replace(vbCrLf, vbLf)
-            transType = transType.Replace(vbCr, vbLf)
-
-            ' Print "Originally issued to" on the next line with a dash.
-            transType = Regex.Replace(
-                transType,
-                "\s*-?\s*(Originally issued to)",
-                vbLf & "- $1",
-                RegexOptions.IgnoreCase
-            )
-
-            ' Print "Transferred from" on the next line with a dash.
-            transType = Regex.Replace(
-                transType,
-                "\s*-?\s*(Transferred from)",
-                vbLf & "- $1",
-                RegexOptions.IgnoreCase
-            )
-
-            ' Remove accidental blank lines.
-            Do While transType.Contains(vbLf & vbLf)
-                transType = transType.Replace(vbLf & vbLf, vbLf)
-            Loop
-
-            row("Trans_Type") = transType.Trim()
-
-        Next
 
     End Sub
 
-    Protected Sub gvOfficeEquipmentLocationList_RowDataBound(sender As Object, e As GridViewRowEventArgs)
+    Protected Sub gvOfficeEquipmentLocationList_RowDataBound(
+    sender As Object,
+    e As GridViewRowEventArgs)
+
         If e.Row.RowType = DataControlRowType.DataRow Then
-            e.Row.Attributes("onclick") = Page.ClientScript.GetPostBackClientHyperlink(gvOfficeEquipmentLocationList, "Select$" & e.Row.RowIndex)
-            e.Row.Style("cursor") = "pointer"
+
+            Dim itemIdObject As Object =
+            DataBinder.Eval(
+                e.Row.DataItem,
+                "Item_ID"
+            )
+
+            Dim itemId As String = ""
+
+            If itemIdObject IsNot Nothing AndAlso
+            Not Convert.IsDBNull(itemIdObject) Then
+
+                itemId = itemIdObject.ToString()
+            End If
+
+            ' Only actual Office Equipment item rows are clickable.
+            If Not String.IsNullOrEmpty(itemId) Then
+                e.Row.Attributes("onclick") =
+                Page.ClientScript.GetPostBackClientHyperlink(
+                    gvOfficeEquipmentLocationList,
+                    "Select$" & e.Row.RowIndex
+                )
+
+                e.Row.Style("cursor") = "pointer"
+            End If
+
         End If
+
     End Sub
 
     ' ============================
     ' OFFICE EQUIPMENTS LIST GRIDVIEW
     ' ============================
-    Protected Sub btnOfficeEquipmentPropSearch_Click(sender As Object, e As EventArgs)
-        Dim searchText As String = txtOfficeEquipmentPropSearch.Text.Trim()
+    'Protected Sub btnOfficeEquipmentPropSearch_Click(sender As Object, e As EventArgs)
+    '    Dim searchText As String = txtOfficeEquipmentPropSearch.Text.Trim()
 
-        ' If no search value → show full list using existing logic
+    '    ' If no search value → show full list using existing logic
+    '    If String.IsNullOrEmpty(searchText) Then
+    '        AddTrace("Office Equipment Search: empty, loading full list.")
+    '        BindOfficeEquipmentsGrid()
+    '        Exit Sub
+    '    End If
+
+    '    ' Replicate the same parameter logic used in BindOfficeEquipmentsGrid
+    '    Dim itemId As String = If(Session("Item_ID"), "0")
+    '    Dim gaId As String = If(Session("GA_ID"), "0")
+
+    '    Dim itemParticularId As String = "0"
+    '    Dim declaredOwner As String = ""
+    '    Dim barangay As String = ""
+
+    '    If gvOfficeEquipmentLocationList.SelectedIndex >= 0 Then
+    '        itemParticularId = gvOfficeEquipmentLocationList.DataKeys(gvOfficeEquipmentLocationList.SelectedIndex).Values("item_particular_id").ToString()
+    '        itemId = gvOfficeEquipmentLocationList.DataKeys(gvOfficeEquipmentLocationList.SelectedIndex).Values("Item_ID").ToString()
+    '        'declaredOwner = gvOfficeEquipmentLocationList.DataKeys(gvOfficeEquipmentLocationList.SelectedIndex).Values("DeclaredOwner").ToString()
+    '        barangay = gvOfficeEquipmentLocationList.DataKeys(gvOfficeEquipmentLocationList.SelectedIndex).Values("Barangay").ToString()
+    '    End If
+
+    '    AddTrace("Office Equipment Search: " & searchText &
+    '         " | itemParticularId=" & itemParticularId &
+    '         " | itemId=" & itemId &
+    '         " | gaId=" & gaId &
+    '         " | declaredOwner=" & declaredOwner &
+    '         " | barangay=" & barangay)
+
+    '    ' Get the same dataset that BindOfficeEquipmentsGrid would bind
+    '    Dim dt As DataTable = GetOfficeEquipmentsData(itemParticularId, itemId, gaId, declaredOwner, barangay)
+
+    '    If dt Is Nothing OrElse dt.Rows.Count = 0 Then
+    '        BindEmptyOfficeEquipmentsGrid()
+    '        Exit Sub
+    '    End If
+
+    '    ' Filter by PropertyNo LIKE '%txtOfficeEquipmentPropSearch%'
+    '    Dim dv As New DataView(dt)
+
+    '    ' Escape special characters for RowFilter
+    '    Dim safeSearch As String = searchText.Replace("'", "''").Replace("[", "[[]").Replace("]", "]]")
+
+    '    dv.RowFilter = "PropertyNo LIKE '%" & safeSearch & "%'"
+
+    '    If dv.Count > 0 Then
+    '        grdListOfOfficeEquipments.DataSource = dv
+    '        grdListOfOfficeEquipments.DataBind()
+    '    Else
+    '        BindEmptyOfficeEquipmentsGrid()
+    '    End If
+    'End Sub
+
+
+    'Added by John
+    Protected Sub btnOfficeEquipmentPropSearch_Click(
+    sender As Object,
+    e As EventArgs)
+
+        Dim searchText As String =
+        txtOfficeEquipmentPropSearch.Text.Trim()
+
+        Dim searchBy As String =
+        ddlOfficeEquipmentSearchCriteria.SelectedValue
+
         If String.IsNullOrEmpty(searchText) Then
-            AddTrace("Office Equipment Search: empty, loading full list.")
+            AddTrace(
+            "Office Equipment Search: empty, loading full list."
+        )
+
             BindOfficeEquipmentsGrid()
             Exit Sub
         End If
 
-        ' Replicate the same parameter logic used in BindOfficeEquipmentsGrid
-        Dim itemId As String = If(Session("Item_ID"), "0")
-        Dim gaId As String = If(Session("GA_ID"), "0")
+        Dim itemId As String =
+        If(Session("Item_ID"), "0").ToString()
+
+        Dim gaId As String =
+        If(Session("GA_ID"), "0").ToString()
 
         Dim itemParticularId As String = "0"
         Dim declaredOwner As String = ""
         Dim barangay As String = ""
 
-        If gvOfficeEquipmentLocationList.SelectedIndex >= 0 Then
-            itemParticularId = gvOfficeEquipmentLocationList.DataKeys(gvOfficeEquipmentLocationList.SelectedIndex).Values("item_particular_id").ToString()
-            itemId = gvOfficeEquipmentLocationList.DataKeys(gvOfficeEquipmentLocationList.SelectedIndex).Values("Item_ID").ToString()
-            declaredOwner = gvOfficeEquipmentLocationList.DataKeys(gvOfficeEquipmentLocationList.SelectedIndex).Values("DeclaredOwner").ToString()
-            barangay = gvOfficeEquipmentLocationList.DataKeys(gvOfficeEquipmentLocationList.SelectedIndex).Values("Barangay").ToString()
+        If String.IsNullOrEmpty(itemId) OrElse itemId = "0" Then
+            BindEmptyOfficeEquipmentsGrid()
+            Exit Sub
         End If
 
-        AddTrace("Office Equipment Search: " & searchText &
-             " | itemParticularId=" & itemParticularId &
-             " | itemId=" & itemId &
-             " | gaId=" & gaId &
-             " | declaredOwner=" & declaredOwner &
-             " | barangay=" & barangay)
+        AddTrace(
+        "Office Equipment Search: " & searchText &
+        " | searchBy=" & searchBy &
+        " | itemId=" & itemId &
+        " | gaId=" & gaId
+    )
 
-        ' Get the same dataset that BindOfficeEquipmentsGrid would bind
-        Dim dt As DataTable = GetOfficeEquipmentsData(itemParticularId, itemId, gaId, declaredOwner, barangay)
+        Dim dt As DataTable =
+        GetOfficeEquipmentsData(
+            itemParticularId,
+            itemId,
+            gaId,
+            declaredOwner,
+            barangay
+        )
+
+        If dt IsNot Nothing Then
+
+            If Not dt.Columns.Contains("SerialNo") Then
+                dt.Columns.Add(
+                "SerialNo",
+                GetType(String)
+            )
+
+                If dt.Columns.Contains("Barcode") Then
+                    For Each row As DataRow In dt.Rows
+                        row("SerialNo") =
+                        row("Barcode").ToString()
+                    Next
+                End If
+            End If
+
+        End If
 
         If dt Is Nothing OrElse dt.Rows.Count = 0 Then
             BindEmptyOfficeEquipmentsGrid()
             Exit Sub
         End If
 
-        ' Filter by PropertyNo LIKE '%txtOfficeEquipmentPropSearch%'
+        ' Permit only the predefined search columns.
+        If searchBy <> "PropertyNo" AndAlso
+        searchBy <> "SerialNo" Then
+
+            searchBy = "PropertyNo"
+        End If
+
+        Dim safeSearch As String =
+        searchText.Replace("'", "''").
+        Replace("[", "[[]").
+        Replace("]", "]]")
+
         Dim dv As New DataView(dt)
 
-        ' Escape special characters for RowFilter
-        Dim safeSearch As String = searchText.Replace("'", "''").Replace("[", "[[]").Replace("]", "]]")
-
-        dv.RowFilter = "PropertyNo LIKE '%" & safeSearch & "%'"
+        dv.RowFilter =
+        searchBy &
+        " LIKE '%" &
+        safeSearch &
+        "%'"
 
         If dv.Count > 0 Then
             grdListOfOfficeEquipments.DataSource = dv
@@ -244,57 +408,126 @@ Partial Class Records_PropertyCard_Rev_Office_Equipment
         Else
             BindEmptyOfficeEquipmentsGrid()
         End If
+
     End Sub
 
-
     Private Sub BindOfficeEquipmentsGrid()
-        Dim itemId As String = If(Session("Item_ID"), "0")
-        Dim gaId As String = If(Session("GA_ID"), "0")
+
+        Dim itemId As String =
+        If(Session("Item_ID"), "0").ToString()
+
+        Dim gaId As String =
+        If(Session("GA_ID"), "0").ToString()
 
         Dim itemParticularId As String = "0"
         Dim declaredOwner As String = ""
         Dim barangay As String = ""
 
-        Try
-            If gvOfficeEquipmentLocationList.SelectedIndex >= 0 Then
-                itemParticularId = gvOfficeEquipmentLocationList.DataKeys(gvOfficeEquipmentLocationList.SelectedIndex).Values("item_particular_id").ToString()
-                itemId = gvOfficeEquipmentLocationList.DataKeys(gvOfficeEquipmentLocationList.SelectedIndex).Values("Item_ID").ToString()
-                declaredOwner = gvOfficeEquipmentLocationList.DataKeys(gvOfficeEquipmentLocationList.SelectedIndex).Values("DeclaredOwner").ToString()
-                barangay = gvOfficeEquipmentLocationList.DataKeys(gvOfficeEquipmentLocationList.SelectedIndex).Values("Barangay").ToString()
+        AddTrace(
+        "Office Equipment List -> itemParticularId: " &
+        itemParticularId
+    )
+
+        AddTrace(
+        "Office Equipment List -> itemId: " &
+        itemId
+    )
+
+        AddTrace(
+        "Office Equipment List -> gaId: " &
+        gaId
+    )
+
+        AddTrace(
+        "Office Equipment List -> declaredOwner: " &
+        declaredOwner
+    )
+
+        AddTrace(
+        "Office Equipment List -> barangay: " &
+        barangay
+    )
+
+        If String.IsNullOrEmpty(itemId) OrElse itemId = "0" Then
+            BindEmptyOfficeEquipmentsGrid()
+            Exit Sub
+        End If
+
+        Dim dt As DataTable =
+        GetOfficeEquipmentsData(
+            itemParticularId,
+            itemId,
+            gaId,
+            declaredOwner,
+            barangay
+        )
+
+        ' Preserve the existing Barcode-to-SerialNo fallback.
+        If dt IsNot Nothing Then
+
+            If Not dt.Columns.Contains("SerialNo") Then
+                dt.Columns.Add(
+                "SerialNo",
+                GetType(String)
+            )
+
+                If dt.Columns.Contains("Barcode") Then
+                    For Each row As DataRow In dt.Rows
+                        row("SerialNo") =
+                        row("Barcode").ToString()
+                    Next
+                End If
             End If
 
-            AddTrace("itemParticularId: " & itemParticularId)
-            AddTrace("itemId: " & itemId)
-            AddTrace("gaId: " & gaId)
-            AddTrace("declaredOwner: " & declaredOwner)
-            AddTrace("barangay: " & barangay)
+        End If
 
-            Dim dt As DataTable = GetOfficeEquipmentsData(itemParticularId, itemId, gaId, declaredOwner, barangay)
-
-            If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
-                grdListOfOfficeEquipments.DataSource = dt
-                grdListOfOfficeEquipments.DataBind()
-            Else
-                BindEmptyOfficeEquipmentsGrid()
-            End If
-        Catch ex As Exception
-
-        End Try
+        If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
+            grdListOfOfficeEquipments.DataSource = dt
+            grdListOfOfficeEquipments.DataBind()
+        Else
+            BindEmptyOfficeEquipmentsGrid()
+        End If
 
     End Sub
+    Private Function GetOfficeEquipmentsData(
+    ByVal itemParticularId As String,
+    ByVal itemId As String,
+    ByVal gaId As String,
+    ByVal declaredOwner As String,
+    ByVal barangay As String) As DataTable
 
-    Private Function GetOfficeEquipmentsData(ByVal itemParticularId As String, ByVal itemId As String, ByVal gaId As String, ByVal declaredOwner As String, ByVal barangay As String) As DataTable
         Dim dt As New DataTable()
+
         Try
-            Dim sql As String = "Exec [AMS].[PropertyCard_Rev_OfficeEquipment_ListOfOfficeEquipments] '" & itemParticularId & "', '" & itemId & "', '" & gaId & "', '" & declaredOwner & "', '" & barangay & "'"
-            dt = objDerived.GetDataTable(sql, CommandType.Text)
+            AddTrace(
+            "Office Equipment Data -> Item_ID: " &
+            itemId
+        )
+
+            Dim sql As String =
+            "Exec [AMS].[PropertyCard_Rev_OfficeEquipment_ListOfOfficeEquipments] '" &
+            itemParticularId & "', '" &
+            itemId & "', '" &
+            gaId & "', '" &
+            declaredOwner & "', '" &
+            barangay & "'"
+
+            dt = objDerived.GetDataTable(
+            sql,
+            CommandType.Text
+        )
+
         Catch ex As Exception
-            System.Diagnostics.Debug.WriteLine("Error loading office equipments: " & ex.Message)
+            System.Diagnostics.Debug.WriteLine(
+            "Error loading office equipments: " &
+            ex.Message
+        )
+
             Return Nothing
         End Try
+
         Return dt
     End Function
-
     Private Sub BindEmptyOfficeEquipmentsGrid()
         Dim dt As DataTable = CreateOfficeEquipmentsSchema()
 
@@ -308,9 +541,11 @@ Partial Class Records_PropertyCard_Rev_Office_Equipment
 
     Private Function CreateOfficeEquipmentsSchema() As DataTable
         Dim dt As New DataTable()
+        dt.Columns.Add("Item_Code", GetType(String))
         dt.Columns.Add("PropertyNo", GetType(String))
-        dt.Columns.Add("Property_code", GetType(String))
+        dt.Columns.Add("Property_ID", GetType(String))
         dt.Columns.Add("ItemDescription", GetType(String))
+        dt.Columns.Add("SerialNo", GetType(String))
         dt.Columns.Add("Title", GetType(String))
         dt.Columns.Add("Author", GetType(String))
         dt.Columns.Add("Unit", GetType(String))
@@ -318,14 +553,14 @@ Partial Class Records_PropertyCard_Rev_Office_Equipment
         dt.Columns.Add("AcqCost", GetType(Decimal))
         dt.Columns.Add("MarketValue", GetType(Decimal))
 
-        dt.Columns.Add("Property_ID", GetType(String))
+        ' dt.Columns.Add("Property_ID", GetType(String))
         dt.Columns.Add("PropertyDetai_ID", GetType(String))
         dt.Columns.Add("Item_ID", GetType(String))
         dt.Columns.Add("Received_ID", GetType(String))
         dt.Columns.Add("AcquisitionCost", GetType(Decimal))
         dt.Columns.Add("Received_Date", GetType(DateTime))
         dt.Columns.Add("Date_Accepted", GetType(DateTime))
-        dt.Columns.Add("useful_life", GetType(String))
+
         dt.Columns.Add("Received_Dtl_ID", GetType(String))
 
         Return dt
@@ -337,25 +572,74 @@ Partial Class Records_PropertyCard_Rev_Office_Equipment
         BindOfficeEquipmentsGrid()
     End Sub
 
-    Protected Sub grdListOfOfficeEquipments_SelectedIndexChanged(sender As Object, e As EventArgs)
+    Protected Sub grdListOfOfficeEquipments_SelectedIndexChanged(
+    sender As Object,
+    e As EventArgs)
+
         If grdListOfOfficeEquipments.SelectedIndex >= 0 Then
+
             loadUnit()
 
-            Dim selectedPropertyId As String = grdListOfOfficeEquipments.SelectedDataKey("Property_ID")
-            Session("Property_ID") = selectedPropertyId
+            Dim selectedPropertyId As String =
+            grdListOfOfficeEquipments.DataKeys(
+                grdListOfOfficeEquipments.SelectedIndex
+            ).Values("Property_ID").ToString()
 
-            Dim propertyDtlId As String = grdListOfOfficeEquipments.DataKeys(grdListOfOfficeEquipments.SelectedIndex).Values("PropertyDetai_ID").ToString()
-            PopulateOfficeEquipmentInformation(propertyDtlId)
+            Session("Property_ID") =
+            selectedPropertyId
 
-            RefreshGridData()
+            Dim propertyDtlId As String =
+            grdListOfOfficeEquipments.DataKeys(
+                grdListOfOfficeEquipments.SelectedIndex
+            ).Values("PropertyDetai_ID").ToString()
+
+            Session("PropertyDetai_ID") =
+            propertyDtlId
+
+            PopulateOfficeEquipmentInformation(
+            propertyDtlId
+        )
+
+            ' Preserve the item-level ledger refresh without
+            ' rebinding the selected property grid.
+            BindOfficeEquipmentLedgerGrid()
+
         End If
+
     End Sub
+    Protected Sub grdListOfOfficeEquipments_RowDataBound(
+    sender As Object,
+    e As GridViewRowEventArgs)
 
-    Protected Sub grdListOfOfficeEquipments_RowDataBound(sender As Object, e As GridViewRowEventArgs)
         If e.Row.RowType = DataControlRowType.DataRow Then
-            e.Row.Attributes("onclick") = Page.ClientScript.GetPostBackClientHyperlink(grdListOfOfficeEquipments, "Select$" & e.Row.RowIndex)
-            e.Row.Style("cursor") = "pointer"
+
+            Dim propertyIdObject As Object =
+            DataBinder.Eval(
+                e.Row.DataItem,
+                "Property_ID"
+            )
+
+            Dim propertyId As String = ""
+
+            If propertyIdObject IsNot Nothing AndAlso
+            Not Convert.IsDBNull(propertyIdObject) Then
+
+                propertyId = propertyIdObject.ToString()
+            End If
+
+            ' Keep the four blank placeholder rows inactive.
+            If Not String.IsNullOrEmpty(propertyId) Then
+                e.Row.Attributes("onclick") =
+                Page.ClientScript.GetPostBackClientHyperlink(
+                    grdListOfOfficeEquipments,
+                    "Select$" & e.Row.RowIndex
+                )
+
+                e.Row.Style("cursor") = "pointer"
+            End If
+
         End If
+
     End Sub
 
     Protected Sub grdListOfOfficeEquipments_OnDataBound(sender As Object, e As EventArgs)
@@ -412,13 +696,14 @@ Partial Class Records_PropertyCard_Rev_Office_Equipment
         If dt.Columns.Contains("MarketValue") Then txtOfficeEquipmentMarketValue.Text = FormatNumber(r("MarketValue"), 2)
         If dt.Columns.Contains("AcquisitionCost") Then txtOfficeEquipmentAcqCost.Text = FormatNumber(r("AcquisitionCost"), 2)
         If dt.Columns.Contains("NoYears") Then txtOfficeEquipmentNoYears.Text = r("NoYears").ToString()
-        If dt.Columns.Contains("DepreciationRate") Then txtOfficeEquipmentDepRate.Text = FormatNumber(r("DepreciationRate"), 2)
+        If dt.Columns.Contains("DepreciationRate") Then txtOfficeEquipmentDepRate.Text = r("DepreciationRate").ToString()
+        'If dt.Columns.Contains("DepreciationRate") Then txtOfficeEquipmentDepRate.Text = FormatNumber(r("DepreciationRate"), 2)
         If dt.Columns.Contains("UsefulLife") Then txtOfficeEquipmentUsefulLife.Text = r("UsefulLife").ToString()
         If dt.Columns.Contains("DepreciationValue") Then txtOfficeEquipmentDepValue.Text = FormatNumber(r("DepreciationValue"), 2)
         If dt.Columns.Contains("SalvageValue") Then txtOfficeEquipmentSalvageValue.Text = FormatNumber(r("SalvageValue"), 2)
         If dt.Columns.Contains("DepreciatedValue") Then txtDepreciatedValueOfficeEquipmentNew.Text = FormatNumber(r("DepreciatedValue"), 2)
 
-        If dt.Columns.Contains("useful_life") Then Session("useful_life") = r("useful_life").ToString()
+        ' If dt.Columns.Contains("useful_life") Then Session("useful_life") = r("useful_life").ToString()
     End Sub
 
     Private Sub ClearOfficeEquipmentInformationForm()
@@ -466,27 +751,59 @@ Partial Class Records_PropertyCard_Rev_Office_Equipment
     ' LEDGER GRIDVIEW
     ' ============================
     Private Sub BindOfficeEquipmentLedgerGrid()
-        Dim classificationId As String = If(Session("ClassificationID"), "0")
 
-        Dim dt As DataTable = GetOfficeEquipmentLedgerData(classificationId)
+        Dim itemId As String =
+        If(Session("Item_ID"), "0").ToString()
+
+        If String.IsNullOrEmpty(itemId) OrElse itemId = "0" Then
+            BindEmptyOfficeEquipmentLedgerGrid()
+            Exit Sub
+        End If
+
+        Dim dt As DataTable =
+        GetOfficeEquipmentLedgerData()
 
         If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
+            FormatOfficeLedgerTransType(dt)
+
             grdOfficeEquipmentLedger.DataSource = dt
             grdOfficeEquipmentLedger.DataBind()
         Else
             BindEmptyOfficeEquipmentLedgerGrid()
         End If
-    End Sub
 
-    Private Function GetOfficeEquipmentLedgerData(ByVal classificationId As String) As DataTable
+    End Sub
+    Private Function GetOfficeEquipmentLedgerData() As DataTable
         Dim dt As New DataTable()
+
         Try
-            Dim sql As String = "Exec [AMS].[PropertyCard_Rev_Ledger_v2] '" & Session("Item_ID") & "'"
-            dt = objDerived.GetDataTable(sql, CommandType.Text)
+            Dim itemId As String =
+            If(Session("Item_ID"), "0").ToString()
+
+            AddTrace(
+            "Office Equipment Ledger Item_ID: " &
+            itemId
+        )
+
+            Dim sql As String =
+            "Exec [AMS].[PropertyCard_Rev_Ledger_v2] '" &
+            itemId &
+            "'"
+
+            dt = objDerived.GetDataTable(
+            sql,
+            CommandType.Text
+        )
+
         Catch ex As Exception
-            System.Diagnostics.Debug.WriteLine("Error loading office equipment ledger: " & ex.Message)
+            System.Diagnostics.Debug.WriteLine(
+            "Error loading office equipment ledger: " &
+            ex.Message
+        )
+
             Return Nothing
         End Try
+
         Return dt
     End Function
 
@@ -530,6 +847,59 @@ Partial Class Records_PropertyCard_Rev_Office_Equipment
 
     Protected Sub btnOfficeEquipmentPreview_Click(sender As Object, e As EventArgs)
         ' reserved
+    End Sub
+
+    Private Sub FormatOfficeLedgerTransType(ByVal dt As DataTable)
+
+        If dt Is Nothing Then
+            Exit Sub
+        End If
+
+        If Not dt.Columns.Contains("Trans_Type") Then
+            Exit Sub
+        End If
+
+        For Each row As DataRow In dt.Rows
+
+            If row.IsNull("Trans_Type") Then
+                Continue For
+            End If
+
+            Dim transType As String = row("Trans_Type").ToString().Trim()
+
+            If String.IsNullOrEmpty(transType) Then
+                Continue For
+            End If
+
+            ' Normalize all line-break formats first.
+            transType = transType.Replace(vbCrLf, vbLf)
+            transType = transType.Replace(vbCr, vbLf)
+
+            ' Print "Originally issued to" on the next line with a dash.
+            transType = Regex.Replace(
+                transType,
+                "\s*-?\s*(Originally issued to)",
+                vbLf & "- $1",
+                RegexOptions.IgnoreCase
+            )
+
+            ' Print "Transferred from" on the next line with a dash.
+            transType = Regex.Replace(
+                transType,
+                "\s*-?\s*(Transferred from)",
+                vbLf & "- $1",
+                RegexOptions.IgnoreCase
+            )
+
+            ' Remove accidental blank lines.
+            Do While transType.Contains(vbLf & vbLf)
+                transType = transType.Replace(vbLf & vbLf, vbLf)
+            Loop
+
+            row("Trans_Type") = transType.Trim()
+
+        Next
+
     End Sub
 
 End Class

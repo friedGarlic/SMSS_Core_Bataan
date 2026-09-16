@@ -2,16 +2,16 @@
 <%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="cc1" %>
 
 <table width="100%">
-    <tr>
+    <tr  style="display: none;"  >
         <td class="DivTitle" style="width: 100%">
-            LIST OF LOCATION (MACHINERY)
+            LIST OF MACHINERY
         </td>
-    </tr>
-    <tr>
+    </tr >
+    <tr  style="display: none;"  >
         <td>
            <asp:GridView ID="gvMachineryLocationList" runat="server" 
                 Width="1000px" SkinID="GridViewAA" HorizontalAlign="Center" 
-                DataKeyNames="item_particular_id,Item_ID,DeclaredOwner,Barangay" 
+                DataKeyNames="item_particular_id,Item_ID,Barangay" 
                 AllowPaging="True" 
                 OnPageIndexChanging="gvMachineryLocationList_PageIndexChanging" 
                 OnSelectedIndexChanged="gvMachineryLocationList_SelectedIndexChanged" 
@@ -21,16 +21,14 @@
                 <Columns>
                     <asp:BoundField DataField="Property_code" HeaderText="CODE" Visible="False"></asp:BoundField>
         
-                    <asp:BoundField DataField="Item_ID" HeaderText="Item Code">
+                    <asp:BoundField DataField="Item_Code" HeaderText="Item Code">
                         <ItemStyle HorizontalAlign="Center" Width="5%"></ItemStyle>
                     </asp:BoundField>
         
-                    <asp:BoundField DataField="Location" HeaderText="Location">
-                        <ItemStyle HorizontalAlign="Left" Width="20%"></ItemStyle>
-                    </asp:BoundField>
+                 
         
-                    <asp:BoundField DataField="DeclaredOwner" DataFormatString="{0:N}" HeaderText="Building">
-                        <ItemStyle HorizontalAlign="Center" Width="12%"></ItemStyle>
+                    <asp:BoundField DataField="ItemDescription" DataFormatString="{0:N}" HeaderText="Item Description">
+                        <ItemStyle HorizontalAlign="Center" Width="22%"></ItemStyle>
                     </asp:BoundField>
         
                     <asp:BoundField DataField="Location" HeaderText="Address" Visible="false">
@@ -63,8 +61,13 @@
                     </asp:BoundField>
 
                     <asp:BoundField DataField="Capacity" HeaderText="Capacity / Specs" Visible="false">
+                        <ItemStyle HorizontalAlign="Left" Width="10%"></ItemStyle>
+                    </asp:BoundField>
+
+                       <asp:BoundField DataField="Location" HeaderText="Location">
                         <ItemStyle HorizontalAlign="Left" Width="15%"></ItemStyle>
                     </asp:BoundField>
+
                 </Columns>
     
                 <%-- Add these style properties for selection --%>
@@ -89,12 +92,12 @@
     <%-- New Section Header --%>
     <tr>
         <td class="DivTitle" style="width: 100%">
-            LIST OF EQUIPMENTS (MACHINERY)
+            LIST OF PROPERTY
         </td>
     </tr>
     
     <%-- Search Section --%>
-    <tr>
+   <%-- <tr>
         <td style="width: 1000px">
             <table style="width: 100%">
                 <tbody>
@@ -104,6 +107,36 @@
                             <asp:TextBox ID="txtMachineryPropSearch" runat="server" Width="95%"></asp:TextBox></td>
                         <td style="width: 30%" class="text5">
                             <asp:Button ID="btnMachineryPropSearch"  CssClass="CSButton"  OnClick="btnMachineryPropSearch_Click" runat="server" Width="150px" Text="SEARCH" OnClientClick="StartProgressBar();"></asp:Button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </td>
+    </tr>--%>
+
+    <tr>
+      <td style="width: 1000px">
+        <table style="width: 100%">
+            <tbody>
+                <tr>
+                    <td style="width: 35%" class="column_RightBold">
+                        SEARCH BY:
+                        <asp:DropDownList ID="ddlMachinerySearchCriteria" runat="server" Width="60%" Style="margin-left:10px;">
+                            <asp:ListItem Text="Property Number" Value="PropertyNo" />
+                            <asp:ListItem Text="Serial Number" Value="SerialNo" />
+                        </asp:DropDownList>
+                    </td>
+
+                    <td style="width: 45%" class="text5">
+                        <asp:TextBox ID="txtMachineryPropSearch" runat="server" Width="95%"></asp:TextBox>
+                    </td>
+
+                    <td style="width: 20%" class="text5">
+                        <asp:Button ID="btnMachineryPropSearch" CssClass="CSButton"
+                            runat="server" Width="110px" Text="SEARCH"
+                            Style="margin-left:-10px;"
+                            OnClick="btnMachineryPropSearch_Click"
+                            OnClientClick="StartProgressBar();"></asp:Button>
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -127,6 +160,10 @@
                     <asp:BoundField DataField="Type" HeaderText="NAME">
                         <HeaderStyle HorizontalAlign="Center"></HeaderStyle>
                         <ItemStyle HorizontalAlign="Left" Width="40%"></ItemStyle>
+                    </asp:BoundField>
+
+                    <asp:BoundField DataField="SerialNo" HeaderText="Serial Number">
+                        <ItemStyle HorizontalAlign="Center" Width="15%"></ItemStyle>
                     </asp:BoundField>
 
                     <asp:BoundField DataField="ServiceFloors" DataFormatString="{0:d}" HeaderText="Floor" Visible="false">
@@ -452,10 +489,23 @@
                                                     <HeaderStyle HorizontalAlign="Center" Height="30px" Width="50px"></HeaderStyle>
                                                     <ItemStyle HorizontalAlign="Center" VerticalAlign="Top" Width="5%"></ItemStyle>
                                                 </asp:BoundField>
-                                                <asp:BoundField DataField="Trans_Type" HeaderText="Particulars">
-                                                    <HeaderStyle HorizontalAlign="Center" Height="30px" Width="50px"></HeaderStyle>
-                                                    <ItemStyle HorizontalAlign="left" VerticalAlign="Top" Width="46%"></ItemStyle>
-                                                </asp:BoundField>
+                                               <asp:TemplateField HeaderText="Particulars">
+                                                    <HeaderStyle HorizontalAlign="Center"
+                                                        Height="30px"
+                                                        Width="50px" />
+
+                                                    <ItemStyle HorizontalAlign="Left"
+                                                        VerticalAlign="Top"
+                                                        Width="46%" />
+
+                                                    <ItemTemplate>
+                                                        <asp:Label ID="lblVehicleTransType"
+                                                            runat="server"
+                                                            Text='<%# Eval("Trans_Type") %>'
+                                                            Style="white-space: pre-line; display: block;">
+                                                        </asp:Label>
+                                                    </ItemTemplate>
+                                                </asp:TemplateField>
                                                 <asp:BoundField DataField="ref" HeaderText="Ref. No.">
                                                     <HeaderStyle HorizontalAlign="Center" Height="30px" Width="50px"></HeaderStyle>
                                                     <ItemStyle HorizontalAlign="Center" VerticalAlign="Top" Width="5%"></ItemStyle>

@@ -1,4 +1,6 @@
 ﻿Imports System.Data
+Imports System.Web.UI.WebControls
+Imports System.Text.RegularExpressions
 
 Partial Class Records_PropertyCard_Rev_Books
     Inherits System.Web.UI.UserControl
@@ -19,8 +21,7 @@ Partial Class Records_PropertyCard_Rev_Books
             BindBooksListGrid()
             BindLedgerGrid()
 
-            Session("GA_ID") = 0
-            Session("SubClassificationID") = 0
+
         Else
             BindBooksGrid()
             BindBooksListGrid()
@@ -33,14 +34,17 @@ Partial Class Records_PropertyCard_Rev_Books
     Public Sub RefreshGridData()
         BindBooksGrid()
 
-        If gvBooksLocationList.SelectedIndex >= 0 Then
+        Dim itemId As String =
+        If(Session("Item_ID"), "0").ToString()
+
+        If Not String.IsNullOrEmpty(itemId) AndAlso itemId <> "0" Then
             BindBooksListGrid()
+            BindLedgerGrid()
         Else
             BindEmptyBooksListGrid()
+            BindEmptyLedgerGrid()
+            ClearBooksInformationForm()
         End If
-
-        ' Always refresh ledger grid
-        BindLedgerGrid()
     End Sub
 
     ' ============================
@@ -62,6 +66,13 @@ Partial Class Records_PropertyCard_Rev_Books
             ' Bind empty grid if no data
             BindEmptyBooksGrid()
         End If
+
+        If gaId = 0 Then
+            BindEmptyBooksGrid()
+            Session("PropertyDetai_ID") = 0
+        End If
+
+
     End Sub
 
     Private Function GetBooksData(ByVal subClassId As String, ByVal gaId As String) As DataTable
@@ -95,10 +106,10 @@ Partial Class Records_PropertyCard_Rev_Books
     Private Function CreateBooksTableSchema() As DataTable
         Dim dt As New DataTable()
         ' Core columns from books gridview
-        dt.Columns.Add("Property_code", GetType(String))
+        dt.Columns.Add("Item_Code", GetType(String))
         dt.Columns.Add("item_particular_id", GetType(String))
         dt.Columns.Add("Item_ID", GetType(String))
-        dt.Columns.Add("DeclaredOwner", GetType(String))
+        dt.Columns.Add("ItemDescription", GetType(String))
         dt.Columns.Add("Barangay", GetType(String))
         dt.Columns.Add("Location", GetType(String))
         dt.Columns.Add("Area", GetType(String))
@@ -107,7 +118,7 @@ Partial Class Records_PropertyCard_Rev_Books
         dt.Columns.Add("MarketValue", GetType(Decimal))
 
         ' Additional books columns
-        dt.Columns.Add("ItemDescription", GetType(String))
+        'dt.Columns.Add("ItemDescription", GetType(String))
         dt.Columns.Add("Title", GetType(String))
         dt.Columns.Add("Author", GetType(String))
         dt.Columns.Add("Unit", GetType(String))
@@ -123,28 +134,18 @@ Partial Class Records_PropertyCard_Rev_Books
         BindBooksGrid()
     End Sub
 
-    Protected Sub gvBooksLocationList_SelectedIndexChanged(sender As Object, e As EventArgs)
+    Protected Sub gvBooksLocationList_SelectedIndexChanged(
+    sender As Object,
+    e As EventArgs)
+
         If gvBooksLocationList.SelectedIndex >= 0 Then
-            Dim selectedItemId As String = gvBooksLocationList.SelectedDataKey("Item_ID")
-            Session("Item_ID") = selectedItemId
 
-            ' Refresh books list grid when a row is selected in the main grid
-            BindBooksListGrid()
+            Dim selectedItemId As String = gvBooksLocationList.DataKeys(gvBooksLocationList.SelectedIndex).Values("Item_ID").ToString()
 
-
-            Dim dt As DataTable = GetLedgerData(Nothing)
-
-            If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
-                'FormatOfficeLedgerTransType(dt)
-
-                grdLedger.DataSource = dt
-                grdLedger.DataBind()
-            Else
-                BindEmptyLedgerGrid()
-            End If
-
+            LoadSelectedItem(selectedItemId)
 
         End If
+
     End Sub
 
     Protected Sub gvBooksLocationList_RowDataBound(sender As Object, e As GridViewRowEventArgs)
@@ -158,10 +159,68 @@ Partial Class Records_PropertyCard_Rev_Books
     ' ============================
     ' BOOKS LIST GRIDVIEW FUNCTIONS
     ' ============================
-    Protected Sub btnBooksPropSearch_Click(sender As Object, e As EventArgs)
-        Dim searchText As String = txtBooksPropSearch.Text.Trim()
+    'Protected Sub btnBooksPropSearch_Click(sender As Object, e As EventArgs)
+    '    Dim searchText As String = txtBooksPropSearch.Text.Trim()
 
-        ' If no search value → show full list using existing logic
+    '    ' If no search value → show full list using existing logic
+    '    If String.IsNullOrEmpty(searchText) Then
+    '        AddTrace("Books Search: empty, loading full list.")
+    '        BindBooksListGrid()
+    '        Exit Sub
+    '    End If
+
+    '    ' Replicate the same parameter logic used in BindBooksListGrid
+    '    Dim itemId As String = If(Session("Item_ID"), "0")
+    '    Dim gaId As String = If(Session("GA_ID"), "0")
+
+    '    Dim itemParticularId As String = "0"
+    '    Dim declaredOwner As String = ""
+    '    Dim barangay As String = ""
+
+    '    If gvBooksLocationList.SelectedIndex >= 0 Then
+    '        itemParticularId = gvBooksLocationList.DataKeys(gvBooksLocationList.SelectedIndex).Values("item_particular_id").ToString()
+    '        itemId = gvBooksLocationList.DataKeys(gvBooksLocationList.SelectedIndex).Values("Item_ID").ToString()
+    '        'declaredOwner = gvBooksLocationList.DataKeys(gvBooksLocationList.SelectedIndex).Values("DeclaredOwner").ToString()
+    '        barangay = gvBooksLocationList.DataKeys(gvBooksLocationList.SelectedIndex).Values("Barangay").ToString()
+    '    End If
+
+    '    AddTrace("Books Search: " & searchText &
+    '         " | itemParticularId=" & itemParticularId &
+    '         " | itemId=" & itemId &
+    '         " | gaId=" & gaId &
+    '         " | declaredOwner=" & declaredOwner &
+    '         " | barangay=" & barangay)
+
+    '    ' Get the same dataset BindBooksListGrid would bind
+    '    Dim dt As DataTable = GetBooksListData(itemParticularId, itemId, gaId, declaredOwner, barangay)
+
+    '    If dt Is Nothing OrElse dt.Rows.Count = 0 Then
+    '        BindEmptyBooksListGrid()
+    '        Exit Sub
+    '    End If
+
+    '    ' Filter by PropertyNo LIKE '%txtBooksPropSearch%'
+    '    Dim dv As New DataView(dt)
+
+    '    ' Escape special chars for DataView RowFilter
+    '    Dim safeSearch As String = searchText.Replace("'", "''").Replace("[", "[[]").Replace("]", "]]")
+
+    '    dv.RowFilter = "PropertyNo LIKE '%" & safeSearch & "%'"
+
+    '    If dv.Count > 0 Then
+    '        grdlistofBooks.DataSource = dv
+    '        grdlistofBooks.DataBind()
+    '    Else
+    '        BindEmptyBooksListGrid()
+    '    End If
+    'End Sub
+
+
+    Protected Sub btnSearch_Click(sender As Object, e As EventArgs)
+        Dim searchText As String = txtSearchTerm.Text.Trim()
+        Dim searchBy As String = ddlSearchCriteria.SelectedValue  ' Get the selected search criterion (PropertyNo or SerialNo)
+
+        ' If no search value, show the full list
         If String.IsNullOrEmpty(searchText) Then
             AddTrace("Books Search: empty, loading full list.")
             BindBooksListGrid()
@@ -175,13 +234,25 @@ Partial Class Records_PropertyCard_Rev_Books
         Dim itemParticularId As String = "0"
         Dim declaredOwner As String = ""
         Dim barangay As String = ""
+        'Try
 
-        If gvBooksLocationList.SelectedIndex >= 0 Then
-            itemParticularId = gvBooksLocationList.DataKeys(gvBooksLocationList.SelectedIndex).Values("item_particular_id").ToString()
-            itemId = gvBooksLocationList.DataKeys(gvBooksLocationList.SelectedIndex).Values("Item_ID").ToString()
-            declaredOwner = gvBooksLocationList.DataKeys(gvBooksLocationList.SelectedIndex).Values("DeclaredOwner").ToString()
-            barangay = gvBooksLocationList.DataKeys(gvBooksLocationList.SelectedIndex).Values("Barangay").ToString()
+
+        '    If gvBooksLocationList.SelectedIndex >= 0 Then
+        '        itemParticularId = gvBooksLocationList.DataKeys(gvBooksLocationList.SelectedIndex).Values("item_particular_id").ToString()
+        '        itemId = gvBooksLocationList.DataKeys(gvBooksLocationList.SelectedIndex).Values("Item_ID").ToString()
+        '        barangay = gvBooksLocationList.DataKeys(gvBooksLocationList.SelectedIndex).Values("Barangay").ToString()
+        '    End If
+
+        'Catch ex As Exception
+        '    itemParticularId = 0
+        '    itemId = 0
+        '    barangay = 0
+        'End Try
+        If String.IsNullOrEmpty(itemId) OrElse itemId = "0" Then
+            BindEmptyBooksListGrid()
+            Exit Sub
         End If
+
 
         AddTrace("Books Search: " & searchText &
              " | itemParticularId=" & itemParticularId &
@@ -198,13 +269,12 @@ Partial Class Records_PropertyCard_Rev_Books
             Exit Sub
         End If
 
-        ' Filter by PropertyNo LIKE '%txtBooksPropSearch%'
+        ' Filter by the selected search criterion (PropertyNo or SerialNo)
         Dim dv As New DataView(dt)
-
-        ' Escape special chars for DataView RowFilter
         Dim safeSearch As String = searchText.Replace("'", "''").Replace("[", "[[]").Replace("]", "]]")
 
-        dv.RowFilter = "PropertyNo LIKE '%" & safeSearch & "%'"
+        ' Apply filter based on the selected criterion
+        dv.RowFilter = String.Format("{0} LIKE '%{1}%'", searchBy, safeSearch)
 
         If dv.Count > 0 Then
             grdlistofBooks.DataSource = dv
@@ -214,47 +284,44 @@ Partial Class Records_PropertyCard_Rev_Books
         End If
     End Sub
 
-
     Private Sub BindBooksListGrid()
-        ' Get parameters from Session - use Item_ID from selected row in the first grid
-        Dim itemId As String = If(Session("Item_ID"), "0")
-        Dim gaId As String = If(Session("GA_ID"), "0")
+        ' Item_ID now comes from the main List of Items grid.
+        Dim itemId As String =
+        If(Session("Item_ID"), "0").ToString()
 
-        ' Get additional parameters from the first grid's selected row if available
+        Dim gaId As String =
+        If(Session("GA_ID"), "0").ToString()
+
         Dim itemParticularId As String = "0"
         Dim declaredOwner As String = ""
         Dim barangay As String = ""
 
-        Try
+        AddTrace("itemParticularId: " & itemParticularId)
+        AddTrace("itemId: " & itemId)
+        AddTrace("gaId: " & gaId)
+        AddTrace("declaredOwner: " & declaredOwner)
+        AddTrace("barangay: " & barangay)
 
-            If gvBooksLocationList.SelectedIndex >= 0 Then
-                itemParticularId = gvBooksLocationList.DataKeys(gvBooksLocationList.SelectedIndex).Values("item_particular_id").ToString()
-                itemId = gvBooksLocationList.DataKeys(gvBooksLocationList.SelectedIndex).Values("Item_ID").ToString()
-                declaredOwner = gvBooksLocationList.DataKeys(gvBooksLocationList.SelectedIndex).Values("DeclaredOwner").ToString()
-                barangay = gvBooksLocationList.DataKeys(gvBooksLocationList.SelectedIndex).Values("Barangay").ToString()
-            End If
+        If String.IsNullOrEmpty(itemId) OrElse itemId = "0" Then
+            BindEmptyBooksListGrid()
+            Exit Sub
+        End If
 
-            AddTrace("itemParticularId: " & itemParticularId)
-            AddTrace("itemId: " & itemId)
-            AddTrace("gaId: " & gaId)
-            AddTrace("declaredOwner: " & declaredOwner)
-            AddTrace("barangay: " & barangay)
+        Dim dt As DataTable =
+        GetBooksListData(
+            itemParticularId,
+            itemId,
+            gaId,
+            declaredOwner,
+            barangay
+        )
 
-            ' Try to get data from stored procedure
-            Dim dt As DataTable = GetBooksListData(itemParticularId, itemId, gaId, declaredOwner, barangay)
-
-            If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
-                ' Bind actual data
-                grdlistofBooks.DataSource = dt
-                grdlistofBooks.DataBind()
-            Else
-                ' Bind empty grid if no data
-                BindEmptyBooksListGrid()
-            End If
-        Catch ex As Exception
-
-        End Try
-
+        If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
+            grdlistofBooks.DataSource = dt
+            grdlistofBooks.DataBind()
+        Else
+            BindEmptyBooksListGrid()
+        End If
     End Sub
 
     Private Function GetBooksListData(ByVal itemParticularId As String, ByVal itemId As String, ByVal gaId As String, ByVal declaredOwner As String, ByVal barangay As String) As DataTable
@@ -289,7 +356,7 @@ Partial Class Records_PropertyCard_Rev_Books
         Dim dt As New DataTable()
         ' Columns from the books list gridview
         dt.Columns.Add("PropertyNo", GetType(String))
-        dt.Columns.Add("Property_code", GetType(String))
+        dt.Columns.Add("Item_Code", GetType(String))
         dt.Columns.Add("ItemDescription", GetType(String))
         dt.Columns.Add("Title", GetType(String))
         dt.Columns.Add("Author", GetType(String))
@@ -323,10 +390,11 @@ Partial Class Records_PropertyCard_Rev_Books
     Protected Sub grdlistofBooks_SelectedIndexChanged(sender As Object, e As EventArgs)
         If grdlistofBooks.SelectedIndex >= 0 Then
             loadUnit()
-            Dim selectedPropertyId As String = grdlistofBooks.SelectedDataKey("Property_ID")
+            Dim selectedPropertyId As String = grdlistofBooks.SelectedDataKey.Value.ToString()
             Session("Property_ID") = selectedPropertyId
 
             Dim propertyDtlId As String = grdlistofBooks.DataKeys(grdlistofBooks.SelectedIndex).Values("PropertyDetai_ID").ToString()
+            Session("PropertyDetai_ID") = propertyDtlId
             PopulateBooksInformation(propertyDtlId)
 
             ' Refresh the current view when book is selected
@@ -372,7 +440,7 @@ Partial Class Records_PropertyCard_Rev_Books
             ' Populate the form fields with data
             txtbookName.Text = dt.Rows(0).Item("Name").ToString()
             txtbookdesciption.Text = dt.Rows(0).Item("Description").ToString()
-            txtBookPrice.Text = FormatNumber(dt.Rows(0).Item("Price").ToString(), 2)
+            txtBookPrice.Text = FormatNumber(If(IsDBNull(dt.Rows(0).Item("Price")) OrElse String.IsNullOrWhiteSpace(Convert.ToString(dt.Rows(0).Item("Price"))), 0D, Convert.ToDecimal(dt.Rows(0).Item("Price"))), 2)
             txtBookClassification.Text = dt.Rows(0).Item("Classification").ToString()
             txtBookClassificationCode.Text = dt.Rows(0).Item("ClassificationCode").ToString()
             txtBookISBN.Text = dt.Rows(0).Item("ISBN").ToString()
@@ -479,12 +547,15 @@ Partial Class Records_PropertyCard_Rev_Books
         Dim classificationId As String = If(Session("ClassificationID"), "0")
 
         ' Try to get data from stored procedure
-        Dim dt As DataTable = GetLedgerData(classificationId)
+        Dim dt As DataTable = GetLedgerData()
 
         If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
             ' Bind actual data
+            FormatVehicleLedgerTransType(dt)
+
             grdLedger.DataSource = dt
             grdLedger.DataBind()
+
         Else
             ' Bind empty grid if no data
             BindEmptyLedgerGrid()
@@ -493,12 +564,13 @@ Partial Class Records_PropertyCard_Rev_Books
 
 
 
-    Private Function GetLedgerData(ByVal classificationId As String) As DataTable
+    Private Function GetLedgerData() As DataTable
         Dim dt As New DataTable()
 
         Try
             ' Use the stored procedure for ledger data
-            Dim sql As String = "Exec [AMS].[PropertyCard_Rev_Ledger_v2] '" & Session("Item_ID") & "'"
+            ' Dim sql As String = "Exec [AMS].[PropertyCard_Rev_Ledger] '" & classificationId & "'"
+            Dim sql As String = "Exec [AMS].[PropertyCard_Rev_Ledger_v2]  '" & Session("Item_ID") & "'"
             dt = objDerived.GetDataTable(sql, CommandType.Text)
 
         Catch ex As Exception
@@ -556,6 +628,104 @@ Partial Class Records_PropertyCard_Rev_Books
 
     End Sub
 
+    Private Sub FormatVehicleLedgerTransType(ByVal dt As DataTable)
 
+        If dt Is Nothing Then
+            Exit Sub
+        End If
+
+        If Not dt.Columns.Contains("Trans_Type") Then
+            Exit Sub
+        End If
+
+        For Each row As DataRow In dt.Rows
+
+            If row.IsNull("Trans_Type") Then
+                Continue For
+            End If
+
+            Dim transType As String = row("Trans_Type").ToString().Trim()
+
+            If String.IsNullOrEmpty(transType) Then
+                Continue For
+            End If
+
+            ' Normalize all line-break formats first.
+            transType = transType.Replace(vbCrLf, vbLf)
+            transType = transType.Replace(vbCr, vbLf)
+
+            ' Print "Originally issued to" on the next line with a dash.
+            transType = Regex.Replace(
+                transType,
+                "\s*-?\s*(Originally issued to)",
+                vbLf & "- $1",
+                RegexOptions.IgnoreCase
+            )
+
+            ' Print "Transferred from" on the next line with a dash.
+            transType = Regex.Replace(
+                transType,
+                "\s*-?\s*(Transferred from)",
+                vbLf & "- $1",
+                RegexOptions.IgnoreCase
+            )
+
+            ' Remove accidental blank lines.
+            Do While transType.Contains(vbLf & vbLf)
+                transType = transType.Replace(vbLf & vbLf, vbLf)
+            Loop
+
+            row("Trans_Type") = transType.Trim()
+
+        Next
+
+    End Sub
+
+
+
+    ' ============================
+    ' LOAD ITEM FROM MAIN PAGE
+    ' ============================
+    Public Sub LoadSelectedItem(ByVal itemId As String)
+
+        If String.IsNullOrEmpty(itemId) OrElse itemId = "0" Then
+            Session("Item_ID") = 0
+            Session("Property_ID") = 0
+            Session("PropertyDetai_ID") = 0
+
+            BindEmptyBooksListGrid()
+            BindEmptyLedgerGrid()
+            ClearBooksInformationForm()
+
+            Exit Sub
+        End If
+
+        Session("Item_ID") = itemId
+        Session("Property_ID") = 0
+        Session("PropertyDetai_ID") = 0
+
+        ' Reset previous property selection.
+        grdlistofBooks.PageIndex = 0
+        grdlistofBooks.SelectedIndex = -1
+
+        ' Reset search fields for the newly selected item.
+        txtSearchTerm.Text = ""
+
+        If ddlSearchCriteria.Items.Count > 0 Then
+            ddlSearchCriteria.SelectedIndex = 0
+        End If
+
+        ' Clear information from the previously selected property.
+        ClearBooksInformationForm()
+
+        AddTrace("Books User Control Item_ID: " & itemId)
+
+        ' Same behavior as the original
+        ' gvBooksLocationList_SelectedIndexChanged.
+        BindBooksListGrid()
+        BindLedgerGrid()
+
+
+    End Sub
 
 End Class

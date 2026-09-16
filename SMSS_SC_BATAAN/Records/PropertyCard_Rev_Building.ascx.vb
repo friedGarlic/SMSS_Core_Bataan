@@ -1,5 +1,6 @@
 ﻿Imports System.Data
 Imports System.Web.UI.WebControls
+Imports System.Text.RegularExpressions
 
 Partial Class Records_PropertyCard_Rev_Building
     Inherits System.Web.UI.UserControl
@@ -17,19 +18,17 @@ Partial Class Records_PropertyCard_Rev_Building
             True)
     End Sub
 
-    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+    Protected Sub Page_Load(
+    ByVal sender As Object,
+    ByVal e As System.EventArgs) Handles Me.Load
+
         If Not Page.IsPostBack Then
             BindBuildingLocationGrid()
-            BindBuildingsGrid()
-            BindBuildingLedgerGrid()
-
-            ' match reference behavior
-            Session("GA_ID") = 0
-            Session("SubClassificationID") = 0
-        Else
-            BindBuildingLocationGrid()
-            BindBuildingsGrid()
+            BindEmptyBuildingsGrid()
+            BindEmptyBuildingLedgerGrid()
+            ClearBuildingInformationForm()
         End If
+
     End Sub
 
     ' ============================
@@ -38,13 +37,17 @@ Partial Class Records_PropertyCard_Rev_Building
     Public Sub RefreshGridData()
         BindBuildingLocationGrid()
 
-        If gvBuildingLocationList.SelectedIndex >= 0 Then
+        Dim itemId As String =
+        If(Session("Item_ID"), "0").ToString()
+
+        If Not String.IsNullOrEmpty(itemId) AndAlso itemId <> "0" Then
             BindBuildingsGrid()
+            BindBuildingLedgerGrid()
         Else
             BindEmptyBuildingsGrid()
+            BindEmptyBuildingLedgerGrid()
+            ClearBuildingInformationForm()
         End If
-
-        BindBuildingLedgerGrid()
     End Sub
 
     ' ============================
@@ -62,6 +65,13 @@ Partial Class Records_PropertyCard_Rev_Building
         Else
             BindEmptyBuildingLocationGrid()
         End If
+
+
+        If gaId = 0 Then
+            BindEmptyBuildingLocationGrid()
+            Session("PropertyDetai_ID") = 0
+        End If
+
     End Sub
 
     Private Function GetBuildingLocationData(ByVal subClassId As String, ByVal gaId As String) As DataTable
@@ -115,139 +125,117 @@ Partial Class Records_PropertyCard_Rev_Building
         BindBuildingLocationGrid()
     End Sub
 
-    Protected Sub gvBuildingLocationList_SelectedIndexChanged(sender As Object, e As EventArgs)
+    Protected Sub gvBuildingLocationList_SelectedIndexChanged(
+    sender As Object,
+    e As EventArgs)
+
         If gvBuildingLocationList.SelectedIndex >= 0 Then
-            Dim selectedItemId As String = gvBuildingLocationList.SelectedDataKey("Item_ID")
-            Session("Item_ID") = selectedItemId
-            BindBuildingsGrid()
 
+            Dim selectedItemId As String =
+            gvBuildingLocationList.DataKeys(
+                gvBuildingLocationList.SelectedIndex
+            ).Values("Item_ID").ToString()
 
-            Dim dt As DataTable = GetBuildingLedgerData(Nothing)
-
-            If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
-                FormatBuildingLedgerTransType(dt)
-
-                grdBuildingLedger.DataSource = dt
-                grdBuildingLedger.DataBind()
-            Else
-                BindEmptyBuildingLedgerGrid()
-            End If
-
+            LoadSelectedItem(selectedItemId)
 
         End If
-    End Sub
-
-
-    Private Sub FormatBuildingLedgerTransType(ByVal dt As DataTable)
-
-        If dt Is Nothing Then
-            Exit Sub
-        End If
-
-        If Not dt.Columns.Contains("Trans_Type") Then
-            Exit Sub
-        End If
-
-        For Each row As DataRow In dt.Rows
-
-            If row.IsNull("Trans_Type") Then
-                Continue For
-            End If
-
-            Dim transType As String = row("Trans_Type").ToString().Trim()
-
-            If String.IsNullOrEmpty(transType) Then
-                Continue For
-            End If
-
-            ' Normalize all line-break formats first.
-            transType = transType.Replace(vbCrLf, vbLf)
-            transType = transType.Replace(vbCr, vbLf)
-
-            ' Print "Originally issued to" on the next line with a dash.
-            transType = Regex.Replace(
-                transType,
-                "\s*-?\s*(Originally issued to)",
-                vbLf & "- $1",
-                RegexOptions.IgnoreCase
-            )
-
-            ' Print "Transferred from" on the next line with a dash.
-            transType = Regex.Replace(
-                transType,
-                "\s*-?\s*(Transferred from)",
-                vbLf & "- $1",
-                RegexOptions.IgnoreCase
-            )
-
-            ' Remove accidental blank lines.
-            Do While transType.Contains(vbLf & vbLf)
-                transType = transType.Replace(vbLf & vbLf, vbLf)
-            Loop
-
-            row("Trans_Type") = transType.Trim()
-
-        Next
 
     End Sub
 
-    Protected Sub gvBuildingLocationList_RowDataBound(sender As Object, e As GridViewRowEventArgs)
+    Protected Sub gvBuildingLocationList_RowDataBound(
+    sender As Object,
+    e As GridViewRowEventArgs)
+
         If e.Row.RowType = DataControlRowType.DataRow Then
-            e.Row.Attributes("onclick") = Page.ClientScript.GetPostBackClientHyperlink(gvBuildingLocationList, "Select$" & e.Row.RowIndex)
-            e.Row.Style("cursor") = "pointer"
+
+            Dim itemIdObject As Object =
+            DataBinder.Eval(e.Row.DataItem, "Item_ID")
+
+            Dim itemId As String = ""
+
+            If itemIdObject IsNot Nothing AndAlso
+            Not Convert.IsDBNull(itemIdObject) Then
+
+                itemId = itemIdObject.ToString()
+            End If
+
+            If Not String.IsNullOrEmpty(itemId) Then
+                e.Row.Attributes("onclick") =
+                Page.ClientScript.GetPostBackClientHyperlink(
+                    gvBuildingLocationList,
+                    "Select$" & e.Row.RowIndex
+                )
+
+                e.Row.Style("cursor") = "pointer"
+            End If
+
         End If
+
     End Sub
 
     ' ============================
     ' LIST OF BUILDINGS (child grid)
     ' ============================
-    Protected Sub btnBuildingPropSearch_Click(sender As Object, e As EventArgs)
-        Dim searchText As String = txtBuildingPropSearch.Text.Trim()
+    Protected Sub btnBuildingPropSearch_Click(
+    sender As Object,
+    e As EventArgs)
 
-        ' If no search value → show full list using existing logic
+        Dim searchText As String =
+        txtBuildingPropSearch.Text.Trim()
+
         If String.IsNullOrEmpty(searchText) Then
             AddTrace("Building Search: empty, loading full list.")
             BindBuildingsGrid()
             Exit Sub
         End If
 
-        ' Replicate the same parameter logic used in BindBuildingsGrid
-        Dim itemId As String = If(Session("Item_ID"), "0").ToString()
-        Dim gaId As String = If(Session("GA_ID"), "0").ToString()
+        Dim itemId As String =
+        If(Session("Item_ID"), "0").ToString()
+
+        Dim gaId As String =
+        If(Session("GA_ID"), "0").ToString()
 
         Dim itemParticularId As String = "0"
         Dim declaredOwner As String = ""
         Dim barangay As String = ""
 
-        If gvBuildingLocationList.SelectedIndex >= 0 Then
-            itemParticularId = gvBuildingLocationList.DataKeys(gvBuildingLocationList.SelectedIndex).Values("item_particular_id").ToString()
-            itemId = gvBuildingLocationList.DataKeys(gvBuildingLocationList.SelectedIndex).Values("Item_ID").ToString()
-            declaredOwner = gvBuildingLocationList.DataKeys(gvBuildingLocationList.SelectedIndex).Values("DeclaredOwner").ToString()
-            barangay = gvBuildingLocationList.DataKeys(gvBuildingLocationList.SelectedIndex).Values("Barangay").ToString()
+        If String.IsNullOrEmpty(itemId) OrElse itemId = "0" Then
+            BindEmptyBuildingsGrid()
+            Exit Sub
         End If
 
-        AddTrace("Building Search: " & searchText &
-             " | itemParticularId=" & itemParticularId &
-             " | itemId=" & itemId &
-             " | gaId=" & gaId &
-             " | declaredOwner=" & declaredOwner &
-             " | barangay=" & barangay)
+        AddTrace(
+        "Building Search: " & searchText &
+        " | itemParticularId=" & itemParticularId &
+        " | itemId=" & itemId &
+        " | gaId=" & gaId &
+        " | declaredOwner=" & declaredOwner &
+        " | barangay=" & barangay
+    )
 
-        ' Get the same dataset BindBuildingsGrid would bind
-        Dim dt As DataTable = GetBuildingsData(itemParticularId, itemId, gaId, declaredOwner, barangay)
+        Dim dt As DataTable =
+        GetBuildingsData(
+            itemParticularId,
+            itemId,
+            gaId,
+            declaredOwner,
+            barangay
+        )
 
         If dt Is Nothing OrElse dt.Rows.Count = 0 Then
             BindEmptyBuildingsGrid()
             Exit Sub
         End If
 
-        ' Filter by PropertyNo LIKE '%txtBuildingPropSearch%'
         Dim dv As New DataView(dt)
 
-        ' Escape special chars for DataView RowFilter
-        Dim safeSearch As String = searchText.Replace("'", "''").Replace("[", "[[]").Replace("]", "]]")
+        Dim safeSearch As String =
+        searchText.Replace("'", "''").
+        Replace("[", "[[]").
+        Replace("]", "]]")
 
-        dv.RowFilter = "PropertyNo LIKE '%" & safeSearch & "%'"
+        dv.RowFilter =
+        "PropertyNo LIKE '%" & safeSearch & "%'"
 
         If dv.Count > 0 Then
             grdListOfBuildings.DataSource = dv
@@ -255,42 +243,48 @@ Partial Class Records_PropertyCard_Rev_Building
         Else
             BindEmptyBuildingsGrid()
         End If
+
     End Sub
 
-
     Private Sub BindBuildingsGrid()
-        Dim itemId As String = If(Session("Item_ID"), "0").ToString()
-        Dim gaId As String = If(Session("GA_ID"), "0").ToString()
+        ' Item_ID is supplied by the main gvItemList.
+        Dim itemId As String =
+        If(Session("Item_ID"), "0").ToString()
 
+        Dim gaId As String =
+        If(Session("GA_ID"), "0").ToString()
+
+        ' These values were previously obtained from the hidden parent grid.
         Dim itemParticularId As String = "0"
         Dim declaredOwner As String = ""
         Dim barangay As String = ""
 
-        Try
-            If gvBuildingLocationList.SelectedIndex >= 0 Then
-                itemParticularId = gvBuildingLocationList.DataKeys(gvBuildingLocationList.SelectedIndex).Values("item_particular_id").ToString()
-                itemId = gvBuildingLocationList.DataKeys(gvBuildingLocationList.SelectedIndex).Values("Item_ID").ToString()
-                declaredOwner = gvBuildingLocationList.DataKeys(gvBuildingLocationList.SelectedIndex).Values("DeclaredOwner").ToString()
-                barangay = gvBuildingLocationList.DataKeys(gvBuildingLocationList.SelectedIndex).Values("Barangay").ToString()
-            End If
+        AddTrace("BUILDING List -> itemParticularId: " & itemParticularId)
+        AddTrace("BUILDING List -> itemId: " & itemId)
+        AddTrace("BUILDING List -> gaId: " & gaId)
+        AddTrace("BUILDING List -> declaredOwner: " & declaredOwner)
+        AddTrace("BUILDING List -> barangay: " & barangay)
 
-            AddTrace("BUILDING List -> itemParticularId: " & itemParticularId)
-            AddTrace("BUILDING List -> itemId: " & itemId)
-            AddTrace("BUILDING List -> gaId: " & gaId)
-            AddTrace("BUILDING List -> declaredOwner: " & declaredOwner)
-            AddTrace("BUILDING List -> barangay: " & barangay)
+        If String.IsNullOrEmpty(itemId) OrElse itemId = "0" Then
+            BindEmptyBuildingsGrid()
+            Exit Sub
+        End If
 
-            Dim dt As DataTable = GetBuildingsData(itemParticularId, itemId, gaId, declaredOwner, barangay)
+        Dim dt As DataTable =
+        GetBuildingsData(
+            itemParticularId,
+            itemId,
+            gaId,
+            declaredOwner,
+            barangay
+        )
 
-            If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
-                grdListOfBuildings.DataSource = dt
-                grdListOfBuildings.DataBind()
-            Else
-                BindEmptyBuildingsGrid()
-            End If
-        Catch ex As Exception
-
-        End Try
+        If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
+            grdListOfBuildings.DataSource = dt
+            grdListOfBuildings.DataBind()
+        Else
+            BindEmptyBuildingsGrid()
+        End If
     End Sub
 
     Private Function GetBuildingsData(ByVal itemParticularId As String, ByVal itemId As String, ByVal gaId As String,
@@ -352,23 +346,47 @@ Partial Class Records_PropertyCard_Rev_Building
 
     Protected Sub grdListOfBuildings_SelectedIndexChanged(sender As Object, e As EventArgs)
         If grdListOfBuildings.SelectedIndex >= 0 Then
-            Dim selectedPropertyId As String = grdListOfBuildings.SelectedDataKey("Property_ID")
+            Dim selectedPropertyId As String = grdListOfBuildings.SelectedDataKey.Value.ToString()
             Session("Property_ID") = selectedPropertyId
 
-            Dim propertyDtlId As String =
-                grdListOfBuildings.DataKeys(grdListOfBuildings.SelectedIndex).Values("PropertyDetai_ID").ToString()
-
+            Dim propertyDtlId As String = grdListOfBuildings.DataKeys(grdListOfBuildings.SelectedIndex).Values("PropertyDetai_ID").ToString()
+            Session("PropertyDetai_ID") = propertyDtlId
             PopulateBuildingInformation(propertyDtlId)
 
             RefreshGridData()
         End If
     End Sub
 
-    Protected Sub grdListOfBuildings_RowDataBound(sender As Object, e As GridViewRowEventArgs)
+    Protected Sub grdListOfBuildings_RowDataBound(
+    sender As Object,
+    e As GridViewRowEventArgs)
+
         If e.Row.RowType = DataControlRowType.DataRow Then
-            e.Row.Attributes("onclick") = Page.ClientScript.GetPostBackClientHyperlink(grdListOfBuildings, "Select$" & e.Row.RowIndex)
-            e.Row.Style("cursor") = "pointer"
+
+            Dim propertyIdObject As Object =
+            DataBinder.Eval(e.Row.DataItem, "Property_ID")
+
+            Dim propertyId As String = ""
+
+            If propertyIdObject IsNot Nothing AndAlso
+            Not Convert.IsDBNull(propertyIdObject) Then
+
+                propertyId = propertyIdObject.ToString()
+            End If
+
+            ' Keep the four empty placeholder rows inactive.
+            If Not String.IsNullOrEmpty(propertyId) Then
+                e.Row.Attributes("onclick") =
+                Page.ClientScript.GetPostBackClientHyperlink(
+                    grdListOfBuildings,
+                    "Select$" & e.Row.RowIndex
+                )
+
+                e.Row.Style("cursor") = "pointer"
+            End If
+
         End If
+
     End Sub
 
     Protected Sub grdListOfBuildings_OnDataBound(sender As Object, e As EventArgs)
@@ -506,11 +524,11 @@ Partial Class Records_PropertyCard_Rev_Building
     ' (uses same SP as reference)
     ' ============================
     Private Sub BindBuildingLedgerGrid()
-        Dim classificationId As String = If(Session("ClassificationID"), "0").ToString()
-
-        Dim dt As DataTable = GetBuildingLedgerData(classificationId)
+        Dim dt As DataTable = GetBuildingLedgerData()
 
         If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
+            FormatBuildingLedgerTransType(dt)
+
             grdBuildingLedger.DataSource = dt
             grdBuildingLedger.DataBind()
         Else
@@ -518,7 +536,7 @@ Partial Class Records_PropertyCard_Rev_Building
         End If
     End Sub
 
-    Private Function GetBuildingLedgerData(ByVal classificationId As String) As DataTable
+    Private Function GetBuildingLedgerData() As DataTable
         Dim dt As New DataTable()
         Try
             Dim sql As String = "Exec [AMS].[PropertyCard_Rev_Ledger_v2] '" & Session("Item_ID") & "'"
@@ -571,5 +589,105 @@ Partial Class Records_PropertyCard_Rev_Building
     Protected Sub btnBuildingPreview_Click(sender As Object, e As EventArgs)
         ' reserved
     End Sub
+
+
+    Private Sub FormatBuildingLedgerTransType(ByVal dt As DataTable)
+
+        If dt Is Nothing Then
+            Exit Sub
+        End If
+
+        If Not dt.Columns.Contains("Trans_Type") Then
+            Exit Sub
+        End If
+
+        For Each row As DataRow In dt.Rows
+
+            If row.IsNull("Trans_Type") Then
+                Continue For
+            End If
+
+            Dim transType As String = row("Trans_Type").ToString().Trim()
+
+            If String.IsNullOrEmpty(transType) Then
+                Continue For
+            End If
+
+            ' Normalize all line-break formats first.
+            transType = transType.Replace(vbCrLf, vbLf)
+            transType = transType.Replace(vbCr, vbLf)
+
+            ' Print "Originally issued to" on the next line with a dash.
+            transType = Regex.Replace(
+                transType,
+                "\s*-?\s*(Originally issued to)",
+                vbLf & "- $1",
+                RegexOptions.IgnoreCase
+            )
+
+            ' Print "Transferred from" on the next line with a dash.
+            transType = Regex.Replace(
+                transType,
+                "\s*-?\s*(Transferred from)",
+                vbLf & "- $1",
+                RegexOptions.IgnoreCase
+            )
+
+            ' Remove accidental blank lines.
+            Do While transType.Contains(vbLf & vbLf)
+                transType = transType.Replace(vbLf & vbLf, vbLf)
+            Loop
+
+            row("Trans_Type") = transType.Trim()
+
+        Next
+
+    End Sub
+
+    ' ============================
+    ' LOAD ITEM FROM MAIN PAGE
+    ' ============================
+    Public Sub LoadSelectedItem(ByVal itemId As String)
+
+        If String.IsNullOrEmpty(itemId) OrElse itemId = "0" Then
+            Session("Item_ID") = 0
+            Session("Property_ID") = 0
+            Session("PropertyDetai_ID") = 0
+
+            grdListOfBuildings.PageIndex = 0
+            grdListOfBuildings.SelectedIndex = -1
+
+            txtBuildingPropSearch.Text = ""
+
+            BindEmptyBuildingsGrid()
+            BindEmptyBuildingLedgerGrid()
+            ClearBuildingInformationForm()
+
+            Exit Sub
+        End If
+
+        Session("Item_ID") = itemId
+        Session("Property_ID") = 0
+        Session("PropertyDetai_ID") = 0
+
+        ' Reset previous property selection.
+        grdListOfBuildings.PageIndex = 0
+        grdListOfBuildings.SelectedIndex = -1
+
+        ' Reset search for the newly selected item.
+        txtBuildingPropSearch.Text = ""
+
+        ' Clear previously displayed Building information.
+        ClearBuildingInformationForm()
+
+        AddTrace("Building User Control Item_ID: " & itemId)
+
+        ' Same process previously handled by
+        ' gvBuildingLocationList_SelectedIndexChanged.
+        BindBuildingsGrid()
+        BindBuildingLedgerGrid()
+
+    End Sub
+
 
 End Class

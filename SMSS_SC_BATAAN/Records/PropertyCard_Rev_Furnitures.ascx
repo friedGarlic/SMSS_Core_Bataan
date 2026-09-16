@@ -6,12 +6,12 @@
     <%-- =========================
          LIST OF LOCATION (FURNITURES AND FIXTURES)
          ========================= --%>
-    <tr>
+    <tr  style="display: none;"  >
         <td class="DivTitle" style="width: 100%">
-            LIST OF LOCATION (FURNITURES AND FIXTURES)
+            LIST OF FURNITURES AND FIXTURES
         </td>
     </tr>
-    <tr>
+    <tr  style="display: none;"  >
         <td>
             <asp:GridView ID="gvFurnitureLocationList" runat="server"
                 Width="1000px" SkinID="GridViewAA" HorizontalAlign="Center"
@@ -25,7 +25,7 @@
                 <Columns>
                     <asp:BoundField DataField="Property_code" HeaderText="CODE" Visible="False"></asp:BoundField>
 
-                    <asp:BoundField DataField="ItemCode" HeaderText="Item Code">
+                    <asp:BoundField DataField="Item_Code" HeaderText="Item Code">
                         <ItemStyle HorizontalAlign="Center" Width="10%"></ItemStyle>
                     </asp:BoundField>
 
@@ -33,9 +33,7 @@
                         <ItemStyle HorizontalAlign="Left" Width="35%"></ItemStyle>
                     </asp:BoundField>
 
-                    <asp:BoundField DataField="Location" HeaderText="Location">
-                        <ItemStyle HorizontalAlign="Left" Width="20%"></ItemStyle>
-                    </asp:BoundField>
+                 
 
                     <asp:BoundField DataField="Room" HeaderText="Room / Office">
                         <ItemStyle HorizontalAlign="Left" Width="15%"></ItemStyle>
@@ -52,6 +50,11 @@
                     <asp:BoundField DataField="MarketValue" HeaderText="Market Value">
                         <ItemStyle HorizontalAlign="Center" Width="10%"></ItemStyle>
                     </asp:BoundField>
+
+                       <asp:BoundField DataField="Location" HeaderText="Location">
+                        <ItemStyle HorizontalAlign="Left" Width="20%"></ItemStyle>
+                    </asp:BoundField>
+
                 </Columns>
             </asp:GridView>
         </td>
@@ -73,12 +76,12 @@
          ========================= --%>
     <tr>
         <td class="DivTitle" style="width: 100%">
-            LIST OF FURNITURES AND FIXTURES
+            LIST OF PROPERTY
         </td>
     </tr>
 
     <%-- Search Section --%>
-    <tr>
+   <%-- <tr>
         <td style="width: 1000px">
             <table style="width: 100%">
                 <tbody>
@@ -90,6 +93,36 @@
                         <td style="width: 30%" class="text5">
                             <asp:Button ID="btnFurniturePropSearch" CssClass="CSButton" OnClick="btnFurniturePropSearch_Click"
                                 runat="server" Width="150px" Text="SEARCH" OnClientClick="StartProgressBar();"></asp:Button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </td>
+    </tr>--%>
+
+    <tr>
+    <td style="width: 1000px">
+        <table style="width: 100%">
+            <tbody>
+                <tr>
+                    <td style="width: 35%" class="column_RightBold">
+                        SEARCH BY:
+                        <asp:DropDownList ID="ddlFurnitureSearchCriteria" runat="server" Width="60%" Style="margin-left:10px;">
+                            <asp:ListItem Text="Property Number" Value="PropertyNo" />
+                            <asp:ListItem Text="Serial Number" Value="SerialNo" />
+                        </asp:DropDownList>
+                    </td>
+
+                    <td style="width: 45%" class="text5">
+                        <asp:TextBox ID="txtFurniturePropSearch" runat="server" Width="95%"></asp:TextBox>
+                    </td>
+
+                    <td style="width: 20%" class="text5">
+                        <asp:Button ID="btnFurniturePropSearch" CssClass="CSButton"
+                            runat="server" Width="110px" Text="SEARCH"
+                            Style="margin-left:-10px;"
+                            OnClick="btnFurniturePropSearch_Click"
+                            OnClientClick="StartProgressBar();"></asp:Button>
                         </td>
                     </tr>
                 </tbody>
@@ -129,6 +162,10 @@
 
                     <asp:BoundField DataField="Author" HeaderText="Author">
                         <ItemStyle HorizontalAlign="Center" Width="12%"></ItemStyle>
+                    </asp:BoundField>
+
+                    <asp:BoundField DataField="SerialNo" HeaderText="Serial Number">
+                        <ItemStyle HorizontalAlign="Center" Width="15%"></ItemStyle>
                     </asp:BoundField>
 
                     <asp:BoundField DataField="Unit" HeaderText="Unit">
@@ -365,10 +402,23 @@
                             <HeaderStyle HorizontalAlign="Center" Height="30px" Width="50px"></HeaderStyle>
                             <ItemStyle HorizontalAlign="Center" VerticalAlign="Top" Width="5%"></ItemStyle>
                         </asp:BoundField>
-                        <asp:BoundField DataField="Trans_Type" HeaderText="Transaction Type">
-                            <HeaderStyle HorizontalAlign="Center" Height="30px" Width="50px"></HeaderStyle>
-                            <ItemStyle HorizontalAlign="left" VerticalAlign="Top" Width="46%"></ItemStyle>
-                        </asp:BoundField>
+                       <asp:TemplateField HeaderText="Particulars">
+                            <HeaderStyle HorizontalAlign="Center"
+                                Height="30px"
+                                Width="50px" />
+
+                            <ItemStyle HorizontalAlign="Left"
+                                VerticalAlign="Top"
+                                Width="46%" />
+
+                            <ItemTemplate>
+                                <asp:Label ID="lblVehicleTransType"
+                                    runat="server"
+                                    Text='<%# Eval("Trans_Type") %>'
+                                    Style="white-space: pre-line; display: block;">
+                                </asp:Label>
+                            </ItemTemplate>
+                        </asp:TemplateField>
                         <asp:BoundField DataField="ref" HeaderText="Ref. No.">
                             <HeaderStyle HorizontalAlign="Center" Height="30px" Width="50px"></HeaderStyle>
                             <ItemStyle HorizontalAlign="Center" VerticalAlign="Top" Width="5%"></ItemStyle>

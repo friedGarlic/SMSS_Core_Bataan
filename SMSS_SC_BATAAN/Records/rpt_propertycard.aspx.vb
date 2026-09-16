@@ -9,7 +9,7 @@ Partial Class Records_rpt_propertycard
 
         rpt.FileName = Server.MapPath("rpt_PropertyCard_Rev.rpt")
         rpt.SetDatabaseLogon(objDerived.username, objDerived.Password)
-        rpt.SetParameterValue("@ClassificationID", Me.Session("ClassificationID"))
+        rpt.SetParameterValue("@GA_ID", Me.Session("GA_ID"))
         Me.PropertyCardReports.ReportSource = rpt
 
     End Sub
