@@ -1505,12 +1505,13 @@ Partial Class Inventory_RIS
 
             ddApprovedBy.DataSource = objDerived.GetDataTable(
                 "SELECT * FROM HRMS.view_signatory " &
-                "WHERE division_key = '" & Me.drpFunction.SelectedItem.Value & "' " &
+                "WHERE (division_key = '" & Me.drpFunction.SelectedItem.Value & "' " &
                 "AND deptid = '" & drpdept.SelectedItem.Value & "' " &
-                "AND isActive = 1",
+                "AND isActive = 1 " &
+                "AND isDeptHead = 'Yes') " &
+                "OR (position_desc = 'Governor' AND isDeptHead = 'Yes')",
                 CommandType.Text
             )
-
             ddApprovedBy.DataTextField = "Full_Name"
             ddApprovedBy.DataValueField = "EmpID"
             ddApprovedBy.DataBind()
