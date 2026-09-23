@@ -1,52 +1,79 @@
+Imports CrystalDecisions.CrystalReports.Engine
+Imports CrystalDecisions.Shared
 
 Partial Class Inventory_t_rpt_return_slip
     Inherits System.Web.UI.Page
     Private objDerived As New connectionreport
+    Private rpt As New ReportDocument
 
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
-        'Me.Session("view") = "2"
-        'Me.CrystalReportViewer1.ReportSource = Me.CrystalReportSource1
-        'Me.CrystalReportViewer1.ToolPanelView = CrystalDecisions.Web.ToolPanelViewType.None
-        'Me.CrystalReportSource1.ReportDocument.SetDatabaseLogon(objDerived.username, objDerived.Password)
-        'Me.CrystalReportSource1.ReportDocument.SetParameterValue(0, Session("Returned_ID"))
-        If Session("Report") = "PRS_EndUser" Then
-            Me.PRS_EndUser.ToolPanelView = CrystalDecisions.Web.ToolPanelViewType.None
-            Me.CrystalReportSource2.Report.FileName = "rpt_Temp_PRS.rpt"
 
-            Me.PRS_EndUser.ReportSource = Me.CrystalReportSource2
-            Me.CrystalReportSource2.ReportDocument.SetDatabaseLogon(objDerived.username, objDerived.Password)
-            Me.CrystalReportSource2.ReportDocument.SetParameterValue("@prs_hdr_id", Session("prs_hdr_id"))
+        ' When the page is opened with ?print=1, export the report that is
+        ' already in Session to PDF and stream it straight to the browser.
+        ' This replaces the normal HTML output so the report opens in the
+        ' browser's PDF viewer, ready to print, with all pages included.
+        If Request.QueryString("print") = "1" Then
 
-        Else
-            Me.ReturnSlipReports.ToolPanelView = CrystalDecisions.Web.ToolPanelViewType.None
-            Me.ReturnSlipReports.ReportSource = Me.CrystalReportSource1
-            Me.CrystalReportSource1.ReportDocument.SetDatabaseLogon(objDerived.username, objDerived.Password)
-            Me.CrystalReportSource1.ReportDocument.SetParameterValue(0, Session("Returned_ID"))
+            Dim rptPrint As ReportDocument = CType(Session("PRS_Report"), ReportDocument)
+
+            If rptPrint Is Nothing Then
+
+                If Session("Page") = "RQ" Then
+                    Me.Page.Response.Redirect("~/Reports and Query/t_rpt_PRS.aspx")
+                ElseIf Session("Page") = "PRS_EndUser" Then
+                    Me.Page.Response.Redirect("~/Inventory/Issuance_PRS.aspx")
+                ElseIf Session("Page") = "PRS_Approved" Then
+                    Me.Page.Response.Redirect("~/Inventory/Issuance_PRSApproval.aspx")
+                End If
+
+                Return
+
+            End If
+
+            rptPrint.SetDatabaseLogon(objDerived.username, objDerived.Password)
+
+            rptPrint.ExportToHttpResponse(ExportFormatType.PortableDocFormat, Me.Page.Response, False, "PRS_Report")
+
+            Me.Page.Response.End()
 
         End If
 
     End Sub
 
     Private Sub Inventory_t_rpt_return_slip_Init(sender As Object, e As EventArgs) Handles Me.Init
-        If Session("Report") = "PRS_EndUser" Then
-            Me.PRS_EndUser.ToolPanelView = CrystalDecisions.Web.ToolPanelViewType.None
-            Me.CrystalReportSource2.Report.FileName = "rpt_Temp_PRS.rpt"
 
-            Me.PRS_EndUser.ReportSource = Me.CrystalReportSource2
-            Me.CrystalReportSource2.ReportDocument.SetDatabaseLogon(objDerived.username, objDerived.Password)
-            Me.CrystalReportSource2.ReportDocument.SetParameterValue("@prs_hdr_id", Session("prs_hdr_id"))
+        If Session("Report") = "PRS_EndUser" Then
+
+            rpt = New ReportDocument()
+            rpt.Load(Server.MapPath("rpt_Temp_PRS.rpt"))
+            rpt.SetParameterValue("@prs_hdr_id", Session("prs_hdr_id"))
+            Session("PRS_Report") = rpt
+
+            rpt.SetDatabaseLogon(objDerived.username, objDerived.Password)
+
+            Me.PRS_EndUser.ToolPanelView = CrystalDecisions.Web.ToolPanelViewType.None
+            Me.PRS_EndUser.ReportSource = rpt
+            Me.PRS_EndUser.Visible = True
+            Me.ReturnSlipReports.Visible = False
 
         Else
+
+            rpt = New ReportDocument()
+            rpt.Load(Server.MapPath("PRS_v2.rpt"))
+            rpt.SetParameterValue(0, Session("Returned_ID"))
+            Session("PRS_Report") = rpt
+
+            rpt.SetDatabaseLogon(objDerived.username, objDerived.Password)
+
             Me.ReturnSlipReports.ToolPanelView = CrystalDecisions.Web.ToolPanelViewType.None
-            Me.ReturnSlipReports.ReportSource = Me.CrystalReportSource1
-            Me.CrystalReportSource1.ReportDocument.SetDatabaseLogon(objDerived.username, objDerived.Password)
-            Me.CrystalReportSource1.ReportDocument.SetParameterValue(0, Session("Returned_ID"))
+            Me.ReturnSlipReports.ReportSource = rpt
+            Me.ReturnSlipReports.Visible = True
+            Me.PRS_EndUser.Visible = False
 
         End If
 
-
-
     End Sub
+
     Protected Sub LinkButton1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles LinkButton1.Click
 
         If Session("Page") = "RQ" Then
@@ -69,6 +96,7 @@ Partial Class Inventory_t_rpt_return_slip
 
         End If
     End Sub
+
     Private Sub Inventory_t_rpt_return_slip_LoadComplete(sender As Object, e As EventArgs) Handles Me.LoadComplete
         Master.FindControl("MasterRowModules").Visible = False
         Master.FindControl("UserRow").Visible = False

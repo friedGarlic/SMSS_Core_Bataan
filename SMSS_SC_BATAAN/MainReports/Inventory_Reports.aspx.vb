@@ -1,4 +1,6 @@
-﻿
+﻿Imports CrystalDecisions.CrystalReports.Engine
+Imports CrystalDecisions.Shared
+
 Partial Class MainReports_Inventory_Reports
     Inherits System.Web.UI.Page
     Private objDerived As New connectionreport
@@ -12,6 +14,34 @@ Partial Class MainReports_Inventory_Reports
 
 
     Private Sub MainReports_Inventory_Reports_Load(sender As Object, e As EventArgs) Handles Me.Load
+
+        ' When the page is opened with ?print=1, export the report that is
+        ' already in Session to PDF and stream it straight to the browser.
+        ' This replaces the normal HTML output so the report opens in the
+        ' browser's PDF viewer, ready to print, with all pages included.
+        If Request.QueryString("print") = "1" Then
+
+            Dim rptPrint As ReportDocument = CType(Session("INV_Report"), ReportDocument)
+
+            If rptPrint Is Nothing Then
+
+                If Session("Report") = "ICS" Then
+                    Me.Page.Response.Redirect("~/Inventory/ICS.aspx")
+                Else
+                    Me.Page.Response.Redirect("~/Inventory/t_RequisitionAndIssunace.aspx")
+                End If
+
+                Return
+
+            End If
+
+            rptPrint.SetDatabaseLogon(objDerived.username, objDerived.Password)
+
+            rptPrint.ExportToHttpResponse(ExportFormatType.PortableDocFormat, Me.Page.Response, False, "InventoryReport")
+
+            Me.Page.Response.End()
+
+        End If
 
         If Session("Report") = "ICS" Then
             loadRIS_Size()
@@ -60,30 +90,34 @@ Partial Class MainReports_Inventory_Reports
                 Me.InventoryReports.ReportSource = Me.CrystalReportSource1
                 Me.CrystalReportSource1.ReportDocument.SetDatabaseLogon(objDerived.username, objDerived.Password)
                 Me.CrystalReportSource1.ReportDocument.SetParameterValue("@ICSHdr_ID", Session("ICSHdr_ID"))
+                Session("INV_Report") = Me.CrystalReportSource1.ReportDocument
 
             ElseIf drpReportFormat.SelectedItem.Value = 2 Then
                 Me.CrystalReportSource2.Report.FileName = "Inventory_ICS_v2_Long.rpt"
                 Me.InventoryReports.ReportSource = Me.CrystalReportSource2
                 Me.CrystalReportSource2.ReportDocument.SetDatabaseLogon(objDerived.username, objDerived.Password)
                 Me.CrystalReportSource2.ReportDocument.SetParameterValue("@ICSHdr_ID", Session("ICSHdr_ID"))
+                Session("INV_Report") = Me.CrystalReportSource2.ReportDocument
 
             End If
 
         ElseIf Session("Report") = "RIS" Then
             lblTitle.Text = "REQUISITION AND ISSUANCE SLIP"
-            Addtrace("ris_no: " & Session("ris_no"))
+            AddTrace("ris_no: " & Session("ris_no"))
             ReportSize.Visible = False
             If drpReportFormat.SelectedItem.Value = 1 Then
                 Me.CrystalReportSource1.Report.FileName = "Inventory_RIS_v2.rpt"
                 Me.InventoryReports.ReportSource = Me.CrystalReportSource1
                 Me.CrystalReportSource1.ReportDocument.SetDatabaseLogon(objDerived.username, objDerived.Password)
                 Me.CrystalReportSource1.ReportDocument.SetParameterValue("@RIS_No", Session("ris_no"))
+                Session("INV_Report") = Me.CrystalReportSource1.ReportDocument
 
             ElseIf drpReportFormat.SelectedItem.Value = 2 Then
                 Me.CrystalReportSource2.Report.FileName = "Inventory_RIS_v2_Long.rpt"
                 Me.InventoryReports.ReportSource = Me.CrystalReportSource2
                 Me.CrystalReportSource2.ReportDocument.SetDatabaseLogon(objDerived.username, objDerived.Password)
                 Me.CrystalReportSource2.ReportDocument.SetParameterValue("@RIS_No", Session("ris_no"))
+                Session("INV_Report") = Me.CrystalReportSource2.ReportDocument
             End If
         End If
 

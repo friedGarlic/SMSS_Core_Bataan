@@ -2,6 +2,9 @@
 Imports System.Data
 Imports System.IO
 Imports System.Drawing
+Imports CrystalDecisions.CrystalReports.Engine
+Imports CrystalDecisions.Shared
+
 Partial Class Reports_and_Query_rpt_Property_Acknowledgement_Receipt_Report
     Inherits System.Web.UI.Page
     Private objDerived As New connectionreport
@@ -25,6 +28,29 @@ Partial Class Reports_and_Query_rpt_Property_Acknowledgement_Receipt_Report
     End Sub
 
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+
+        ' When the page is opened with ?print=1, export the report that is
+        ' already in Session to PDF and stream it straight to the browser.
+        ' This replaces the normal HTML output so the report opens in the
+        ' browser's PDF viewer, ready to print, with all pages included.
+        If Request.QueryString("print") = "1" Then
+
+            Dim rptPrint As ReportDocument = CType(Session("PAR_Report"), ReportDocument)
+
+            If rptPrint Is Nothing Then
+                Me.Page.Response.Redirect("~/Inventory/Property_Acknowledgement_Receipt_Report.aspx")
+                Return
+            End If
+
+            rptPrint.SetDatabaseLogon(objDerived.username, objDerived.Password)
+
+            rptPrint.ExportToHttpResponse(ExportFormatType.PortableDocFormat, Me.Page.Response, False, "PAR_Report")
+
+            Me.Page.Response.End()
+            Return
+
+        End If
+
         If Not Page.IsPostBack Then
             Me.MultiView1.SetActiveView(Me.View1)
             If Session("MRENumber") <> "" Then
@@ -32,6 +58,7 @@ Partial Class Reports_and_Query_rpt_Property_Acknowledgement_Receipt_Report
                 Me.CrystalReportViewer1.ReportSource = Me.CrystalReportSource1
                 Me.CrystalReportSource1.ReportDocument.SetDatabaseLogon(objDerived.username, objDerived.Password)
                 Me.CrystalReportSource1.ReportDocument.SetParameterValue("@MRENumber", Session("MRENumber"))
+                Session("PAR_Report") = Me.CrystalReportSource1.ReportDocument
             Else
             End If
             LoadNotedBy()
@@ -49,6 +76,7 @@ Partial Class Reports_and_Query_rpt_Property_Acknowledgement_Receipt_Report
                 Me.CrystalReportViewer1.ReportSource = Me.CrystalReportSource1
                 Me.CrystalReportSource1.ReportDocument.SetDatabaseLogon(objDerived.username, objDerived.Password)
                 Me.CrystalReportSource1.ReportDocument.SetParameterValue("@MRENumber", Session("MRENumber"))
+                Session("PAR_Report") = Me.CrystalReportSource1.ReportDocument
             Else
             End If
         Else
@@ -60,6 +88,7 @@ Partial Class Reports_and_Query_rpt_Property_Acknowledgement_Receipt_Report
                 Me.CrystalReportSource2.ReportDocument.SetParameterValue("@MRENumber", Session("MRENumber"))
                 Me.CrystalReportSource2.ReportDocument.SetParameterValue("NotedBy", drpNotedBy.SelectedItem.Text)
                 Me.CrystalReportSource2.ReportDocument.SetParameterValue("Position", lblPosition.Text)
+                Session("PAR_Report") = Me.CrystalReportSource2.ReportDocument
             Else
             End If
         End If
@@ -74,6 +103,7 @@ Partial Class Reports_and_Query_rpt_Property_Acknowledgement_Receipt_Report
             Me.CrystalReportSource2.ReportDocument.SetParameterValue("@MRENumber", Session("MRENumber"))
             Me.CrystalReportSource2.ReportDocument.SetParameterValue("NotedBy", drpNotedBy.SelectedItem.Text)
             Me.CrystalReportSource2.ReportDocument.SetParameterValue("Position", lblPosition.Text)
+            Session("PAR_Report") = Me.CrystalReportSource2.ReportDocument
         Else
         End If
     End Sub
@@ -89,6 +119,7 @@ Partial Class Reports_and_Query_rpt_Property_Acknowledgement_Receipt_Report
             Me.CrystalReportViewer1.ReportSource = Me.CrystalReportSource1
             Me.CrystalReportSource1.ReportDocument.SetDatabaseLogon(objDerived.username, objDerived.Password)
             Me.CrystalReportSource1.ReportDocument.SetParameterValue("@MRENumber", Session("MRENumber"))
+            Session("PAR_Report") = Me.CrystalReportSource1.ReportDocument
         End If
     End Sub
 
@@ -102,6 +133,7 @@ Partial Class Reports_and_Query_rpt_Property_Acknowledgement_Receipt_Report
                 Me.CrystalReportSource2.ReportDocument.SetParameterValue("NotedBy", drpNotedBy.SelectedItem.Text)
                 Me.CrystalReportSource2.ReportDocument.SetParameterValue("Position", lblPosition.Text)
             End If
+            Session("PAR_Report") = Me.CrystalReportSource2.ReportDocument
         End If
     End Sub
     ' ================================================================

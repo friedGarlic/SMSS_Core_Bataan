@@ -16,13 +16,34 @@ Partial Class Reports_and_Query_t_rpt_RIS_Conso
             True)
     End Sub
 
-    ' Page_Load is now intentionally empty.
-    ' Report binding happens in Page_Init so the CrystalReportViewer
+    ' Page_Load now handles the ?print=1 PDF-stream branch.
+    ' Report binding still happens in Page_Init so the CrystalReportViewer
     ' can process pagination postbacks (Next Page, Previous Page, Print,
     ' Export) against the SAME report instance it is navigating with.
     Private Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
 
-        ' Intentionally left blank.
+        ' When the page is opened with ?print=1, export the report that is
+        ' already in Session to PDF and stream it straight to the browser.
+        ' This replaces the normal HTML output so the report opens in the
+        ' browser's PDF viewer, ready to print, with all pages included.
+        If Request.QueryString("print") = "1" Then
+
+            Dim rptPrint As ReportDocument = CType(Session("RISConso_Report"), ReportDocument)
+
+            If rptPrint Is Nothing Then
+                Me.Page.Response.Redirect("~/Reports and Query/t_requisition_and_issuance.aspx")
+                Return
+            End If
+
+            rptPrint.SetDatabaseLogon(objDerived.username, objDerived.Password)
+
+            rptPrint.ExportToHttpResponse(ExportFormatType.PortableDocFormat, Me.Page.Response, False, "RIS_Conso_Report")
+
+            Me.Page.Response.End()
+
+        End If
+
+        ' Intentionally left blank otherwise.
 
     End Sub
 

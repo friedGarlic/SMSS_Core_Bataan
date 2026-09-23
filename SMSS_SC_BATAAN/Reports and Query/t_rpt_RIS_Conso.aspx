@@ -5,9 +5,42 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
     <asp:ScriptManager ID="ScriptManager1" runat="server">
     </asp:ScriptManager>
+    <script type="text/javascript">
+        function PrintReport() {
+            var frame = document.getElementById("pdfPrintFrame");
+            if (!frame) {
+                alert("Print frame not found.");
+                return;
+            }
+
+            // Reset any previous handler so we do not trigger print twice.
+            frame.onload = null;
+
+            frame.onload = function () {
+                // Small delay so the PDF viewer finishes initializing
+                // before we ask it to print.
+                setTimeout(function () {
+                    try {
+                        frame.contentWindow.focus();
+                        frame.contentWindow.print();
+                    } catch (e) {
+                        alert("Could not open the print dialog automatically. The report will be shown so you can print it manually.");
+                        frame.style.display = "block";
+                        frame.style.width = "100%";
+                        frame.style.height = "900px";
+                    }
+                }, 800);
+            };
+
+            // Cache-buster so the browser always reloads the PDF fresh.
+            frame.src = "t_rpt_RIS_Conso.aspx?print=1&t=" + new Date().getTime();
+        }
+    </script>
+
+    <iframe id="pdfPrintFrame" style="display:none; width:0; height:0; border:0;"></iframe>
 
     <div>
-        <table width="1020px">
+        <table width="1020px" cellpadding="0" cellspacing="0">
             <tr>
                 <td style="width:1%"></td>
                 <td style="width:98%" class="PageTitle">
@@ -25,40 +58,61 @@
 
             <tr>
                 <td style="width:1%"></td>
+                <td style="width:98%" align="left">
+                    <table width="1000px" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td align="right">
+                                <asp:LinkButton ID="btnPrintReport" runat="server" CssClass="LinkBtnSelect" OnClientClick="PrintReport(); return false;">Print Report</asp:LinkButton>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td style="width:1%"></td>
+            </tr>
+
+            <tr>
+                <td style="width:1%"></td>
                 <td style="width:98%" align="center">
-                    <!-- Button row – upper left -->
+                    <!-- Button row – upper left (existing, hidden) -->
                     <div style="text-align:left; padding-bottom:5px; margin-left:70px; display:none; ">
                         <asp:Button ID="btnExportPDF" runat="server" Width="20%" Text="Export to PDF" CssClass="CSButton" OnClick="btnExportPDF_Click" />
                     </div>
 
-                    <!-- Report viewer container (scrollable) -->
-                    <div style="max-width:850px; max-height:1300px; background-color:#808080; text-align:center; vertical-align:middle; overflow:scroll">
+                    <!-- Report viewer container -->
+                    <div style="width: 1000px; background-color: #808080; text-align: center; vertical-align: middle">
                         <table width="100%">
                             <tr>
-                                <td style="width:100%;height:5px"></td>
+                                <td style="width:100%;height:10px"></td>
                             </tr>
                             <tr>
                                 <td style="width:100%" align="center">
-                                    <CR:CrystalReportViewer ID="RISConsoReport" 
-                                        runat="server" 
-                                        AutoDataBind="true" 
-                                        HasToggleGroupTreeButton="False" 
-                                        HasCrystalLogo="False" 
-                                        BackColor="#ffffff" 
-                                        BestFitPage="true" 
-                                        DisplayToolbar="True" 
-                                        PrintMode="ActiveX" 
-                                        EnableExportButton="True" 
-                                        EnablePrintButton="True" 
-                                        EnableParameterPrompt="False" 
-                                        HasExportButton="True" 
-                                        HasPrintButton="True" />
+                                    <CR:CrystalReportViewer ID="RISConsoReport"
+                                        runat="server"
+                                        AutoDataBind="true"
+                                        HasToggleGroupTreeButton="False"
+                                        HasCrystalLogo="False"
+                                        HasSearchButton="False"
+                                        HasDrilldownTabs="False"
+                                        BestFitPage="False"
+                                        BackColor="#ffffff"
+                                        Height="930px"
+                                        Width="980px"
+                                        BorderStyle="Solid"
+                                        BorderColor="#2977dc"
+                                        BorderWidth="1px"
+                                        ToolPanelView="None"
+                                        HasGroupTree="False"
+                                        HasPrintButton="False"
+                                        DisplayToolbar="True"
+                                        EnableExportButton="True"
+                                        HasExportButton="True"
+                                        EnableParameterPrompt="False" />
                                     <CR:CrystalReportSource ID="CrystalReportSource1" runat="server">
                                     </CR:CrystalReportSource>
                                 </td>
                             </tr>
                             <tr>
-                                <td style="width:100%;height:5px"></td>
+                                <td style="width:100%;height:10px"></td>
                             </tr>
                         </table>
                     </div>

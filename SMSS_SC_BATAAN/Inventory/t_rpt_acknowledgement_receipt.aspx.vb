@@ -1,5 +1,6 @@
 Imports System.IO
 Imports CrystalDecisions.CrystalReports.Engine
+Imports CrystalDecisions.Shared
 Imports System.Data
 
 Partial Class t_rpt_acknowledgement_receipt
@@ -8,19 +9,49 @@ Partial Class t_rpt_acknowledgement_receipt
     Private rpt_PARE As New ReportDocument ' Declare ReportDocument Object
 
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+
+        ' When the page is opened with ?print=1, export the report that is
+        ' already in Session to PDF and stream it straight to the browser.
+        ' This replaces the normal HTML output so the report opens in the
+        ' browser's PDF viewer, ready to print, with all pages included.
+        If Request.QueryString("print") = "1" Then
+
+            Dim rptPrint As ReportDocument = CType(Session("PARE_Report"), ReportDocument)
+
+            If rptPrint Is Nothing Then
+                Me.Page.Response.Redirect(GetBackUrl())
+                Return
+            End If
+
+            rptPrint.SetDatabaseLogon(objDerived.username, objDerived.Password)
+
+            rptPrint.ExportToHttpResponse(ExportFormatType.PortableDocFormat, Me.Page.Response, False, "AcknowledgementReceipt")
+
+            Me.Page.Response.End()
+
+        End If
+
         If Not IsPostBack Then
             Session("PARE_ReportType") = "Short" ' Default selection
         End If
         LoadReport() ' Ensure the report loads on every request
     End Sub
 
+    Private Function GetBackUrl() As String
+        If Request.UrlReferrer IsNot Nothing Then
+            Return Request.UrlReferrer.ToString()
+        End If
+        Return "~/Default.aspx"
+    End Function
 
+    Protected Sub LinkButton1_Click(sender As Object, e As EventArgs) Handles LinkButton1.Click
+        Me.Page.Response.Redirect(GetBackUrl())
+    End Sub
 
     Protected Sub drpPaperSize_SelectedIndexChanged(sender As Object, e As EventArgs) Handles drpPaperSize.SelectedIndexChanged
         Session("PARE_ReportType") = drpPaperSize.SelectedValue ' Store selection in session
         LoadReport()
     End Sub
-
 
     Protected Sub LoadReport()
         Try
@@ -61,6 +92,9 @@ Partial Class t_rpt_acknowledgement_receipt
                 ' Assign the report to the viewer
                 PARE_Reports.ReportSource = rpt_PARE
                 PARE_Reports.DataBind()
+
+                ' Store in Session so the ?print=1 request can export it.
+                Session("PARE_Report") = rpt_PARE
 
                 ' Log the resolved file path for debugging
                 AddTrace("Resolved Report Path: " & reportFileName)
@@ -103,9 +137,12 @@ Partial Class t_rpt_acknowledgement_receipt
         Master.FindControl("UserRow").Visible = False
         Master.FindControl("Menu1").Visible = False
     End Sub
+
     Protected Sub Page_Unload(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Unload
         Try
-            If rpt_PARE IsNot Nothing Then
+            ' Keep the report alive in Session so the ?print=1 request can
+            ' export it to PDF. Only dispose if it was never stored.
+            If Session("PARE_Report") Is Nothing AndAlso rpt_PARE IsNot Nothing Then
                 rpt_PARE.Close()
                 rpt_PARE.Dispose()
             End If
@@ -113,6 +150,5 @@ Partial Class t_rpt_acknowledgement_receipt
             ' Prevent any runtime exceptions from breaking the unload process
         End Try
     End Sub
-
 
 End Class

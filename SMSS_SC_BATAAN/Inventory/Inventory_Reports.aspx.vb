@@ -1,9 +1,33 @@
-﻿
+﻿Imports System.IO
+Imports CrystalDecisions.CrystalReports.Engine
+Imports CrystalDecisions.Shared
+
 Partial Class MainReports_Inventory_Reports
     Inherits System.Web.UI.Page
     Private objDerived As New connectionreport
 
     Private Sub MainReports_Inventory_Reports_Load(sender As Object, e As EventArgs) Handles Me.Load
+
+        ' When the page is opened with ?print=1, export the report that is
+        ' already in Session to PDF and stream it straight to the browser.
+        ' This replaces the normal HTML output so the report opens in the
+        ' browser's PDF viewer, ready to print, with all pages included.
+        If Request.QueryString("print") = "1" Then
+
+            Dim rptPrint As ReportDocument = CType(Session("INV_Report"), ReportDocument)
+
+            If rptPrint Is Nothing Then
+                Me.Page.Response.Redirect(GetBackUrl())
+                Return
+            End If
+
+            rptPrint.SetDatabaseLogon(objDerived.username, objDerived.Password)
+
+            rptPrint.ExportToHttpResponse(ExportFormatType.PortableDocFormat, Me.Page.Response, False, "InventoryReport")
+
+            Me.Page.Response.End()
+
+        End If
 
         If Session("Report") = "ICS" Then
             loadRIS_Size()
@@ -22,27 +46,32 @@ Partial Class MainReports_Inventory_Reports
 
     End Sub
 
-    Private Sub LnkPrevious_Click(sender As Object, e As EventArgs) Handles LnkPrevious.Click
+    Private Function GetBackUrl() As String
         If Session("Page") = "INV" And Session("Report") = "ICS" Then
-            Me.Page.Response.Redirect("~/Inventory/ICS.aspx")
+            Return "~/Inventory/ICS.aspx"
 
         ElseIf Session("Page") = "INV" And Session("Report") = "RIS" Then
-            Me.Page.Response.Redirect("~/Inventory/t_RequisitionAndIssunace.aspx")
+            Return "~/Inventory/t_RequisitionAndIssunace.aspx"
 
         ElseIf Session("Page") = "RQ" And Session("Report") = "ICS" Then
-            Me.Page.Response.Redirect("~/Reports and Query/t_rpt_ICS.aspx")
+            Return "~/Reports and Query/t_rpt_ICS.aspx"
 
         ElseIf Session("Page") = "RQ" And Session("Report") = "RIS" Then
-            Me.Page.Response.Redirect("~/Reports and Query/t_requisition_and_issuance.aspx")
+            Return "~/Reports and Query/t_requisition_and_issuance.aspx"
 
         End If
+
+        Return "~/Inventory/ICS.aspx"
+    End Function
+
+    Private Sub LnkPrevious_Click(sender As Object, e As EventArgs) Handles LnkPrevious.Click
+        Me.Page.Response.Redirect(GetBackUrl())
     End Sub
 
     Protected Sub drpReportFormat_SelectedIndexChanged(sender As Object, e As EventArgs) Handles drpReportFormat.SelectedIndexChanged
         loadRIS_Size()
         drpReportFormat.Visible = False
     End Sub
-
 
     Protected Sub loadRIS_Size()
         Me.InventoryReports.ToolPanelView = CrystalDecisions.Web.ToolPanelViewType.None
@@ -64,6 +93,7 @@ Partial Class MainReports_Inventory_Reports
                 Me.CrystalReportSource1.ReportDocument.SetParameterValue("@ICSHdr_ID", Session("ICSHdr_ID"))
 
                 Me.InventoryReports.ReportSource = Me.CrystalReportSource1
+                Session("INV_Report") = Me.CrystalReportSource1.ReportDocument
 
             ElseIf drpReportFormat.SelectedItem.Value = 2 Then
 
@@ -75,6 +105,7 @@ Partial Class MainReports_Inventory_Reports
                 Me.CrystalReportSource2.ReportDocument.SetParameterValue("@ICSHdr_ID", Session("ICSHdr_ID"))
 
                 Me.InventoryReports.ReportSource = Me.CrystalReportSource2
+                Session("INV_Report") = Me.CrystalReportSource2.ReportDocument
 
             End If
 
@@ -91,6 +122,7 @@ Partial Class MainReports_Inventory_Reports
                 Me.CrystalReportSource1.ReportDocument.SetParameterValue("@RIS_No", Session("ris_no"))
 
                 Me.InventoryReports.ReportSource = Me.CrystalReportSource1
+                Session("INV_Report") = Me.CrystalReportSource1.ReportDocument
 
             ElseIf drpReportFormat.SelectedItem.Value = 2 Then
 
@@ -102,11 +134,11 @@ Partial Class MainReports_Inventory_Reports
                 Me.CrystalReportSource2.ReportDocument.SetParameterValue("@RIS_No", Session("ris_no"))
 
                 Me.InventoryReports.ReportSource = Me.CrystalReportSource2
+                Session("INV_Report") = Me.CrystalReportSource2.ReportDocument
 
             End If
         End If
     End Sub
-
 
     Private Sub AddTrace(ByVal message As String)
         ' Prevent single quotes in the message from breaking JavaScript

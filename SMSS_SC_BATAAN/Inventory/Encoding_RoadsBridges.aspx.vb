@@ -1967,6 +1967,32 @@ Partial Class Inventory_Encoding_RoadsBridges
         subclassID
     )
 
+        ' Fallback: when the dropdown is at "No Subclass"
+        ' (value = 0), resolve the SubClassificationID from
+        ' the selected property itself so the stored
+        ' procedure returns the correct record.
+        If subclassID = 0 Then
+
+            Integer.TryParse(
+            Convert.ToString(
+                objDerived.GetValue(
+                    "SELECT SubClassificationID " &
+                    "FROM AMS.Property " &
+                    "WHERE Property_ID = '" &
+                    propertyID & "'",
+                    CommandType.Text
+                )
+            ),
+            subclassID
+        )
+
+            AddTrace(
+            "Fallback SubClassificationID from Property_ID: " &
+            subclassID
+        )
+
+        End If
+
 
 
         ' =====================================================
@@ -2110,6 +2136,8 @@ Partial Class Inventory_Encoding_RoadsBridges
             End If
 
         Next
+
+        AddTrace("propertyID: " & propertyID)
 
         If selectedDataRow Is Nothing Then
 

@@ -1,25 +1,38 @@
 Imports System.IO
 Imports CrystalDecisions.CrystalReports.Engine
+Imports CrystalDecisions.Shared
 Partial Class Records_rpt_propertycard
     Inherits System.Web.UI.Page
     Private objDerived As New connectionreport
     Dim rpt As New ReportDocument
 
-    ' Page_Load is now intentionally empty.
-    ' The report binding happens in Page_Init so the CrystalReportViewer
-    ' can process pagination postbacks (Next Page, Previous Page, Print,
-    ' Export) against the SAME report instance it is navigating with.
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
 
-        ' Intentionally left blank.
+        ' When the page is opened with ?print=1, export the report that is
+        ' already in Session to PDF and stream it straight to the browser.
+        ' This replaces the normal HTML output so the report opens in the
+        ' browser's PDF viewer, ready to print, with all pages included.
+        If Request.QueryString("print") = "1" Then
+
+            Dim rptPrint As ReportDocument = CType(Session("PC_Report"), ReportDocument)
+
+            If rptPrint Is Nothing Then
+                Me.Page.Response.Redirect("~/Records/PropertyCard_Rev.aspx")
+                Return
+            End If
+
+            rptPrint.SetDatabaseLogon(objDerived.username, objDerived.Password)
+
+            rptPrint.ExportToHttpResponse(ExportFormatType.PortableDocFormat, Me.Page.Response, False, "PropertyCard")
+
+            Me.Page.Response.End()
+
+        End If
 
     End Sub
 
     Protected Sub Page_Init(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Init
 
-        ' On the very first request, build the report and stash it in Session.
-        ' On every subsequent request (including pagination postbacks),
-        ' pull the SAME instance from Session — this preserves page state.
         If Not IsPostBack Then
 
             rpt = New ReportDocument()
@@ -31,7 +44,6 @@ Partial Class Records_rpt_propertycard
 
             rpt = CType(Session("PC_Report"), ReportDocument)
 
-            ' Session may have expired or been lost — rebuild as fallback.
             If rpt Is Nothing Then
 
                 rpt = New ReportDocument()
@@ -43,19 +55,14 @@ Partial Class Records_rpt_propertycard
 
         End If
 
-        ' Re-apply database credentials on EVERY request.
-        ' Crystal Reports drops the runtime logon across postbacks;
-        ' re-applying here ensures no login prompt appears.
         rpt.SetDatabaseLogon(objDerived.username, objDerived.Password)
 
-        ' Bind BEFORE the viewer processes its view state.
         Me.PropertyCardReports.ReportSource = rpt
 
     End Sub
+
     Protected Sub Page_Unload(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Unload
-        ' Intentionally left blank.
-        ' The ReportDocument lives in Session and must NOT be disposed
-        ' while the viewer still needs it for pagination.
+
     End Sub
 
     Protected Sub drpListofReport_SelectedIndexChanged(sender As Object, e As EventArgs)
@@ -74,11 +81,11 @@ Partial Class Records_rpt_propertycard
             Session("PC_Report") = rpt
         End If
 
-        ' Re-apply logon before binding (same reason as in Page_Load)
         rpt.SetDatabaseLogon(objDerived.username, objDerived.Password)
 
         Me.PropertyCardReports.ReportSource = rpt
     End Sub
+
     Protected Sub LinkButton1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles LinkButton1.Click
         Me.Page.Response.Redirect("~/Records/PropertyCard_Rev.aspx")
     End Sub
