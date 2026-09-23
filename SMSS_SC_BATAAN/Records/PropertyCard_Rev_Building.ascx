@@ -5,12 +5,12 @@
     <%-- =========================
          LIST OF LOCATION
          ========================= --%>
-    <tr>
+    <tr style="display: none;"  >
         <td class="DivTitle" style="width: 100%">
-            LIST OF LOCATION (BUILDINGS)
+            LIST OF BUILDINGS
         </td>
     </tr>
-    <tr>
+    <tr style="display: none;"  >
         <td>
             <asp:GridView ID="gvBuildingLocationList" runat="server"
                 Width="1000px" SkinID="GridViewAA" HorizontalAlign="Center"
@@ -32,9 +32,7 @@
                         <ItemStyle HorizontalAlign="Left" Width="25%" />
                     </asp:BoundField>
 
-                    <asp:BoundField DataField="Location" HeaderText="Location">
-                        <ItemStyle HorizontalAlign="Left" Width="20%" />
-                    </asp:BoundField>
+            
 
                     <asp:BoundField DataField="FloorArea" HeaderText="Floor Area">
                         <ItemStyle HorizontalAlign="Center" Width="10%" />
@@ -51,6 +49,12 @@
                     <asp:BoundField DataField="MarketValue" HeaderText="Market Value">
                         <ItemStyle HorizontalAlign="Center" Width="15%" />
                     </asp:BoundField>
+
+                    <asp:BoundField DataField="Location" HeaderText="Location">
+                        <ItemStyle HorizontalAlign="Left" Width="20%" />
+                    </asp:BoundField>
+
+
                 </Columns>
             </asp:GridView>
         </td>
@@ -73,7 +77,7 @@
          ========================= --%>
     <tr>
         <td class="DivTitle" style="width: 100%">
-            LIST OF BUILDINGS
+            LIST OF PROPERTY
         </td>
     </tr>
 
@@ -453,10 +457,23 @@
                             <ItemStyle HorizontalAlign="Center" VerticalAlign="Top" Width="5%" />
                         </asp:BoundField>
 
-                        <asp:BoundField DataField="Trans_Type" HeaderText="Particulars">
-                            <HeaderStyle HorizontalAlign="Center" Height="30px" Width="50px" />
-                            <ItemStyle HorizontalAlign="left" VerticalAlign="Top" Width="46%" />
-                        </asp:BoundField>
+                        <asp:TemplateField HeaderText="Particulars">
+                            <HeaderStyle HorizontalAlign="Center"
+                                Height="30px"
+                                Width="50px" />
+
+                            <ItemStyle HorizontalAlign="Left"
+                                VerticalAlign="Top"
+                                Width="46%" />
+
+                            <ItemTemplate>
+                                <asp:Label ID="lblVehicleTransType"
+                                    runat="server"
+                                    Text='<%# Eval("Trans_Type") %>'
+                                    Style="white-space: pre-line; display: block;">
+                                </asp:Label>
+                            </ItemTemplate>
+                        </asp:TemplateField>
 
                         <asp:BoundField DataField="ref" HeaderText="Ref. No.">
                             <HeaderStyle HorizontalAlign="Center" Height="30px" Width="50px" />

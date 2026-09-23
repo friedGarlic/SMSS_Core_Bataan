@@ -6,6 +6,7 @@ Partial Class Reports_and_Query_t_rpt_RIS_Conso
     Inherits System.Web.UI.Page
 
     Private objDerived As New connectionreport
+    Private rpt As New ReportDocument
 
     Private Sub AddTrace(ByVal message As String)
         Dim safeMessage As String = message.Replace("'", "\'")
@@ -15,13 +16,48 @@ Partial Class Reports_and_Query_t_rpt_RIS_Conso
             True)
     End Sub
 
+    ' Page_Load is now intentionally empty.
+    ' Report binding happens in Page_Init so the CrystalReportViewer
+    ' can process pagination postbacks (Next Page, Previous Page, Print,
+    ' Export) against the SAME report instance it is navigating with.
     Private Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+
+        ' Intentionally left blank.
+
+    End Sub
+
+    Private Sub Page_Init(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Init
+
+        ' On the very first request, build the report and stash it in Session.
+        ' On every subsequent request (including pagination postbacks),
+        ' pull the SAME instance from Session — this preserves page state.
         If Not IsPostBack Then
 
-            LoadReset()
             LoadRISConso()
 
+        Else
+
+            rpt = CType(Session("RISConso_Report"), ReportDocument)
+
+            ' Session may have expired or been lost — rebuild as fallback.
+            If rpt Is Nothing Then
+
+                LoadRISConso()
+
+            Else
+
+                ' Re-apply database credentials on EVERY request.
+                ' Crystal Reports drops the runtime logon across postbacks;
+                ' re-applying here ensures no login prompt appears.
+                rpt.SetDatabaseLogon(objDerived.username, objDerived.Password)
+
+                ' Bind BEFORE the viewer processes its view state.
+                Me.RISConsoReport.ReportSource = rpt
+
+            End If
+
         End If
+
     End Sub
 
     Private Sub LoadRISConso()
@@ -36,21 +72,25 @@ Partial Class Reports_and_Query_t_rpt_RIS_Conso
         RISConsoReport.HasCrystalLogo = False
         RISConsoReport.BackColor = Drawing.Color.White
 
-        ' Set report file (relative path like reference)
-        Me.CrystalReportSource1.Report.FileName = "~/Inventory/Inventory_RIS_Conso.rpt"
-
-        ' Set report source
-        Me.RISConsoReport.ReportSource = Me.CrystalReportSource1
+        ' Load the report into the class-level ReportDocument (like the reference)
+        rpt = New ReportDocument()
+        rpt.Load(Server.MapPath("~/Inventory/Inventory_RIS_Conso.rpt"))
 
         ' Set database logon credentials
-        Me.CrystalReportSource1.ReportDocument.SetDatabaseLogon(objDerived.username, objDerived.Password)
+        rpt.SetDatabaseLogon(objDerived.username, objDerived.Password)
 
         ' Set parameter values from Session
-        Me.CrystalReportSource1.ReportDocument.SetParameterValue("@RC_ID", Session("RIS_RC_ID"))
-        Me.CrystalReportSource1.ReportDocument.SetParameterValue("@Cyear", Session("RIS_Year"))
-        Me.CrystalReportSource1.ReportDocument.SetParameterValue("@MonthFrom", Session("RIS_MonthFrom"))
-        Me.CrystalReportSource1.ReportDocument.SetParameterValue("@MonthTo", Session("RIS_MonthTo"))
+        rpt.SetParameterValue("@RC_ID", Session("RIS_RC_ID"))
+        rpt.SetParameterValue("@Cyear", Session("RIS_Year"))
+        rpt.SetParameterValue("@MonthFrom", Session("RIS_MonthFrom"))
+        rpt.SetParameterValue("@MonthTo", Session("RIS_MonthTo"))
 
+        ' Cache the loaded report in Session so it can be reused
+        ' across pagination postbacks (Next Page, Previous Page, etc.)
+        Session("RISConso_Report") = rpt
+
+        ' Bind the ReportDocument object DIRECTLY to the viewer
+        Me.RISConsoReport.ReportSource = rpt
 
     End Sub
 
@@ -63,39 +103,42 @@ Partial Class Reports_and_Query_t_rpt_RIS_Conso
         RISConsoReport.HasCrystalLogo = False
         RISConsoReport.BackColor = Drawing.Color.White
 
-        ' Set report file (relative path like reference)
-        Me.CrystalReportSource1.Report.FileName = "~/Inventory/Inventory_RIS_Conso.rpt"
-
-        ' Set report source
-        Me.RISConsoReport.ReportSource = Me.CrystalReportSource1
+        ' Load the report into the class-level ReportDocument
+        rpt = New ReportDocument()
+        rpt.Load(Server.MapPath("~/Inventory/Inventory_RIS_Conso.rpt"))
 
         ' Set database logon credentials
-        Me.CrystalReportSource1.ReportDocument.SetDatabaseLogon(objDerived.username, objDerived.Password)
+        rpt.SetDatabaseLogon(objDerived.username, objDerived.Password)
 
         ' Set parameter values from Session
-        Me.CrystalReportSource1.ReportDocument.SetParameterValue("@RC_ID", Session("Reset"))
-        Me.CrystalReportSource1.ReportDocument.SetParameterValue("@Cyear", Session("Reset"))
-        Me.CrystalReportSource1.ReportDocument.SetParameterValue("@MonthFrom", Session("Reset"))
-        Me.CrystalReportSource1.ReportDocument.SetParameterValue("@MonthTo", Session("Reset"))
+        rpt.SetParameterValue("@RC_ID", Session("Reset"))
+        rpt.SetParameterValue("@Cyear", Session("Reset"))
+        rpt.SetParameterValue("@MonthFrom", Session("Reset"))
+        rpt.SetParameterValue("@MonthTo", Session("Reset"))
 
+        ' Cache the loaded report in Session
+        Session("RISConso_Report") = rpt
+
+        ' Bind the ReportDocument object DIRECTLY to the viewer
+        Me.RISConsoReport.ReportSource = rpt
 
     End Sub
 
     Protected Sub btnExportPDF_Click(sender As Object, e As EventArgs)
         Try
             ' Create a new ReportDocument instance and load the report
-            Dim rpt As New ReportDocument()
-            rpt.Load(Server.MapPath("~/Inventory/Inventory_RIS_Conso.rpt"))
-            rpt.SetDatabaseLogon(objDerived.username, objDerived.Password)
+            Dim rptExport As New ReportDocument()
+            rptExport.Load(Server.MapPath("~/Inventory/Inventory_RIS_Conso.rpt"))
+            rptExport.SetDatabaseLogon(objDerived.username, objDerived.Password)
 
             ' Set parameters (same as before)
-            rpt.SetParameterValue("@RC_ID", Session("RIS_RC_ID"))
-            rpt.SetParameterValue("@Cyear", Session("RIS_Year"))
-            rpt.SetParameterValue("@MonthFrom", Session("RIS_MonthFrom"))
-            rpt.SetParameterValue("@MonthTo", Session("RIS_MonthTo"))
+            rptExport.SetParameterValue("@RC_ID", Session("RIS_RC_ID"))
+            rptExport.SetParameterValue("@Cyear", Session("RIS_Year"))
+            rptExport.SetParameterValue("@MonthFrom", Session("RIS_MonthFrom"))
+            rptExport.SetParameterValue("@MonthTo", Session("RIS_MonthTo"))
 
             ' Export to PDF and write to response
-            Dim stream As System.IO.Stream = rpt.ExportToStream(CrystalDecisions.Shared.ExportFormatType.PortableDocFormat)
+            Dim stream As System.IO.Stream = rptExport.ExportToStream(CrystalDecisions.Shared.ExportFormatType.PortableDocFormat)
             Response.Clear()
             Response.ContentType = "application/pdf"
             Response.AddHeader("Content-Disposition", "attachment; filename=RIS_Conso_Report.pdf")
@@ -103,8 +146,14 @@ Partial Class Reports_and_Query_t_rpt_RIS_Conso
             Response.Flush()
             Response.End()
         Catch ex As Exception
-            'MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Export failed: " & ex.Message)
+            AddTrace("Export failed: " & ex.Message)
         End Try
+    End Sub
+
+    Protected Sub Page_Unload(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Unload
+        ' Intentionally left blank.
+        ' The ReportDocument lives in Session and must NOT be disposed
+        ' while the viewer still needs it for pagination.
     End Sub
 
 End Class

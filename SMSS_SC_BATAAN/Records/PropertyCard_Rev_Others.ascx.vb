@@ -1,5 +1,6 @@
 ﻿Imports System.Data
 Imports System.Web.UI.WebControls
+Imports System.Text.RegularExpressions
 
 Partial Class Records_PropertyCard_Rev_Others
     Inherits System.Web.UI.UserControl
@@ -14,18 +15,17 @@ Partial Class Records_PropertyCard_Rev_Others
         True)
     End Sub
 
-    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+    Protected Sub Page_Load(
+    ByVal sender As Object,
+    ByVal e As System.EventArgs) Handles Me.Load
+
         If Not Page.IsPostBack Then
             BindOthersGrid()
-            BindOthersListGrid()
-            BindOthersLedgerGrid()
-
-            Session("GA_ID") = 0
-            Session("SubClassificationID") = 0
-        Else
-            BindOthersGrid()
-            BindOthersListGrid()
+            BindEmptyOthersListGrid()
+            BindEmptyOthersLedgerGrid()
+            ClearOthersInformationForm()
         End If
+
     End Sub
 
     ' ============================
@@ -34,15 +34,84 @@ Partial Class Records_PropertyCard_Rev_Others
     Public Sub RefreshGridData()
         BindOthersGrid()
 
-        If gvOthersLocationList.SelectedIndex >= 0 Then
+        Dim itemId As String =
+        If(Session("Item_ID"), "0").ToString()
+
+        If Not String.IsNullOrEmpty(itemId) AndAlso
+        itemId <> "0" Then
+
             BindOthersListGrid()
+            BindOthersLedgerGrid()
         Else
+            grdListOfOthers.PageIndex = 0
+            grdListOfOthers.SelectedIndex = -1
+
+            txtOthersPropertySearch.Text = ""
+
+            If ddlSearchCriteria.Items.Count > 0 Then
+                ddlSearchCriteria.SelectedIndex = 0
+            End If
+
             BindEmptyOthersListGrid()
+            BindEmptyOthersLedgerGrid()
+            ClearOthersInformationForm()
         End If
 
-        BindOthersLedgerGrid()
-        'ClearOthersInformationForm()
     End Sub
+
+    ' ============================
+    ' LOAD ITEM FROM MAIN PAGE
+    ' ============================
+    Public Sub LoadSelectedItem(ByVal itemId As String)
+
+        If String.IsNullOrEmpty(itemId) OrElse itemId = "0" Then
+            Session("Item_ID") = 0
+            Session("Property_ID") = 0
+            Session("PropertyDetai_ID") = 0
+
+            grdListOfOthers.PageIndex = 0
+            grdListOfOthers.SelectedIndex = -1
+
+            txtOthersPropertySearch.Text = ""
+
+            If ddlSearchCriteria.Items.Count > 0 Then
+                ddlSearchCriteria.SelectedIndex = 0
+            End If
+
+            BindEmptyOthersListGrid()
+            BindEmptyOthersLedgerGrid()
+            ClearOthersInformationForm()
+
+            Exit Sub
+        End If
+
+        Session("Item_ID") = itemId
+        Session("Property_ID") = 0
+        Session("PropertyDetai_ID") = 0
+
+        ' Reset the previously selected Others property.
+        grdListOfOthers.PageIndex = 0
+        grdListOfOthers.SelectedIndex = -1
+
+        ' Reset the search controls for the newly selected item.
+        txtOthersPropertySearch.Text = ""
+
+        If ddlSearchCriteria.Items.Count > 0 Then
+            ddlSearchCriteria.SelectedIndex = 0
+        End If
+
+        ClearOthersInformationForm()
+
+        AddTrace(
+        "Others User Control Item_ID: " &
+        itemId
+    )
+
+        BindOthersListGrid()
+        BindOthersLedgerGrid()
+
+    End Sub
+
 
     ' ============================
     ' LOCATION GRIDVIEW FUNCTIONS
@@ -59,6 +128,13 @@ Partial Class Records_PropertyCard_Rev_Others
         Else
             BindEmptyOthersGrid()
         End If
+
+        If gaId = 0 Then
+            BindEmptyOthersGrid()
+            Session("PropertyDetai_ID") = 0
+        End If
+
+
     End Sub
 
     Private Function GetOthersLocationData(ByVal subClassId As String, ByVal gaId As String) As DataTable
@@ -92,7 +168,7 @@ Partial Class Records_PropertyCard_Rev_Others
         dt.Columns.Add("Property_code", GetType(String))
         dt.Columns.Add("item_particular_id", GetType(String))
         dt.Columns.Add("Item_ID", GetType(String))
-        dt.Columns.Add("DeclaredOwner", GetType(String))
+        dt.Columns.Add("ItemDescription", GetType(String))
         dt.Columns.Add("Barangay", GetType(String))
         dt.Columns.Add("Location", GetType(String))
         dt.Columns.Add("Area", GetType(String))
@@ -108,90 +184,118 @@ Partial Class Records_PropertyCard_Rev_Others
         BindOthersGrid()
     End Sub
 
-    Protected Sub gvOthersLocationList_SelectedIndexChanged(sender As Object, e As EventArgs)
-        Try
+    Protected Sub gvOthersLocationList_SelectedIndexChanged(
+    sender As Object,
+    e As EventArgs)
 
-            If gvOthersLocationList.SelectedIndex >= 0 Then
-                Dim selectedItemId As String = gvOthersLocationList.SelectedDataKey("Item_ID")
-                Session("Item_ID") = selectedItemId
-                BindOthersListGrid()
+        If gvOthersLocationList.SelectedIndex >= 0 Then
 
+            Dim selectedItemId As String =
+            gvOthersLocationList.DataKeys(
+                gvOthersLocationList.SelectedIndex
+            ).Values("Item_ID").ToString()
 
-                Dim dt As DataTable = GetOthersLedgerData(Nothing)
+            LoadSelectedItem(selectedItemId)
 
-                If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
-                    'FormatBuildingLedgerTransType(dt)
-
-                    grdOthersLedger.DataSource = dt
-                    grdOthersLedger.DataBind()
-                Else
-                    BindEmptyOthersLedgerGrid()
-                End If
-
-            End If
-
-        Catch ex As Exception
-
-        End Try
-    End Sub
-
-    Protected Sub gvOthersLocationList_RowDataBound(sender As Object, e As GridViewRowEventArgs)
-        If e.Row.RowType = DataControlRowType.DataRow Then
-            e.Row.Attributes("onclick") = Page.ClientScript.GetPostBackClientHyperlink(gvOthersLocationList, "Select$" & e.Row.RowIndex)
-            e.Row.Style("cursor") = "pointer"
         End If
+
     End Sub
 
-    ' ============================
-    ' OTHERS LIST GRIDVIEW
-    ' ============================
-    Protected Sub btnOthersPropertySearch_Click(sender As Object, e As EventArgs)
-        Dim searchText As String = txtOthersPropertySearch.Text.Trim()
+    Protected Sub btnOthersPropertySearch_Click(
+    sender As Object,
+    e As EventArgs)
 
-        ' If no search value → show full list using existing logic
+        Dim searchText As String =
+        txtOthersPropertySearch.Text.Trim()
+
+        Dim searchBy As String =
+        ddlSearchCriteria.SelectedValue
+
         If String.IsNullOrEmpty(searchText) Then
-            AddTrace("Others Search: empty, loading full list.")
+            AddTrace(
+            "Others Search: empty, loading full list."
+        )
+
             BindOthersListGrid()
             Exit Sub
         End If
 
-        ' Replicate the same parameter logic used in BindOthersListGrid
-        Dim itemId As String = If(Session("Item_ID"), "0")
-        Dim gaId As String = If(Session("GA_ID"), "0")
+        Dim itemId As String =
+        If(Session("Item_ID"), "0").ToString()
+
+        Dim gaId As String =
+        If(Session("GA_ID"), "0").ToString()
 
         Dim itemParticularId As String = "0"
         Dim declaredOwner As String = ""
         Dim barangay As String = ""
 
-        If gvOthersLocationList.SelectedIndex >= 0 Then
-            itemParticularId = gvOthersLocationList.DataKeys(gvOthersLocationList.SelectedIndex).Values("item_particular_id").ToString()
-            itemId = gvOthersLocationList.DataKeys(gvOthersLocationList.SelectedIndex).Values("Item_ID").ToString()
-            declaredOwner = gvOthersLocationList.DataKeys(gvOthersLocationList.SelectedIndex).Values("DeclaredOwner").ToString()
-            barangay = gvOthersLocationList.DataKeys(gvOthersLocationList.SelectedIndex).Values("Barangay").ToString()
+        If String.IsNullOrEmpty(itemId) OrElse itemId = "0" Then
+            BindEmptyOthersListGrid()
+            Exit Sub
         End If
 
-        AddTrace("Others Search: " & searchText &
-             " | itemParticularId=" & itemParticularId &
-             " | itemId=" & itemId &
-             " | gaId=" & gaId &
-             " | declaredOwner=" & declaredOwner &
-             " | barangay=" & barangay)
+        AddTrace(
+        "Others Search: " & searchText &
+        " | searchBy=" & searchBy &
+        " | itemParticularId=" & itemParticularId &
+        " | itemId=" & itemId &
+        " | gaId=" & gaId &
+        " | declaredOwner=" & declaredOwner &
+        " | barangay=" & barangay
+    )
 
-        ' Get the same dataset that BindOthersListGrid would bind
-        Dim dt As DataTable = GetOthersData(itemParticularId, itemId, gaId, declaredOwner, barangay)
+        Dim dt As DataTable =
+        GetOthersData(
+            itemParticularId,
+            itemId,
+            gaId,
+            declaredOwner,
+            barangay
+        )
+
+        If dt IsNot Nothing Then
+
+            If Not dt.Columns.Contains("SerialNo") Then
+                dt.Columns.Add(
+                "SerialNo",
+                GetType(String)
+            )
+
+                If dt.Columns.Contains("Barcode") Then
+                    For Each row As DataRow In dt.Rows
+                        row("SerialNo") =
+                        row("Barcode").ToString()
+                    Next
+                End If
+            End If
+
+        End If
 
         If dt Is Nothing OrElse dt.Rows.Count = 0 Then
             BindEmptyOthersListGrid()
             Exit Sub
         End If
 
-        ' Filter by PropertyNo LIKE '%txtOthersPropertySearch%'
+        ' Only allow the two predefined search columns.
+        If searchBy <> "PropertyNo" AndAlso
+        searchBy <> "SerialNo" Then
+
+            searchBy = "PropertyNo"
+        End If
+
+        Dim safeSearch As String =
+        searchText.Replace("'", "''").
+        Replace("[", "[[]").
+        Replace("]", "]]")
+
         Dim dv As New DataView(dt)
 
-        ' Escape special characters for RowFilter
-        Dim safeSearch As String = searchText.Replace("'", "''").Replace("[", "[[]").Replace("]", "]]")
-
-        dv.RowFilter = "PropertyNo LIKE '%" & safeSearch & "%'"
+        dv.RowFilter =
+        searchBy &
+        " LIKE '%" &
+        safeSearch &
+        "%'"
 
         If dv.Count > 0 Then
             grdListOfOthers.DataSource = dv
@@ -199,42 +303,181 @@ Partial Class Records_PropertyCard_Rev_Others
         Else
             BindEmptyOthersListGrid()
         End If
+
+    End Sub
+    ' ============================
+    ' OTHERS LIST GRIDVIEW
+    ' ============================
+    'Protected Sub btnOthersPropertySearch_Click(sender As Object, e As EventArgs)
+    '    Dim searchText As String = txtOthersPropertySearch.Text.Trim()
+
+    '    ' If no search value → show full list using existing logic
+    '    If String.IsNullOrEmpty(searchText) Then
+    '        AddTrace("Others Search: empty, loading full list.")
+    '        BindOthersListGrid()
+    '        Exit Sub
+    '    End If
+
+    '    ' Replicate the same parameter logic used in BindOthersListGrid
+    '    Dim itemId As String = If(Session("Item_ID"), "0")
+    '    Dim gaId As String = If(Session("GA_ID"), "0")
+
+    '    Dim itemParticularId As String = "0"
+    '    Dim declaredOwner As String = ""
+    '    Dim barangay As String = ""
+
+    '    If gvOthersLocationList.SelectedIndex >= 0 Then
+    '        itemParticularId = gvOthersLocationList.DataKeys(gvOthersLocationList.SelectedIndex).Values("item_particular_id").ToString()
+    '        itemId = gvOthersLocationList.DataKeys(gvOthersLocationList.SelectedIndex).Values("Item_ID").ToString()
+    '        'declaredOwner = gvOthersLocationList.DataKeys(gvOthersLocationList.SelectedIndex).Values("DeclaredOwner").ToString()
+    '        barangay = gvOthersLocationList.DataKeys(gvOthersLocationList.SelectedIndex).Values("Barangay").ToString()
+    '    End If
+
+    '    AddTrace("Others Search: " & searchText &
+    '         " | itemParticularId=" & itemParticularId &
+    '         " | itemId=" & itemId &
+    '         " | gaId=" & gaId &
+    '         " | declaredOwner=" & declaredOwner &
+    '         " | barangay=" & barangay)
+
+    '    ' Get the same dataset that BindOthersListGrid would bind
+    '    Dim dt As DataTable = GetOthersData(itemParticularId, itemId, gaId, declaredOwner, barangay)
+
+    '    If dt Is Nothing OrElse dt.Rows.Count = 0 Then
+    '        BindEmptyOthersListGrid()
+    '        Exit Sub
+    '    End If
+
+    '    ' Filter by PropertyNo LIKE '%txtOthersPropertySearch%'
+    '    Dim dv As New DataView(dt)
+
+    '    ' Escape special characters for RowFilter
+    '    Dim safeSearch As String = searchText.Replace("'", "''").Replace("[", "[[]").Replace("]", "]]")
+
+    '    dv.RowFilter = "PropertyNo LIKE '%" & safeSearch & "%'"
+
+    '    If dv.Count > 0 Then
+    '        grdListOfOthers.DataSource = dv
+    '        grdListOfOthers.DataBind()
+    '    Else
+    '        BindEmptyOthersListGrid()
+    '    End If
+    'End Sub
+
+    'ADded by John
+    Protected Sub gvOthersLocationList_RowDataBound(
+    sender As Object,
+    e As GridViewRowEventArgs)
+
+        If e.Row.RowType = DataControlRowType.DataRow Then
+
+            Dim itemIdObject As Object =
+            DataBinder.Eval(
+                e.Row.DataItem,
+                "Item_ID"
+            )
+
+            Dim itemId As String = ""
+
+            If itemIdObject IsNot Nothing AndAlso
+            Not Convert.IsDBNull(itemIdObject) Then
+
+                itemId = itemIdObject.ToString()
+            End If
+
+            ' Only actual Others item rows are clickable.
+            If Not String.IsNullOrEmpty(itemId) Then
+                e.Row.Attributes("onclick") =
+                Page.ClientScript.GetPostBackClientHyperlink(
+                    gvOthersLocationList,
+                    "Select$" & e.Row.RowIndex
+                )
+
+                e.Row.Style("cursor") = "pointer"
+            End If
+
+        End If
+
     End Sub
 
-
     Private Sub BindOthersListGrid()
-        Dim itemId As String = If(Session("Item_ID"), "0")
-        Dim gaId As String = If(Session("GA_ID"), "0")
+
+        Dim itemId As String =
+        If(Session("Item_ID"), "0").ToString()
+
+        Dim gaId As String =
+        If(Session("GA_ID"), "0").ToString()
 
         Dim itemParticularId As String = "0"
         Dim declaredOwner As String = ""
         Dim barangay As String = ""
 
-        Try
-            If gvOthersLocationList.SelectedIndex >= 0 Then
-                itemParticularId = gvOthersLocationList.DataKeys(gvOthersLocationList.SelectedIndex).Values("item_particular_id").ToString()
-                itemId = gvOthersLocationList.DataKeys(gvOthersLocationList.SelectedIndex).Values("Item_ID").ToString()
-                declaredOwner = gvOthersLocationList.DataKeys(gvOthersLocationList.SelectedIndex).Values("DeclaredOwner").ToString()
-                barangay = gvOthersLocationList.DataKeys(gvOthersLocationList.SelectedIndex).Values("Barangay").ToString()
+        AddTrace(
+        "Others List -> itemParticularId: " &
+        itemParticularId
+    )
+
+        AddTrace(
+        "Others List -> itemId: " &
+        itemId
+    )
+
+        AddTrace(
+        "Others List -> gaId: " &
+        gaId
+    )
+
+        AddTrace(
+        "Others List -> declaredOwner: " &
+        declaredOwner
+    )
+
+        AddTrace(
+        "Others List -> barangay: " &
+        barangay
+    )
+
+        If String.IsNullOrEmpty(itemId) OrElse itemId = "0" Then
+            BindEmptyOthersListGrid()
+            Exit Sub
+        End If
+
+        Dim dt As DataTable =
+        GetOthersData(
+            itemParticularId,
+            itemId,
+            gaId,
+            declaredOwner,
+            barangay
+        )
+
+        ' Preserve support for stored procedures that return
+        ' the serial number through Barcode.
+        If dt IsNot Nothing Then
+
+            If Not dt.Columns.Contains("SerialNo") Then
+                dt.Columns.Add(
+                "SerialNo",
+                GetType(String)
+            )
+
+                If dt.Columns.Contains("Barcode") Then
+                    For Each row As DataRow In dt.Rows
+                        row("SerialNo") =
+                        row("Barcode").ToString()
+                    Next
+                End If
             End If
 
-            AddTrace("itemParticularId: " & itemParticularId)
-            AddTrace("itemId: " & itemId)
-            AddTrace("gaId: " & gaId)
-            AddTrace("declaredOwner: " & declaredOwner)
-            AddTrace("barangay: " & barangay)
+        End If
 
-            Dim dt As DataTable = GetOthersData(itemParticularId, itemId, gaId, declaredOwner, barangay)
+        If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
+            grdListOfOthers.DataSource = dt
+            grdListOfOthers.DataBind()
+        Else
+            BindEmptyOthersListGrid()
+        End If
 
-            If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
-                grdListOfOthers.DataSource = dt
-                grdListOfOthers.DataBind()
-            Else
-                BindEmptyOthersListGrid()
-            End If
-        Catch ex As Exception
-
-        End Try
     End Sub
 
     Private Function GetOthersData(ByVal itemParticularId As String, ByVal itemId As String, ByVal gaId As String,
@@ -266,6 +509,7 @@ Partial Class Records_PropertyCard_Rev_Others
         dt.Columns.Add("PropertyNo", GetType(String))
         dt.Columns.Add("Property_code", GetType(String))
         dt.Columns.Add("ItemDescription", GetType(String))
+        dt.Columns.Add("SerialNo", GetType(String))
         dt.Columns.Add("Category", GetType(String))
         dt.Columns.Add("Unit", GetType(String))
         dt.Columns.Add("AcqDate", GetType(String))
@@ -293,25 +537,74 @@ Partial Class Records_PropertyCard_Rev_Others
 
     End Sub
 
-    Protected Sub grdListOfOthers_SelectedIndexChanged(sender As Object, e As EventArgs)
+    Protected Sub grdListOfOthers_SelectedIndexChanged(
+    sender As Object,
+    e As EventArgs)
+
         If grdListOfOthers.SelectedIndex >= 0 Then
+
             loadUnit()
 
-            Dim selectedPropertyId As String = grdListOfOthers.SelectedDataKey("Property_ID")
-            Session("Property_ID") = selectedPropertyId
+            Dim selectedPropertyId As String =
+            grdListOfOthers.DataKeys(
+                grdListOfOthers.SelectedIndex
+            ).Values("Property_ID").ToString()
 
-            Dim propertyDtlId As String = grdListOfOthers.DataKeys(grdListOfOthers.SelectedIndex).Values("PropertyDetai_ID").ToString()
-            PopulateOthersInformation(propertyDtlId)
+            Session("Property_ID") =
+            selectedPropertyId
 
-            RefreshGridData()
+            Dim propertyDtlId As String =
+            grdListOfOthers.DataKeys(
+                grdListOfOthers.SelectedIndex
+            ).Values("PropertyDetai_ID").ToString()
+
+            Session("PropertyDetai_ID") =
+            propertyDtlId
+
+            PopulateOthersInformation(
+            propertyDtlId
+        )
+
+            ' Refresh only the item-level ledger.
+            ' Do not rebind the selected property grid.
+            BindOthersLedgerGrid()
+
         End If
+
     End Sub
+    Protected Sub grdListOfOthers_RowDataBound(
+    sender As Object,
+    e As GridViewRowEventArgs)
 
-    Protected Sub grdListOfOthers_RowDataBound(sender As Object, e As GridViewRowEventArgs)
         If e.Row.RowType = DataControlRowType.DataRow Then
-            e.Row.Attributes("onclick") = Page.ClientScript.GetPostBackClientHyperlink(grdListOfOthers, "Select$" & e.Row.RowIndex)
-            e.Row.Style("cursor") = "pointer"
+
+            Dim propertyIdObject As Object =
+            DataBinder.Eval(
+                e.Row.DataItem,
+                "Property_ID"
+            )
+
+            Dim propertyId As String = ""
+
+            If propertyIdObject IsNot Nothing AndAlso
+            Not Convert.IsDBNull(propertyIdObject) Then
+
+                propertyId = propertyIdObject.ToString()
+            End If
+
+            ' Keep the four blank placeholder rows inactive.
+            If Not String.IsNullOrEmpty(propertyId) Then
+                e.Row.Attributes("onclick") =
+                Page.ClientScript.GetPostBackClientHyperlink(
+                    grdListOfOthers,
+                    "Select$" & e.Row.RowIndex
+                )
+
+                e.Row.Style("cursor") = "pointer"
+            End If
+
         End If
+
     End Sub
 
     Protected Sub grdListOfOthers_OnDataBound(sender As Object, e As EventArgs)
@@ -405,30 +698,62 @@ Partial Class Records_PropertyCard_Rev_Others
     ' LEDGER GRIDVIEW
     ' ============================
     Private Sub BindOthersLedgerGrid()
-        Dim classificationId As String = If(Session("ClassificationID"), "0")
 
-        Dim dt As DataTable = GetOthersLedgerData(classificationId)
+        Dim itemId As String =
+        If(Session("Item_ID"), "0").ToString()
+
+        If String.IsNullOrEmpty(itemId) OrElse itemId = "0" Then
+            BindEmptyOthersLedgerGrid()
+            Exit Sub
+        End If
+
+        Dim dt As DataTable =
+        GetOthersLedgerData()
 
         If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
+            FormatOthersLedgerTransType(dt)
+
             grdOthersLedger.DataSource = dt
             grdOthersLedger.DataBind()
         Else
             BindEmptyOthersLedgerGrid()
         End If
+
     End Sub
 
-    Private Function GetOthersLedgerData(ByVal classificationId As String) As DataTable
+    Private Function GetOthersLedgerData() As DataTable
         Dim dt As New DataTable()
+
         Try
-            Dim sql As String = "Exec [AMS].[PropertyCard_Rev_Ledger_v2] '" & Session("Item_ID") & "'"
-            dt = objDerived.GetDataTable(sql, CommandType.Text)
+            Dim itemId As String =
+            If(Session("Item_ID"), "0").ToString()
+
+            AddTrace(
+            "Others Ledger Item_ID: " &
+            itemId
+        )
+
+            Dim sql As String =
+            "Exec [AMS].[PropertyCard_Rev_Ledger_v2] '" &
+            itemId &
+            "'"
+
+            dt = objDerived.GetDataTable(
+            sql,
+            CommandType.Text
+        )
+
         Catch ex As Exception
-            System.Diagnostics.Debug.WriteLine("Error loading others ledger: " & ex.Message)
+            System.Diagnostics.Debug.WriteLine(
+            "Error loading others ledger: " &
+            ex.Message
+        )
+
             Return Nothing
         End Try
+
         Return dt
     End Function
-
     Private Sub BindEmptyOthersLedgerGrid()
         Dim dt As DataTable = CreateOthersLedgerSchema()
 
@@ -470,5 +795,60 @@ Partial Class Records_PropertyCard_Rev_Others
     Protected Sub btnOthersPreview_Click(sender As Object, e As EventArgs)
         ' reserved
     End Sub
+
+    Private Sub FormatOthersLedgerTransType(ByVal dt As DataTable)
+
+        If dt Is Nothing Then
+            Exit Sub
+        End If
+
+        If Not dt.Columns.Contains("Trans_Type") Then
+            Exit Sub
+        End If
+
+        For Each row As DataRow In dt.Rows
+
+            If row.IsNull("Trans_Type") Then
+                Continue For
+            End If
+
+            Dim transType As String = row("Trans_Type").ToString().Trim()
+
+            If String.IsNullOrEmpty(transType) Then
+                Continue For
+            End If
+
+            ' Normalize all line-break formats first.
+            transType = transType.Replace(vbCrLf, vbLf)
+            transType = transType.Replace(vbCr, vbLf)
+
+            ' Print "Originally issued to" on the next line with a dash.
+            transType = Regex.Replace(
+                transType,
+                "\s*-?\s*(Originally issued to)",
+                vbLf & "- $1",
+                RegexOptions.IgnoreCase
+            )
+
+            ' Print "Transferred from" on the next line with a dash.
+            transType = Regex.Replace(
+                transType,
+                "\s*-?\s*(Transferred from)",
+                vbLf & "- $1",
+                RegexOptions.IgnoreCase
+            )
+
+            ' Remove accidental blank lines.
+            Do While transType.Contains(vbLf & vbLf)
+                transType = transType.Replace(vbLf & vbLf, vbLf)
+            Loop
+
+            row("Trans_Type") = transType.Trim()
+
+        Next
+
+    End Sub
+
+
 
 End Class

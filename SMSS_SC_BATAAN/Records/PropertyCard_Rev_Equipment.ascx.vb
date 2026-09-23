@@ -1,5 +1,6 @@
 ﻿Imports System.Data
 Imports System.Web.UI.WebControls
+Imports System.Text.RegularExpressions
 
 Partial Class Records_PropertyCard_Rev_Equipment
     Inherits System.Web.UI.UserControl
@@ -14,18 +15,18 @@ Partial Class Records_PropertyCard_Rev_Equipment
         True)
     End Sub
 
-    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+    Protected Sub Page_Load(
+    ByVal sender As Object,
+    ByVal e As System.EventArgs) Handles Me.Load
+
         If Not Page.IsPostBack Then
             BindEquipmentGrid()
-            BindEquipmentsGrid()
-            BindEquipmentLedgerGrid()
-
-            Session("GA_ID") = 0
-            Session("SubClassificationID") = 0
-        Else
-            BindEquipmentGrid()
-            BindEquipmentsGrid()
+            BindEmptyEquipmentsGrid()
+            BindEmptySubItemsGrid()
+            BindEmptyEquipmentLedgerGrid()
+            ClearEquipmentInformationForm()
         End If
+
     End Sub
 
     ' ============================
@@ -34,14 +35,94 @@ Partial Class Records_PropertyCard_Rev_Equipment
     Public Sub RefreshGridData()
         BindEquipmentGrid()
 
-        If gvEquipmentLocationList.SelectedIndex >= 0 Then
+        Dim itemId As String =
+        If(Session("Item_ID"), "0").ToString()
+
+        Dim propertyId As String =
+        If(Session("Property_ID"), "0").ToString()
+
+        If Not String.IsNullOrEmpty(itemId) AndAlso itemId <> "0" Then
             BindEquipmentsGrid()
         Else
             BindEmptyEquipmentsGrid()
+            BindEmptySubItemsGrid()
+            BindEmptyEquipmentLedgerGrid()
+            ClearEquipmentInformationForm()
+
+            Exit Sub
         End If
 
-        BindEquipmentLedgerGrid()
+        If Not String.IsNullOrEmpty(propertyId) AndAlso
+        propertyId <> "0" Then
+
+            BindSubItemsGrid()
+            BindEquipmentLedgerGrid()
+        Else
+            BindEmptySubItemsGrid()
+            BindEmptyEquipmentLedgerGrid()
+        End If
+
     End Sub
+
+    ' ============================
+    ' LOAD ITEM FROM MAIN PAGE
+    ' ============================
+    Public Sub LoadSelectedItem(ByVal itemId As String)
+
+        If String.IsNullOrEmpty(itemId) OrElse itemId = "0" Then
+            Session("Item_ID") = 0
+            Session("Property_ID") = 0
+            Session("PropertyDetai_ID") = 0
+
+            grdListOfEquipments.PageIndex = 0
+            grdListOfEquipments.SelectedIndex = -1
+
+            txtEquipmentPropSearch.Text = ""
+
+            If ddlEquipmentSearchCriteria.Items.Count > 0 Then
+                ddlEquipmentSearchCriteria.SelectedIndex = 0
+            End If
+
+            BindEmptyEquipmentsGrid()
+            BindEmptySubItemsGrid()
+            BindEmptyEquipmentLedgerGrid()
+            ClearEquipmentInformationForm()
+
+            Exit Sub
+        End If
+
+        Session("Item_ID") = itemId
+        Session("Property_ID") = 0
+        Session("PropertyDetai_ID") = 0
+
+        ' Reset previous Equipment property selection.
+        grdListOfEquipments.PageIndex = 0
+        grdListOfEquipments.SelectedIndex = -1
+
+        ' Reset the search controls for the newly selected item.
+        txtEquipmentPropSearch.Text = ""
+
+        If ddlEquipmentSearchCriteria.Items.Count > 0 Then
+            ddlEquipmentSearchCriteria.SelectedIndex = 0
+        End If
+
+        ClearEquipmentInformationForm()
+
+        AddTrace(
+        "Equipment User Control Item_ID: " &
+        itemId
+    )
+
+        ' Load all Equipment property records belonging to the item.
+        BindEquipmentsGrid()
+
+        ' These sections require an individual Property_ID.
+        BindEmptySubItemsGrid()
+        BindEmptyEquipmentLedgerGrid()
+
+    End Sub
+
+
 
     ' ============================
     ' LOCATION GRIDVIEW FUNCTIONS
@@ -58,6 +139,13 @@ Partial Class Records_PropertyCard_Rev_Equipment
         Else
             BindEmptyEquipmentGrid()
         End If
+
+        If gaId = 0 Then
+            BindEmptyEquipmentGrid()
+            Session("PropertyDetai_ID") = 0
+        End If
+
+
     End Sub
 
     Private Function GetEquipmentLocationData(ByVal subClassId As String, ByVal gaId As String) As DataTable
@@ -88,10 +176,10 @@ Partial Class Records_PropertyCard_Rev_Equipment
 
     Private Function CreateEquipmentLocationSchema() As DataTable
         Dim dt As New DataTable()
-        dt.Columns.Add("Property_code", GetType(String))
+        dt.Columns.Add("Item_Code", GetType(String))
         dt.Columns.Add("item_particular_id", GetType(String))
         dt.Columns.Add("Item_ID", GetType(String))
-        dt.Columns.Add("DeclaredOwner", GetType(String))
+        dt.Columns.Add("ItemDescription", GetType(String))
         dt.Columns.Add("Barangay", GetType(String))
         dt.Columns.Add("Location", GetType(String))
         dt.Columns.Add("Area", GetType(String))
@@ -107,140 +195,211 @@ Partial Class Records_PropertyCard_Rev_Equipment
         BindEquipmentGrid()
     End Sub
 
-    Protected Sub gvEquipmentLocationList_SelectedIndexChanged(sender As Object, e As EventArgs)
+    Protected Sub gvEquipmentLocationList_SelectedIndexChanged(
+    sender As Object,
+    e As EventArgs)
+
         If gvEquipmentLocationList.SelectedIndex >= 0 Then
-            Dim selectedItemId As String = gvEquipmentLocationList.SelectedDataKey("Item_ID")
-            Session("Item_ID") = selectedItemId
-            BindEquipmentsGrid()
 
+            Dim selectedItemId As String =
+            gvEquipmentLocationList.DataKeys(
+                gvEquipmentLocationList.SelectedIndex
+            ).Values("Item_ID").ToString()
 
-            Dim dt As DataTable = GetEquipmentLedgerData(Nothing)
-
-            If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
-                FormatEquipmentLedgerTransType(dt)
-
-                grdEquipmentLedger.DataSource = dt
-                grdEquipmentLedger.DataBind()
-            Else
-                BindEmptyEquipmentLedgerGrid()
-            End If
-
+            LoadSelectedItem(selectedItemId)
 
         End If
-    End Sub
-
-
-    Private Sub FormatEquipmentLedgerTransType(ByVal dt As DataTable)
-
-        If dt Is Nothing Then
-            Exit Sub
-        End If
-
-        If Not dt.Columns.Contains("Trans_Type") Then
-            Exit Sub
-        End If
-
-        For Each row As DataRow In dt.Rows
-
-            If row.IsNull("Trans_Type") Then
-                Continue For
-            End If
-
-            Dim transType As String = row("Trans_Type").ToString().Trim()
-
-            If String.IsNullOrEmpty(transType) Then
-                Continue For
-            End If
-
-            ' Normalize all line-break formats first.
-            transType = transType.Replace(vbCrLf, vbLf)
-            transType = transType.Replace(vbCr, vbLf)
-
-            ' Print "Originally issued to" on the next line with a dash.
-            transType = Regex.Replace(
-                transType,
-                "\s*-?\s*(Originally issued to)",
-                vbLf & "- $1",
-                RegexOptions.IgnoreCase
-            )
-
-            ' Print "Transferred from" on the next line with a dash.
-            transType = Regex.Replace(
-                transType,
-                "\s*-?\s*(Transferred from)",
-                vbLf & "- $1",
-                RegexOptions.IgnoreCase
-            )
-
-            ' Remove accidental blank lines.
-            Do While transType.Contains(vbLf & vbLf)
-                transType = transType.Replace(vbLf & vbLf, vbLf)
-            Loop
-
-            row("Trans_Type") = transType.Trim()
-
-        Next
 
     End Sub
 
+    Protected Sub gvEquipmentLocationList_RowDataBound(
+    sender As Object,
+    e As GridViewRowEventArgs)
 
-    Protected Sub gvEquipmentLocationList_RowDataBound(sender As Object, e As GridViewRowEventArgs)
         If e.Row.RowType = DataControlRowType.DataRow Then
-            e.Row.Attributes("onclick") = Page.ClientScript.GetPostBackClientHyperlink(gvEquipmentLocationList, "Select$" & e.Row.RowIndex)
-            e.Row.Style("cursor") = "pointer"
+
+            Dim itemIdObject As Object =
+            DataBinder.Eval(
+                e.Row.DataItem,
+                "Item_ID"
+            )
+
+            Dim itemId As String = ""
+
+            If itemIdObject IsNot Nothing AndAlso
+            Not Convert.IsDBNull(itemIdObject) Then
+
+                itemId = itemIdObject.ToString()
+            End If
+
+            If Not String.IsNullOrEmpty(itemId) Then
+                e.Row.Attributes("onclick") =
+                Page.ClientScript.GetPostBackClientHyperlink(
+                    gvEquipmentLocationList,
+                    "Select$" & e.Row.RowIndex
+                )
+
+                e.Row.Style("cursor") = "pointer"
+            End If
+
         End If
+
     End Sub
 
     ' ============================
     ' EQUIPMENTS LIST GRIDVIEW
     ' ============================
-    Protected Sub btnEquipmentPropSearch_Click(sender As Object, e As EventArgs)
-        Dim searchText As String = txtEquipmentPropSearch.Text.Trim()
+    'Protected Sub btnEquipmentPropSearch_Click(sender As Object, e As EventArgs)
+    '    Dim searchText As String = txtEquipmentPropSearch.Text.Trim()
 
-        ' If no search value → show full list using existing logic
+    '    ' If no search value → show full list using existing logic
+    '    If String.IsNullOrEmpty(searchText) Then
+    '        AddTrace("Equipment Search: empty, loading full list.")
+    '        BindEquipmentsGrid()
+    '        Exit Sub
+    '    End If
+
+    '    ' Replicate the same parameter logic used in BindEquipmentsGrid
+    '    Dim itemId As String = If(Session("Item_ID"), "0")
+    '    Dim gaId As String = If(Session("GA_ID"), "0")
+
+    '    Dim itemParticularId As String = "0"
+    '    Dim declaredOwner As String = ""
+    '    Dim barangay As String = ""
+
+    '    If gvEquipmentLocationList.SelectedIndex >= 0 Then
+    '        itemParticularId = gvEquipmentLocationList.DataKeys(gvEquipmentLocationList.SelectedIndex).Values("item_particular_id").ToString()
+    '        itemId = gvEquipmentLocationList.DataKeys(gvEquipmentLocationList.SelectedIndex).Values("Item_ID").ToString()
+    '        'declaredOwner = gvEquipmentLocationList.DataKeys(gvEquipmentLocationList.SelectedIndex).Values("DeclaredOwner").ToString()
+    '        barangay = gvEquipmentLocationList.DataKeys(gvEquipmentLocationList.SelectedIndex).Values("Barangay").ToString()
+    '    End If
+
+    '    AddTrace("Equipment Search: " & searchText &
+    '         " | itemParticularId=" & itemParticularId &
+    '         " | itemId=" & itemId &
+    '         " | gaId=" & gaId &
+    '         " | declaredOwner=" & declaredOwner &
+    '         " | barangay=" & barangay)
+
+    '    ' Get the same dataset that BindEquipmentsGrid would bind
+    '    Dim dt As DataTable = GetEquipmentsData(itemParticularId, itemId, gaId, declaredOwner, barangay)
+
+    '    If dt Is Nothing OrElse dt.Rows.Count = 0 Then
+    '        BindEmptyEquipmentsGrid()
+    '        Exit Sub
+    '    End If
+
+    '    ' Filter by PropertyNo LIKE '%txtEquipmentPropSearch%'
+    '    Dim dv As New DataView(dt)
+
+    '    ' Escape special characters for RowFilter
+    '    Dim safeSearch As String = searchText.Replace("'", "''").Replace("[", "[[]").Replace("]", "]]")
+
+    '    dv.RowFilter = "PropertyNo LIKE '%" & safeSearch & "%'"
+
+    '    If dv.Count > 0 Then
+    '        grdListOfEquipments.DataSource = dv
+    '        grdListOfEquipments.DataBind()
+    '    Else
+    '        BindEmptyEquipmentsGrid()
+    '    End If
+    'End Sub
+
+
+    'Added by John
+    Protected Sub btnEquipmentPropSearch_Click(
+    sender As Object,
+    e As EventArgs)
+
+        Dim searchText As String =
+        txtEquipmentPropSearch.Text.Trim()
+
+        Dim searchBy As String =
+        ddlEquipmentSearchCriteria.SelectedValue
+
         If String.IsNullOrEmpty(searchText) Then
-            AddTrace("Equipment Search: empty, loading full list.")
+            AddTrace(
+            "Equipment Search: empty, loading full list."
+        )
+
             BindEquipmentsGrid()
             Exit Sub
         End If
 
-        ' Replicate the same parameter logic used in BindEquipmentsGrid
-        Dim itemId As String = If(Session("Item_ID"), "0")
-        Dim gaId As String = If(Session("GA_ID"), "0")
+        Dim itemId As String =
+        If(Session("Item_ID"), "0").ToString()
+
+        Dim gaId As String =
+        If(Session("GA_ID"), "0").ToString()
 
         Dim itemParticularId As String = "0"
         Dim declaredOwner As String = ""
         Dim barangay As String = ""
 
-        If gvEquipmentLocationList.SelectedIndex >= 0 Then
-            itemParticularId = gvEquipmentLocationList.DataKeys(gvEquipmentLocationList.SelectedIndex).Values("item_particular_id").ToString()
-            itemId = gvEquipmentLocationList.DataKeys(gvEquipmentLocationList.SelectedIndex).Values("Item_ID").ToString()
-            declaredOwner = gvEquipmentLocationList.DataKeys(gvEquipmentLocationList.SelectedIndex).Values("DeclaredOwner").ToString()
-            barangay = gvEquipmentLocationList.DataKeys(gvEquipmentLocationList.SelectedIndex).Values("Barangay").ToString()
+        If String.IsNullOrEmpty(itemId) OrElse itemId = "0" Then
+            BindEmptyEquipmentsGrid()
+            Exit Sub
         End If
 
-        AddTrace("Equipment Search: " & searchText &
-             " | itemParticularId=" & itemParticularId &
-             " | itemId=" & itemId &
-             " | gaId=" & gaId &
-             " | declaredOwner=" & declaredOwner &
-             " | barangay=" & barangay)
+        AddTrace(
+        "Equipment Search: " & searchText &
+        " | searchBy=" & searchBy &
+        " | itemId=" & itemId &
+        " | gaId=" & gaId
+    )
 
-        ' Get the same dataset that BindEquipmentsGrid would bind
-        Dim dt As DataTable = GetEquipmentsData(itemParticularId, itemId, gaId, declaredOwner, barangay)
+        Dim dt As DataTable =
+        GetEquipmentsData(
+            itemParticularId,
+            itemId,
+            gaId,
+            declaredOwner,
+            barangay
+        )
+
+        ' Preserve the existing SerialNo fallback.
+        If dt IsNot Nothing Then
+
+            If Not dt.Columns.Contains("SerialNo") Then
+                dt.Columns.Add(
+                "SerialNo",
+                GetType(String)
+            )
+
+                If dt.Columns.Contains("Barcode") Then
+                    For Each row As DataRow In dt.Rows
+                        row("SerialNo") =
+                        row("Barcode").ToString()
+                    Next
+                End If
+            End If
+
+        End If
 
         If dt Is Nothing OrElse dt.Rows.Count = 0 Then
             BindEmptyEquipmentsGrid()
             Exit Sub
         End If
 
-        ' Filter by PropertyNo LIKE '%txtEquipmentPropSearch%'
+        ' Only allow the predefined DataTable column names.
+        If searchBy <> "PropertyNo" AndAlso
+        searchBy <> "SerialNo" Then
+
+            searchBy = "PropertyNo"
+        End If
+
+        Dim safeSearch As String =
+        searchText.Replace("'", "''").
+        Replace("[", "[[]").
+        Replace("]", "]]")
+
         Dim dv As New DataView(dt)
 
-        ' Escape special characters for RowFilter
-        Dim safeSearch As String = searchText.Replace("'", "''").Replace("[", "[[]").Replace("]", "]]")
-
-        dv.RowFilter = "PropertyNo LIKE '%" & safeSearch & "%'"
+        dv.RowFilter =
+        searchBy &
+        " LIKE '%" &
+        safeSearch &
+        "%'"
 
         If dv.Count > 0 Then
             grdListOfEquipments.DataSource = dv
@@ -248,42 +407,86 @@ Partial Class Records_PropertyCard_Rev_Equipment
         Else
             BindEmptyEquipmentsGrid()
         End If
+
     End Sub
 
-
     Private Sub BindEquipmentsGrid()
-        Dim itemId As String = If(Session("Item_ID"), "0")
-        Dim gaId As String = If(Session("GA_ID"), "0")
+
+        Dim itemId As String =
+        If(Session("Item_ID"), "0").ToString()
+
+        Dim gaId As String =
+        If(Session("GA_ID"), "0").ToString()
 
         Dim itemParticularId As String = "0"
         Dim declaredOwner As String = ""
         Dim barangay As String = ""
-        Try
 
-            If gvEquipmentLocationList.SelectedIndex >= 0 Then
-                itemParticularId = gvEquipmentLocationList.DataKeys(gvEquipmentLocationList.SelectedIndex).Values("item_particular_id").ToString()
-                itemId = gvEquipmentLocationList.DataKeys(gvEquipmentLocationList.SelectedIndex).Values("Item_ID").ToString()
-                declaredOwner = gvEquipmentLocationList.DataKeys(gvEquipmentLocationList.SelectedIndex).Values("DeclaredOwner").ToString()
-                barangay = gvEquipmentLocationList.DataKeys(gvEquipmentLocationList.SelectedIndex).Values("Barangay").ToString()
+        AddTrace(
+        "Equipment List -> itemParticularId: " &
+        itemParticularId
+    )
+
+        AddTrace(
+        "Equipment List -> itemId: " &
+        itemId
+    )
+
+        AddTrace(
+        "Equipment List -> gaId: " &
+        gaId
+    )
+
+        AddTrace(
+        "Equipment List -> declaredOwner: " &
+        declaredOwner
+    )
+
+        AddTrace(
+        "Equipment List -> barangay: " &
+        barangay
+    )
+
+        If String.IsNullOrEmpty(itemId) OrElse itemId = "0" Then
+            BindEmptyEquipmentsGrid()
+            Exit Sub
+        End If
+
+        Dim dt As DataTable =
+        GetEquipmentsData(
+            itemParticularId,
+            itemId,
+            gaId,
+            declaredOwner,
+            barangay
+        )
+
+        If dt IsNot Nothing Then
+
+            ' Preserve the existing SerialNo fallback.
+            If Not dt.Columns.Contains("SerialNo") Then
+                dt.Columns.Add(
+                "SerialNo",
+                GetType(String)
+            )
+
+                If dt.Columns.Contains("Barcode") Then
+                    For Each row As DataRow In dt.Rows
+                        row("SerialNo") =
+                        row("Barcode").ToString()
+                    Next
+                End If
             End If
 
-            AddTrace("itemParticularId: " & itemParticularId)
-            AddTrace("itemId: " & itemId)
-            AddTrace("gaId: " & gaId)
-            AddTrace("declaredOwner: " & declaredOwner)
-            AddTrace("barangay: " & barangay)
+        End If
 
-            Dim dt As DataTable = GetEquipmentsData(itemParticularId, itemId, gaId, declaredOwner, barangay)
+        If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
+            grdListOfEquipments.DataSource = dt
+            grdListOfEquipments.DataBind()
+        Else
+            BindEmptyEquipmentsGrid()
+        End If
 
-            If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
-                grdListOfEquipments.DataSource = dt
-                grdListOfEquipments.DataBind()
-            Else
-                BindEmptyEquipmentsGrid()
-            End If
-        Catch ex As Exception
-
-        End Try
     End Sub
 
     Private Function GetEquipmentsData(ByVal itemParticularId As String, ByVal itemId As String, ByVal gaId As String,
@@ -313,9 +516,10 @@ Partial Class Records_PropertyCard_Rev_Equipment
     Private Function CreateEquipmentsSchema() As DataTable
         Dim dt As New DataTable()
         dt.Columns.Add("PropertyNo", GetType(String))
-        dt.Columns.Add("Property_code", GetType(String))
+        dt.Columns.Add("Item_Code", GetType(String))
         dt.Columns.Add("ItemDescription", GetType(String))
         dt.Columns.Add("Title", GetType(String))
+        dt.Columns.Add("SerialNo", GetType(String))
         dt.Columns.Add("Author", GetType(String))
         dt.Columns.Add("Unit", GetType(String))
         dt.Columns.Add("AcqDate", GetType(String))
@@ -341,25 +545,74 @@ Partial Class Records_PropertyCard_Rev_Equipment
         BindEquipmentsGrid()
     End Sub
 
-    Protected Sub grdListOfEquipments_SelectedIndexChanged(sender As Object, e As EventArgs)
+    Protected Sub grdListOfEquipments_SelectedIndexChanged(
+    sender As Object,
+    e As EventArgs)
+
         If grdListOfEquipments.SelectedIndex >= 0 Then
+
             loadUnit()
 
-            Dim selectedPropertyId As String = grdListOfEquipments.SelectedDataKey("Property_ID")
-            Session("Property_ID") = selectedPropertyId
+            Dim selectedPropertyId As String =
+            grdListOfEquipments.DataKeys(
+                grdListOfEquipments.SelectedIndex
+            ).Values("Property_ID").ToString()
 
-            Dim propertyDtlId As String = grdListOfEquipments.DataKeys(grdListOfEquipments.SelectedIndex).Values("PropertyDetai_ID").ToString()
-            PopulateEquipmentInformation(propertyDtlId)
+            Session("Property_ID") =
+            selectedPropertyId
 
-            RefreshGridData()
+            Dim propertyDtlId As String =
+            grdListOfEquipments.DataKeys(
+                grdListOfEquipments.SelectedIndex
+            ).Values("PropertyDetai_ID").ToString()
+
+            Session("PropertyDetai_ID") =
+            propertyDtlId
+
+            PopulateEquipmentInformation(
+            propertyDtlId
+        )
+
+            ' These grids depend on the selected property.
+            BindSubItemsGrid()
+            BindEquipmentLedgerGrid()
+
         End If
+
     End Sub
+    Protected Sub grdListOfEquipments_RowDataBound(
+    sender As Object,
+    e As GridViewRowEventArgs)
 
-    Protected Sub grdListOfEquipments_RowDataBound(sender As Object, e As GridViewRowEventArgs)
         If e.Row.RowType = DataControlRowType.DataRow Then
-            e.Row.Attributes("onclick") = Page.ClientScript.GetPostBackClientHyperlink(grdListOfEquipments, "Select$" & e.Row.RowIndex)
-            e.Row.Style("cursor") = "pointer"
+
+            Dim propertyIdObject As Object =
+            DataBinder.Eval(
+                e.Row.DataItem,
+                "Property_ID"
+            )
+
+            Dim propertyId As String = ""
+
+            If propertyIdObject IsNot Nothing AndAlso
+            Not Convert.IsDBNull(propertyIdObject) Then
+
+                propertyId = propertyIdObject.ToString()
+            End If
+
+            ' Keep the four empty placeholder rows inactive.
+            If Not String.IsNullOrEmpty(propertyId) Then
+                e.Row.Attributes("onclick") =
+                Page.ClientScript.GetPostBackClientHyperlink(
+                    grdListOfEquipments,
+                    "Select$" & e.Row.RowIndex
+                )
+
+                e.Row.Style("cursor") = "pointer"
+            End If
+
         End If
+
     End Sub
 
     Protected Sub grdListOfEquipments_OnDataBound(sender As Object, e As EventArgs)
@@ -470,19 +723,32 @@ Partial Class Records_PropertyCard_Rev_Equipment
     ' LEDGER GRIDVIEW
     ' ============================
     Private Sub BindEquipmentLedgerGrid()
-        Dim classificationId As String = If(Session("ClassificationID"), "0")
 
-        Dim dt As DataTable = GetEquipmentLedgerData(classificationId)
+        Dim propertyId As String =
+        If(Session("Property_ID"), "0").ToString()
+
+        If String.IsNullOrEmpty(propertyId) OrElse
+        propertyId = "0" Then
+
+            BindEmptyEquipmentLedgerGrid()
+            Exit Sub
+        End If
+
+        Dim dt As DataTable =
+        GetEquipmentLedgerData()
 
         If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
+            FormatEquipLedgerTransType(dt)
+
             grdEquipmentLedger.DataSource = dt
             grdEquipmentLedger.DataBind()
         Else
             BindEmptyEquipmentLedgerGrid()
         End If
+
     End Sub
 
-    Private Function GetEquipmentLedgerData(ByVal classificationId As String) As DataTable
+    Private Function GetEquipmentLedgerData() As DataTable
         Dim dt As New DataTable()
         Try
             Dim sql As String = "Exec [AMS].[PropertyCard_Rev_Ledger_v2] '" & Session("Item_ID") & "'"
@@ -534,6 +800,165 @@ Partial Class Records_PropertyCard_Rev_Equipment
 
     Protected Sub btnEquipmentPreview_Click(sender As Object, e As EventArgs)
         ' reserved
+    End Sub
+
+
+
+
+
+    Private currentPropertyId As String = ""
+
+    ' Add these event handlers for the Sub Items grid
+    Protected Sub grdSubItems_PageIndexChanging(sender As Object, e As GridViewPageEventArgs)
+        grdSubItems.PageIndex = e.NewPageIndex
+        BindSubItemsGrid()
+    End Sub
+
+    Protected Sub grdSubItems_RowDataBound(sender As Object, e As GridViewRowEventArgs)
+        If e.Row.RowType = DataControlRowType.DataRow Then
+            ' Optional: Add click functionality if needed
+            ' e.Row.Attributes("onclick") = Page.ClientScript.GetPostBackClientHyperlink(grdSubItems, "Select$" & e.Row.RowIndex)
+            ' e.Row.Style("cursor") = "pointer"
+        End If
+    End Sub
+
+
+    ' Add this method to bind the Sub Items grid
+    Private Sub BindSubItemsGrid()
+        Dim propertyId As String = Session("Property_ID")
+
+        If String.IsNullOrEmpty(propertyId) OrElse propertyId = "0" Then
+            BindEmptySubItemsGrid()
+            Return
+        End If
+
+        Try
+            ' Replace this with your actual stored procedure or query
+            ' Option 1: Using stored procedure
+            Dim sql As String = "Exec [AMS].[GetSubItemsByPropertyId] @Item_ID = " & Session("Item_ID")
+            Dim dt As DataTable = objDerived.GetDataTable(sql, CommandType.Text)
+
+            ' Option 2: Using direct query (uncomment if you prefer)
+            ' Dim query As String = "SELECT " &
+            '     "si.SubItemDescription, " &
+            '     "si.Brand, " &
+            '     "si.Model, " &
+            '     "si.Qty, " &
+            '     "si.Amount, " &
+            '     "si.ChassisNo, " &
+            '     "si.EngineNo, " &
+            '     "p.PropertyNo, " &
+            '     "si.SerialNo " &
+            '     "FROM AMS.SubItems si " &
+            '     "INNER JOIN AMS.Property p ON si.Property_ID = p.Property_ID " &
+            '     "WHERE si.Property_ID = " & propertyId & " " &
+            '     "ORDER BY si.SubItemDescription"
+            ' Dim dt As DataTable = objDerived.GetDataTable(query, CommandType.Text)
+
+            If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
+                grdSubItems.DataSource = dt
+                grdSubItems.DataBind()
+            Else
+                BindEmptySubItemsGrid()
+            End If
+        Catch ex As Exception
+            System.Diagnostics.Debug.WriteLine("Error loading sub items: " & ex.Message)
+            BindEmptySubItemsGrid()
+        End Try
+    End Sub
+
+    ' Method to bind empty rows (4 empty rows) to the Sub Items grid
+    Private Sub BindEmptySubItemsGrid()
+        Dim dt As DataTable = CreateSubItemsSchema()
+
+        ' Add 4 empty rows
+        For i As Integer = 1 To 4
+            Dim row As DataRow = dt.NewRow()
+            row("SubItemDescription") = ""
+            row("Brand") = ""
+            row("Model") = ""
+            row("Qty") = 0
+            row("Amount") = 0
+            row("ChassisNo") = ""
+            row("EngineNo") = ""
+            row("PropertyNo") = ""
+            row("SerialNo") = ""
+            dt.Rows.Add(row)
+        Next
+
+        grdSubItems.DataSource = dt
+        grdSubItems.DataBind()
+    End Sub
+
+    ' Create schema for Sub Items grid
+    Private Function CreateSubItemsSchema() As DataTable
+        Dim dt As New DataTable()
+        dt.Columns.Add("SubItemDescription", GetType(String))
+        dt.Columns.Add("Brand", GetType(String))
+        dt.Columns.Add("Model", GetType(String))
+        dt.Columns.Add("Qty", GetType(Decimal))
+        dt.Columns.Add("Amount", GetType(Decimal))
+        dt.Columns.Add("ChassisNo", GetType(String))
+        dt.Columns.Add("EngineNo", GetType(String))
+        dt.Columns.Add("PropertyNo", GetType(String))
+        dt.Columns.Add("SerialNo", GetType(String))
+        Return dt
+    End Function
+
+
+
+    Private Sub FormatEquipLedgerTransType(ByVal dt As DataTable)
+
+        If dt Is Nothing Then
+            Exit Sub
+        End If
+
+        If Not dt.Columns.Contains("Trans_Type") Then
+            Exit Sub
+        End If
+
+        For Each row As DataRow In dt.Rows
+
+            If row.IsNull("Trans_Type") Then
+                Continue For
+            End If
+
+            Dim transType As String = row("Trans_Type").ToString().Trim()
+
+            If String.IsNullOrEmpty(transType) Then
+                Continue For
+            End If
+
+            ' Normalize all line-break formats first.
+            transType = transType.Replace(vbCrLf, vbLf)
+            transType = transType.Replace(vbCr, vbLf)
+
+            ' Print "Originally issued to" on the next line with a dash.
+            transType = Regex.Replace(
+                transType,
+                "\s*-?\s*(Originally issued to)",
+                vbLf & "- $1",
+                RegexOptions.IgnoreCase
+            )
+
+            ' Print "Transferred from" on the next line with a dash.
+            transType = Regex.Replace(
+                transType,
+                "\s*-?\s*(Transferred from)",
+                vbLf & "- $1",
+                RegexOptions.IgnoreCase
+            )
+
+            ' Remove accidental blank lines.
+            Do While transType.Contains(vbLf & vbLf)
+                transType = transType.Replace(vbLf & vbLf, vbLf)
+            Loop
+
+            row("Trans_Type") = transType.Trim()
+
+        Next
+
+
     End Sub
 
 End Class

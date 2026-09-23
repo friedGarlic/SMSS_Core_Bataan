@@ -6,16 +6,16 @@
     <%-- =========================
          LIST OF LOCATION (VEHICLE)
          ========================= --%>
-    <tr>
+    <tr style="display:none" >
         <td class="DivTitle" style="width: 100%">
-            LIST OF LOCATION (VEHICLE)
+            LIST OF VEHICLE
         </td>
     </tr>
-    <tr>
+    <tr style="display:none" >
         <td>
             <asp:GridView ID="gvVehicleLocationList" runat="server"
                 Width="1000px" SkinID="GridViewAA" HorizontalAlign="Center"
-                DataKeyNames="item_particular_id,Item_ID,DeclaredOwner,Barangay"
+                DataKeyNames="item_particular_id,Item_ID,Barangay"
                 AllowPaging="True"
                 OnPageIndexChanging="gvVehicleLocationList_PageIndexChanging"
                 OnSelectedIndexChanged="gvVehicleLocationList_SelectedIndexChanged"
@@ -41,7 +41,7 @@
                         <ItemStyle HorizontalAlign="Center" Width="15%"></ItemStyle>
                     </asp:BoundField>
 
-                    <asp:BoundField DataField="Location" HeaderText="Location / User">
+                    <asp:BoundField DataField="Location" HeaderText="Location / User" Visible="false">
                         <ItemStyle HorizontalAlign="Left" Width="15%"></ItemStyle>
                     </asp:BoundField>
 
@@ -78,7 +78,7 @@
          ========================= --%>
     <tr>
         <td class="DivTitle" style="width: 100%">
-            LIST OF VEHICLES
+            LIST OF PROPERTY
         </td>
     </tr>
 
@@ -87,7 +87,7 @@
         <td style="width: 1000px">
             <table style="width: 100%">
                 <tbody>
-                    <tr>
+                    <%--<tr>
                         <td style="width: 30%" class="column_RightBold">SEARCH PROPERTY NUMBER :</td>
                         <td style="width: 40%" class="text5">
                             <asp:TextBox ID="txtVehiclePropSearch" runat="server" Width="95%"></asp:TextBox>
@@ -96,6 +96,28 @@
                             <asp:Button ID="btnVehiclePropSearch" CssClass="CSButton"
                                 OnClick="btnVehiclePropSearch_Click"
                                 runat="server" Width="150px" Text="SEARCH"
+                                OnClientClick="StartProgressBar();"></asp:Button>
+                        </td>
+                    </tr>--%>
+
+                    <tr>
+                        <td style="width: 35%" class="column_RightBold">
+                            SEARCH BY:
+                            <asp:DropDownList ID="ddlVehicleSearchCriteria" runat="server" Width="60%" Style="margin-left:10px;">
+                                <asp:ListItem Text="Property Number" Value="PropertyNo" />
+                                <asp:ListItem Text="Serial Number" Value="SerialNo" />
+                            </asp:DropDownList>
+                        </td>
+
+                        <td style="width: 45%" class="text5">
+                            <asp:TextBox ID="txtVehiclePropSearch" runat="server" Width="95%"></asp:TextBox>
+                        </td>
+
+                        <td style="width: 20%" class="text5">
+                            <asp:Button ID="btnVehiclePropSearch" CssClass="CSButton"
+                                runat="server" Width="110px" Text="SEARCH"
+                                Style="margin-left:-10px;"
+                                OnClick="btnVehiclePropSearch_Click"
                                 OnClientClick="StartProgressBar();"></asp:Button>
                         </td>
                     </tr>
@@ -119,7 +141,7 @@
                 <Columns>
                     <asp:BoundField DataField="PropertyNo" HeaderText="Property No." ControlStyle-CssClass="header">
                         <HeaderStyle HorizontalAlign="Center"></HeaderStyle>
-                        <ItemStyle HorizontalAlign="Right" Width="10%"></ItemStyle>
+                        <ItemStyle HorizontalAlign="Right" Width="15%"></ItemStyle>
                     </asp:BoundField>
 
                     <asp:BoundField DataField="Property_code" HeaderText="Property No." Visible="false">
@@ -127,7 +149,7 @@
                     </asp:BoundField>
 
                     <asp:BoundField DataField="PlateNo" HeaderText="Plate No.">
-                        <ItemStyle HorizontalAlign="Center" Width="10%"></ItemStyle>
+                        <ItemStyle HorizontalAlign="Center" Width="15%"></ItemStyle>
                     </asp:BoundField>
 
                     <asp:BoundField DataField="MakeModel" HeaderText="Make / Model">
@@ -135,8 +157,12 @@
                     </asp:BoundField>
 
                     <asp:BoundField DataField="EngineNo" HeaderText="Engine No.">
-                        <ItemStyle HorizontalAlign="Center" Width="12%"></ItemStyle>
+                        <ItemStyle HorizontalAlign="Center" Width="17%"></ItemStyle>
                     </asp:BoundField>
+
+<%--                    <asp:BoundField DataField="SerialNo" HeaderText="Serial Number">
+                        <ItemStyle HorizontalAlign="Center" Width="15%"></ItemStyle>
+                    </asp:BoundField>--%>
 
                     <asp:BoundField DataField="ChassisNo" HeaderText="Chassis No.">
                         <ItemStyle HorizontalAlign="Center" Width="12%"></ItemStyle>
@@ -150,9 +176,9 @@
                         <ItemStyle HorizontalAlign="Center" Width="10%"></ItemStyle>
                     </asp:BoundField>
 
-                    <asp:BoundField DataField="MarketValue" HeaderText="Market Value">
+                   <%-- <asp:BoundField DataField="MarketValue" HeaderText="Market Value">
                         <ItemStyle HorizontalAlign="Center" Width="11%"></ItemStyle>
-                    </asp:BoundField>
+                    </asp:BoundField>--%>
                 </Columns>
             </asp:GridView>
             <br />
@@ -341,10 +367,23 @@
                             <HeaderStyle HorizontalAlign="Center" Height="30px" Width="50px"></HeaderStyle>
                             <ItemStyle HorizontalAlign="Center" VerticalAlign="Top" Width="5%"></ItemStyle>
                         </asp:BoundField>
-                        <asp:BoundField DataField="Trans_Type" HeaderText="Particulars">
-                            <HeaderStyle HorizontalAlign="Center" Height="30px" Width="50px"></HeaderStyle>
-                            <ItemStyle HorizontalAlign="left" VerticalAlign="Top" Width="46%"></ItemStyle>
-                        </asp:BoundField>
+                       <asp:TemplateField HeaderText="Particulars">
+                            <HeaderStyle HorizontalAlign="Center"
+                                Height="30px"
+                                Width="50px" />
+
+                            <ItemStyle HorizontalAlign="Left"
+                                VerticalAlign="Top"
+                                Width="46%" />
+
+                            <ItemTemplate>
+                                <asp:Label ID="lblVehicleTransType"
+                                    runat="server"
+                                    Text='<%# Eval("Trans_Type") %>'
+                                    Style="white-space: pre-line; display: block;">
+                                </asp:Label>
+                            </ItemTemplate>
+                        </asp:TemplateField>
                         <asp:BoundField DataField="ref" HeaderText="Ref. No.">
                             <HeaderStyle HorizontalAlign="Center" Height="30px" Width="50px"></HeaderStyle>
                             <ItemStyle HorizontalAlign="Center" VerticalAlign="Top" Width="5%"></ItemStyle>

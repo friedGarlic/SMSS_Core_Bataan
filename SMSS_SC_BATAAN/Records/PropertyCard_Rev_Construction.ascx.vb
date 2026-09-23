@@ -1,5 +1,6 @@
 ﻿Imports System.Data
 Imports System.Web.UI.WebControls
+Imports System.Text.RegularExpressions
 
 Partial Class Records_PropertyCard_Rev_Construction
     Inherits System.Web.UI.UserControl
@@ -14,57 +15,100 @@ Partial Class Records_PropertyCard_Rev_Construction
         True)
     End Sub
 
-    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
-        If Not Page.IsPostBack Then
-            BindConstructionGrid()
-            BindConstructionEquipmentsGrid()
-            BindConstructionLedgerGrid()
+    Protected Sub Page_Load(
+    ByVal sender As Object,
+    ByVal e As System.EventArgs) Handles Me.Load
 
-            Session("GA_ID") = 0
-            Session("SubClassificationID") = 0
-        Else
+        If Not Page.IsPostBack Then
+            mvSubClass.SetActiveView(Me.vwRoad)
+
             BindConstructionGrid()
-            BindConstructionEquipmentsGrid()
+            BindEmptyConstructionEquipmentsGrid()
+            BindEmptyConstructionLedgerGrid()
+            ClearConstructionInformationForm()
         End If
+
     End Sub
+
+    ' ============================
+    ' SELECTED ITEM SUBCLASS
+    ' ============================
+    Private Sub SetSelectedItemSubClassification(
+    ByVal itemId As String)
+
+        Dim numericItemId As Long
+
+        If Not Long.TryParse(itemId, numericItemId) Then
+            AddTrace(
+            "Invalid Construction Item_ID for SubClassification: " &
+            itemId
+        )
+
+            Exit Sub
+        End If
+
+        Try
+            Dim sql As String =
+            "SELECT TOP 1 " &
+            "ISNULL(SubClassificationID, 0) AS SubClassificationID " &
+            "FROM dbo.m_item " &
+            "WHERE Item_ID = " & numericItemId
+
+            Dim dt As DataTable =
+            objDerived.GetDataTable(
+                sql,
+                CommandType.Text
+            )
+
+            If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
+                Session("SubClassificationID") =
+                dt.Rows(0)("SubClassificationID").ToString()
+
+                AddTrace(
+                "Construction SubClassificationID: " &
+                Session("SubClassificationID").ToString()
+            )
+            End If
+
+        Catch ex As Exception
+            AddTrace(
+            "Error loading Construction SubClassificationID: " &
+            ex.Message
+        )
+        End Try
+
+    End Sub
+
 
     ' ============================
     ' REFRESH METHOD (same pattern)
     ' ============================
     Public Sub RefreshGridData()
-        ' Store the current selected values before rebinding
-        Dim selectedItemParticularId As String = Nothing
-        Dim selectedItemId As String = Nothing
 
-        If gvConstructionLocationList.SelectedIndex >= 0 AndAlso gvConstructionLocationList.DataKeys.Count > gvConstructionLocationList.SelectedIndex Then
-            selectedItemParticularId = gvConstructionLocationList.DataKeys(gvConstructionLocationList.SelectedIndex).Values("item_particular_id").ToString()
-            selectedItemId = gvConstructionLocationList.DataKeys(gvConstructionLocationList.SelectedIndex).Values("Item_ID").ToString()
+        Dim itemId As String =
+        If(Session("Item_ID"), "0").ToString()
+
+        If Not String.IsNullOrEmpty(itemId) AndAlso itemId <> "0" Then
+            SetSelectedItemSubClassification(itemId)
+            DecideSubClassView()
+        Else
+            mvSubClass.SetActiveView(Me.vwRoad)
         End If
-
-        ' Decide which MultiView to show based on SubClassification
-        DecideSubClassView()
 
         BindConstructionGrid()
 
-        ' Try to restore the selection
-        If Not String.IsNullOrEmpty(selectedItemParticularId) Then
-            For i As Integer = 0 To gvConstructionLocationList.Rows.Count - 1
-                Dim dataKey = gvConstructionLocationList.DataKeys(i)
-                If dataKey IsNot Nothing AndAlso dataKey.Values("item_particular_id").ToString() = selectedItemParticularId Then
-                    gvConstructionLocationList.SelectedIndex = i
-                    Exit For
-                End If
-            Next
-        End If
-
-        If gvConstructionLocationList.SelectedIndex >= 0 Then
+        If Not String.IsNullOrEmpty(itemId) AndAlso itemId <> "0" Then
             BindConstructionEquipmentsGrid()
+            BindConstructionLedgerGrid()
         Else
             BindEmptyConstructionEquipmentsGrid()
+            BindEmptyConstructionLedgerGrid()
+            ClearConstructionInformationForm()
         End If
 
-        BindConstructionLedgerGrid()
     End Sub
+
+
     ' ============================
     ' LOCATION GRIDVIEW FUNCTIONS
     ' ============================
@@ -80,6 +124,12 @@ Partial Class Records_PropertyCard_Rev_Construction
         Else
             BindEmptyConstructionGrid()
         End If
+
+        If gaId = 0 Then
+            BindEmptyConstructionGrid()
+            Session("PropertyDetai_ID") = 0
+        End If
+
     End Sub
 
     Private Function GetConstructionLocationData(ByVal subClassId As String, ByVal gaId As String) As DataTable
@@ -113,7 +163,7 @@ Partial Class Records_PropertyCard_Rev_Construction
         dt.Columns.Add("Property_code", GetType(String))
         dt.Columns.Add("item_particular_id", GetType(String))
         dt.Columns.Add("Item_ID", GetType(String))
-        dt.Columns.Add("DeclaredOwner", GetType(String))
+        dt.Columns.Add("ItemDescription", GetType(String))
         dt.Columns.Add("Barangay", GetType(String))
         dt.Columns.Add("Location", GetType(String))
         dt.Columns.Add("Area", GetType(String))
@@ -129,92 +179,123 @@ Partial Class Records_PropertyCard_Rev_Construction
         BindConstructionGrid()
     End Sub
 
-    Protected Sub gvConstructionLocationList_SelectedIndexChanged(sender As Object, e As EventArgs)
+    Protected Sub gvConstructionLocationList_SelectedIndexChanged(
+    sender As Object,
+    e As EventArgs)
+
         If gvConstructionLocationList.SelectedIndex >= 0 Then
-            Dim selectedItemId As String = gvConstructionLocationList.SelectedDataKey("Item_ID")
-            Session("Item_ID") = selectedItemId
-            BindConstructionEquipmentsGrid()
 
+            Dim selectedItemId As String =
+            gvConstructionLocationList.DataKeys(
+                gvConstructionLocationList.SelectedIndex
+            ).Values("Item_ID").ToString()
 
-            Dim dt As DataTable = GetConstructionLedgerData(Nothing)
+            LoadSelectedItem(selectedItemId)
 
-            If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
-                FormatConstructionLedgerTransType(dt)
+        End If
 
-                grdConstructionLedger.DataSource = dt
-                grdConstructionLedger.DataBind()
-            Else
-                BindEmptyConstructionLedgerGrid()
+    End Sub
+
+    Protected Sub gvConstructionLocationList_RowDataBound(
+    sender As Object,
+    e As GridViewRowEventArgs)
+
+        If e.Row.RowType = DataControlRowType.DataRow Then
+
+            Dim itemIdObject As Object =
+            DataBinder.Eval(
+                e.Row.DataItem,
+                "Item_ID"
+            )
+
+            Dim itemId As String = ""
+
+            If itemIdObject IsNot Nothing AndAlso
+            Not Convert.IsDBNull(itemIdObject) Then
+
+                itemId = itemIdObject.ToString()
+            End If
+
+            If Not String.IsNullOrEmpty(itemId) Then
+                e.Row.Attributes("onclick") =
+                Page.ClientScript.GetPostBackClientHyperlink(
+                    gvConstructionLocationList,
+                    "Select$" & e.Row.RowIndex
+                )
+
+                e.Row.Style("cursor") = "pointer"
             End If
 
         End If
-    End Sub
 
-    Protected Sub gvConstructionLocationList_RowDataBound(sender As Object, e As GridViewRowEventArgs)
-        If e.Row.RowType = DataControlRowType.DataRow Then
-            e.Row.Attributes("onclick") = Page.ClientScript.GetPostBackClientHyperlink(gvConstructionLocationList, "Select$" & e.Row.RowIndex)
-            e.Row.Style("cursor") = "pointer"
-        End If
     End Sub
 
     ' ============================
     ' EQUIPMENTS LIST GRIDVIEW
     ' ============================
-    Protected Sub btnConstructionPropSearch_Click(sender As Object, e As EventArgs)
-        Dim searchText As String = txtConstructionPropSearch.Text.Trim()
+    Protected Sub btnConstructionPropSearch_Click(
+    sender As Object,
+    e As EventArgs)
 
-        ' If no search value → show full list using existing logic
+        Dim searchText As String =
+        txtConstructionPropSearch.Text.Trim()
+
         If String.IsNullOrEmpty(searchText) Then
-            AddTrace("Construction Search: empty, loading full list.")
+            AddTrace(
+            "Construction Search: empty, loading full list."
+        )
+
             BindConstructionEquipmentsGrid()
             Exit Sub
         End If
 
-        ' Replicate the same parameter logic used in BindConstructionEquipmentsGrid
-        Dim itemId As String = If(Session("Item_ID"), "0")
-        Dim gaId As String = If(Session("GA_ID"), "0")
+        Dim itemId As String =
+        If(Session("Item_ID"), "0").ToString()
+
+        Dim gaId As String =
+        If(Session("GA_ID"), "0").ToString()
 
         Dim itemParticularId As String = "0"
         Dim declaredOwner As String = ""
         Dim barangay As String = ""
 
-        If gvConstructionLocationList.SelectedIndex >= 0 AndAlso gvConstructionLocationList.DataKeys.Count > gvConstructionLocationList.SelectedIndex Then
-            Dim dataKey = gvConstructionLocationList.DataKeys(gvConstructionLocationList.SelectedIndex)
-            If dataKey IsNot Nothing Then
-                itemParticularId = dataKey.Values("item_particular_id").ToString()
-                itemId = dataKey.Values("Item_ID").ToString()
-                declaredOwner = dataKey.Values("DeclaredOwner").ToString()
-                barangay = dataKey.Values("Barangay").ToString()
-            End If
-        Else
-            ' If no row is selected, show a message and exit
-            AddTrace("Please select a location first")
+        If String.IsNullOrEmpty(itemId) OrElse itemId = "0" Then
             BindEmptyConstructionEquipmentsGrid()
             Exit Sub
         End If
 
-        AddTrace("Construction Search: " & searchText &
-             " | itemParticularId=" & itemParticularId &
-             " | itemId=" & itemId &
-             " | gaId=" & gaId &
-             " | declaredOwner=" & declaredOwner &
-             " | barangay=" & barangay)
+        AddTrace(
+        "Construction Search: " & searchText &
+        " | itemParticularId=" & itemParticularId &
+        " | itemId=" & itemId &
+        " | gaId=" & gaId &
+        " | declaredOwner=" & declaredOwner &
+        " | barangay=" & barangay
+    )
 
-        ' Get the same dataset that BindConstructionEquipmentsGrid would bind
-        Dim dt As DataTable = GetConstructionEquipmentsData(itemParticularId, itemId, gaId, declaredOwner, barangay)
+        Dim dt As DataTable =
+        GetConstructionEquipmentsData(
+            itemParticularId,
+            itemId,
+            gaId,
+            declaredOwner,
+            barangay
+        )
 
         If dt Is Nothing OrElse dt.Rows.Count = 0 Then
             BindEmptyConstructionEquipmentsGrid()
             Exit Sub
         End If
 
-        ' Filter by PropertyNo LIKE '%txtConstructionPropSearch%'
         Dim dv As New DataView(dt)
 
-        ' Escape special characters for RowFilter
-        Dim safeSearch As String = searchText.Replace("'", "''").Replace("[", "[[]").Replace("]", "]]")
+        Dim safeSearch As String =
+        searchText.Replace("'", "''").
+        Replace("[", "[[]").
+        Replace("]", "]]")
 
-        dv.RowFilter = "PropertyNo LIKE '%" & safeSearch & "%'"
+        dv.RowFilter =
+        "PropertyNo LIKE '%" & safeSearch & "%'"
 
         If dv.Count > 0 Then
             grdListOfConstructionEquipments.DataSource = dv
@@ -222,45 +303,67 @@ Partial Class Records_PropertyCard_Rev_Construction
         Else
             BindEmptyConstructionEquipmentsGrid()
         End If
+
     End Sub
 
-
     Private Sub BindConstructionEquipmentsGrid()
-        Dim itemId As String = If(Session("Item_ID"), "0")
-        Dim gaId As String = If(Session("GA_ID"), "0")
+
+        Dim itemId As String =
+        If(Session("Item_ID"), "0").ToString()
+
+        Dim gaId As String =
+        If(Session("GA_ID"), "0").ToString()
 
         Dim itemParticularId As String = "0"
         Dim declaredOwner As String = ""
         Dim barangay As String = ""
-        Try
 
-            If gvConstructionLocationList.SelectedIndex >= 0 AndAlso gvConstructionLocationList.DataKeys.Count > gvConstructionLocationList.SelectedIndex Then
-                Dim dataKey = gvConstructionLocationList.DataKeys(gvConstructionLocationList.SelectedIndex)
-                If dataKey IsNot Nothing Then
-                    itemParticularId = dataKey.Values("item_particular_id").ToString()
-                    itemId = dataKey.Values("Item_ID").ToString()
-                    declaredOwner = dataKey.Values("DeclaredOwner").ToString()
-                    barangay = dataKey.Values("Barangay").ToString()
-                End If
-            End If
+        AddTrace(
+        "Construction List -> itemParticularId: " &
+        itemParticularId
+    )
 
-            AddTrace("itemParticularId: " & itemParticularId)
-            AddTrace("itemId: " & itemId)
-            AddTrace("gaId: " & gaId)
-            AddTrace("declaredOwner: " & declaredOwner)
-            AddTrace("barangay: " & barangay)
+        AddTrace(
+        "Construction List -> itemId: " &
+        itemId
+    )
 
-            Dim dt As DataTable = GetConstructionEquipmentsData(itemParticularId, itemId, gaId, declaredOwner, barangay)
+        AddTrace(
+        "Construction List -> gaId: " &
+        gaId
+    )
 
-            If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
-                grdListOfConstructionEquipments.DataSource = dt
-                grdListOfConstructionEquipments.DataBind()
-            Else
-                BindEmptyConstructionEquipmentsGrid()
-            End If
-        Catch ex As Exception
+        AddTrace(
+        "Construction List -> declaredOwner: " &
+        declaredOwner
+    )
 
-        End Try
+        AddTrace(
+        "Construction List -> barangay: " &
+        barangay
+    )
+
+        If String.IsNullOrEmpty(itemId) OrElse itemId = "0" Then
+            BindEmptyConstructionEquipmentsGrid()
+            Exit Sub
+        End If
+
+        Dim dt As DataTable =
+        GetConstructionEquipmentsData(
+            itemParticularId,
+            itemId,
+            gaId,
+            declaredOwner,
+            barangay
+        )
+
+        If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
+            grdListOfConstructionEquipments.DataSource = dt
+            grdListOfConstructionEquipments.DataBind()
+        Else
+            BindEmptyConstructionEquipmentsGrid()
+        End If
+
     End Sub
 
     Private Function GetConstructionEquipmentsData(ByVal itemParticularId As String, ByVal itemId As String, ByVal gaId As String, ByVal declaredOwner As String, ByVal barangay As String) As DataTable
@@ -317,78 +420,67 @@ Partial Class Records_PropertyCard_Rev_Construction
         BindConstructionEquipmentsGrid()
     End Sub
 
-    Protected Sub grdListOfConstructionEquipments_SelectedIndexChanged(sender As Object, e As EventArgs)
+    Protected Sub grdListOfConstructionEquipments_SelectedIndexChanged(
+    sender As Object,
+    e As EventArgs)
+
         If grdListOfConstructionEquipments.SelectedIndex >= 0 Then
 
-            Dim selectedPropertyId As String = grdListOfConstructionEquipments.SelectedDataKey("Property_ID")
+            Dim selectedPropertyId As String =
+            grdListOfConstructionEquipments.DataKeys(
+                grdListOfConstructionEquipments.SelectedIndex
+            ).Values("Property_ID").ToString()
+
             Session("Property_ID") = selectedPropertyId
 
-            Dim propertyDtlId As String = grdListOfConstructionEquipments.DataKeys(grdListOfConstructionEquipments.SelectedIndex).Values("PropertyDetai_ID").ToString()
+            Dim propertyDtlId As String =
+            grdListOfConstructionEquipments.DataKeys(
+                grdListOfConstructionEquipments.SelectedIndex
+            ).Values("PropertyDetai_ID").ToString()
+
+            Session("PropertyDetai_ID") = propertyDtlId
+
             PopulateConstructionInformation(propertyDtlId)
 
             RefreshGridData()
+
         End If
-    End Sub
-
-
-    Private Sub FormatConstructionLedgerTransType(ByVal dt As DataTable)
-
-        If dt Is Nothing Then
-            Exit Sub
-        End If
-
-        If Not dt.Columns.Contains("Trans_Type") Then
-            Exit Sub
-        End If
-
-        For Each row As DataRow In dt.Rows
-
-            If row.IsNull("Trans_Type") Then
-                Continue For
-            End If
-
-            Dim transType As String = row("Trans_Type").ToString().Trim()
-
-            If String.IsNullOrEmpty(transType) Then
-                Continue For
-            End If
-
-            ' Normalize all line-break formats first.
-            transType = transType.Replace(vbCrLf, vbLf)
-            transType = transType.Replace(vbCr, vbLf)
-
-            ' Print "Originally issued to" on the next line with a dash.
-            transType = Regex.Replace(
-                transType,
-                "\s*-?\s*(Originally issued to)",
-                vbLf & "- $1",
-                RegexOptions.IgnoreCase
-            )
-
-            ' Print "Transferred from" on the next line with a dash.
-            transType = Regex.Replace(
-                transType,
-                "\s*-?\s*(Transferred from)",
-                vbLf & "- $1",
-                RegexOptions.IgnoreCase
-            )
-
-            ' Remove accidental blank lines.
-            Do While transType.Contains(vbLf & vbLf)
-                transType = transType.Replace(vbLf & vbLf, vbLf)
-            Loop
-
-            row("Trans_Type") = transType.Trim()
-
-        Next
 
     End Sub
 
-    Protected Sub grdListOfConstructionEquipments_RowDataBound(sender As Object, e As GridViewRowEventArgs)
+    Protected Sub grdListOfConstructionEquipments_RowDataBound(
+    sender As Object,
+    e As GridViewRowEventArgs)
+
         If e.Row.RowType = DataControlRowType.DataRow Then
-            e.Row.Attributes("onclick") = Page.ClientScript.GetPostBackClientHyperlink(grdListOfConstructionEquipments, "Select$" & e.Row.RowIndex)
-            e.Row.Style("cursor") = "pointer"
+
+            Dim propertyIdObject As Object =
+            DataBinder.Eval(
+                e.Row.DataItem,
+                "Property_ID"
+            )
+
+            Dim propertyId As String = ""
+
+            If propertyIdObject IsNot Nothing AndAlso
+            Not Convert.IsDBNull(propertyIdObject) Then
+
+                propertyId = propertyIdObject.ToString()
+            End If
+
+            ' Keep the four empty placeholder rows inactive.
+            If Not String.IsNullOrEmpty(propertyId) Then
+                e.Row.Attributes("onclick") =
+                Page.ClientScript.GetPostBackClientHyperlink(
+                    grdListOfConstructionEquipments,
+                    "Select$" & e.Row.RowIndex
+                )
+
+                e.Row.Style("cursor") = "pointer"
+            End If
+
         End If
+
     End Sub
 
     Protected Sub grdListOfConstructionEquipments_OnDataBound(sender As Object, e As EventArgs)
@@ -819,6 +911,7 @@ Partial Class Records_PropertyCard_Rev_Construction
         Dim dt As DataTable = GetConstructionLedgerData(classificationId)
 
         If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
+            FormatConstrucLedgerTransType(dt)
             grdConstructionLedger.DataSource = dt
             grdConstructionLedger.DataBind()
         Else
@@ -879,5 +972,113 @@ Partial Class Records_PropertyCard_Rev_Construction
     Protected Sub btnConstructionPreview_Click(sender As Object, e As EventArgs)
         ' reserved
     End Sub
+
+
+    Private Sub FormatConstrucLedgerTransType(ByVal dt As DataTable)
+
+        If dt Is Nothing Then
+            Exit Sub
+        End If
+
+        If Not dt.Columns.Contains("Trans_Type") Then
+            Exit Sub
+        End If
+
+        For Each row As DataRow In dt.Rows
+
+            If row.IsNull("Trans_Type") Then
+                Continue For
+            End If
+
+            Dim transType As String = row("Trans_Type").ToString().Trim()
+
+            If String.IsNullOrEmpty(transType) Then
+                Continue For
+            End If
+
+            ' Normalize all line-break formats first.
+            transType = transType.Replace(vbCrLf, vbLf)
+            transType = transType.Replace(vbCr, vbLf)
+
+            ' Print "Originally issued to" on the next line with a dash.
+            transType = Regex.Replace(
+                transType,
+                "\s*-?\s*(Originally issued to)",
+                vbLf & "- $1",
+                RegexOptions.IgnoreCase
+            )
+
+            ' Print "Transferred from" on the next line with a dash.
+            transType = Regex.Replace(
+                transType,
+                "\s*-?\s*(Transferred from)",
+                vbLf & "- $1",
+                RegexOptions.IgnoreCase
+            )
+
+            ' Remove accidental blank lines.
+            Do While transType.Contains(vbLf & vbLf)
+                transType = transType.Replace(vbLf & vbLf, vbLf)
+            Loop
+
+            row("Trans_Type") = transType.Trim()
+
+        Next
+
+    End Sub
+
+    ' ============================
+    ' LOAD ITEM FROM MAIN PAGE
+    ' ============================
+    Public Sub LoadSelectedItem(ByVal itemId As String)
+
+        If String.IsNullOrEmpty(itemId) OrElse itemId = "0" Then
+            Session("Item_ID") = 0
+            Session("Property_ID") = 0
+            Session("PropertyDetai_ID") = 0
+
+            grdListOfConstructionEquipments.PageIndex = 0
+            grdListOfConstructionEquipments.SelectedIndex = -1
+
+            txtConstructionPropSearch.Text = ""
+
+            mvSubClass.SetActiveView(Me.vwRoad)
+
+            BindEmptyConstructionEquipmentsGrid()
+            BindEmptyConstructionLedgerGrid()
+            ClearConstructionInformationForm()
+
+            Exit Sub
+        End If
+
+        Session("Item_ID") = itemId
+        Session("Property_ID") = 0
+        Session("PropertyDetai_ID") = 0
+
+        ' Retrieve the selected item's SubClassificationID so
+        ' the Road or Bridge View can be selected correctly.
+        SetSelectedItemSubClassification(itemId)
+        DecideSubClassView()
+
+        ' Reset previous property selection.
+        grdListOfConstructionEquipments.PageIndex = 0
+        grdListOfConstructionEquipments.SelectedIndex = -1
+
+        ' Reset search for the newly selected item.
+        txtConstructionPropSearch.Text = ""
+
+        ' Clear previously displayed Road or Bridge information.
+        ClearConstructionInformationForm()
+
+        AddTrace(
+            "Construction User Control Item_ID: " &
+            itemId
+        )
+
+        BindConstructionEquipmentsGrid()
+        BindConstructionLedgerGrid()
+
+    End Sub
+
 
 End Class

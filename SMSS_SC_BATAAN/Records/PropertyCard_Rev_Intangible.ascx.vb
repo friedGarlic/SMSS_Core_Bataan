@@ -1,5 +1,7 @@
 ﻿Imports System.Data
 Imports System.Web.UI.WebControls
+Imports System.Text.RegularExpressions
+
 
 Partial Class Records_PropertyCard_Rev_Intangible
     Inherits System.Web.UI.UserControl
@@ -14,19 +16,17 @@ Partial Class Records_PropertyCard_Rev_Intangible
         True)
     End Sub
 
-    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+    Protected Sub Page_Load(
+    ByVal sender As Object,
+    ByVal e As System.EventArgs) Handles Me.Load
+
         If Not Page.IsPostBack Then
             BindIntangibleLocationGrid()
-            BindIntangibleAssetsGrid()
-            BindIntangibleLedgerGrid()
+            BindEmptyIntangibleAssetsGrid()
+            BindEmptyIntangibleLedgerGrid()
             ClearIntangibleInformationForm()
-
-            Session("GA_ID") = 0
-            Session("SubClassificationID") = 0
-        Else
-            BindIntangibleLocationGrid()
-            BindIntangibleAssetsGrid()
         End If
+
     End Sub
 
     ' ============================
@@ -35,15 +35,84 @@ Partial Class Records_PropertyCard_Rev_Intangible
     Public Sub RefreshGridData()
         BindIntangibleLocationGrid()
 
-        If gvIntangibleLocationList.SelectedIndex >= 0 Then
+        Dim itemId As String =
+        If(Session("Item_ID"), "0").ToString()
+
+        If Not String.IsNullOrEmpty(itemId) AndAlso
+        itemId <> "0" Then
+
             BindIntangibleAssetsGrid()
+            BindIntangibleLedgerGrid()
         Else
+            grdListOfIntangibleAssets.PageIndex = 0
+            grdListOfIntangibleAssets.SelectedIndex = -1
+
             BindEmptyIntangibleAssetsGrid()
+            BindEmptyIntangibleLedgerGrid()
+            ClearIntangibleInformationForm()
         End If
 
-        BindIntangibleLedgerGrid()
-        ClearIntangibleInformationForm()
     End Sub
+
+
+    ' ============================
+    ' LOAD ITEM FROM MAIN PAGE
+    ' ============================
+    Public Sub LoadSelectedItem(ByVal itemId As String)
+
+        If String.IsNullOrEmpty(itemId) OrElse itemId = "0" Then
+            Session("Item_ID") = 0
+            Session("Property_ID") = 0
+            Session("PropertyDetai_ID") = 0
+
+            gvIntangibleLocationList.SelectedIndex = -1
+
+            grdListOfIntangibleAssets.PageIndex = 0
+            grdListOfIntangibleAssets.SelectedIndex = -1
+
+            txtIntangiblePropSearch.Text = ""
+
+            If ddlIntangibleSearchCriteria.Items.Count > 0 Then
+                ddlIntangibleSearchCriteria.SelectedIndex = 0
+            End If
+
+            BindEmptyIntangibleAssetsGrid()
+            BindEmptyIntangibleLedgerGrid()
+            ClearIntangibleInformationForm()
+
+            Exit Sub
+        End If
+
+        Session("Item_ID") = itemId
+        Session("Property_ID") = 0
+        Session("PropertyDetai_ID") = 0
+
+        ' The main gvItemList is now the primary item selector.
+        gvIntangibleLocationList.SelectedIndex = -1
+
+        ' Reset the previous child-property selection.
+        grdListOfIntangibleAssets.PageIndex = 0
+        grdListOfIntangibleAssets.SelectedIndex = -1
+
+        ' Reset search controls for the newly selected item.
+        txtIntangiblePropSearch.Text = ""
+
+        If ddlIntangibleSearchCriteria.Items.Count > 0 Then
+            ddlIntangibleSearchCriteria.SelectedIndex = 0
+        End If
+
+        ClearIntangibleInformationForm()
+
+        AddTrace(
+        "Intangible User Control Item_ID: " &
+        itemId
+    )
+
+        BindIntangibleAssetsGrid()
+        BindIntangibleLedgerGrid()
+
+    End Sub
+
 
     ' ============================
     ' LOCATION GRIDVIEW FUNCTIONS
@@ -60,6 +129,12 @@ Partial Class Records_PropertyCard_Rev_Intangible
         Else
             BindEmptyIntangibleLocationGrid()
         End If
+
+        If gaId = "0" Then
+            BindEmptyIntangibleLocationGrid()
+            Session("PropertyDetai_ID") = 0
+        End If
+
     End Sub
 
     Private Function GetIntangibleLocationData(ByVal subClassId As String, ByVal gaId As String) As DataTable
@@ -90,10 +165,11 @@ Partial Class Records_PropertyCard_Rev_Intangible
 
     Private Function CreateIntangibleLocationSchema() As DataTable
         Dim dt As New DataTable()
-        dt.Columns.Add("Property_code", GetType(String))
+        dt.Columns.Add("Item_Code", GetType(String))
         dt.Columns.Add("item_particular_id", GetType(String))
         dt.Columns.Add("Item_ID", GetType(String))
-        dt.Columns.Add("DeclaredOwner", GetType(String))
+
+        dt.Columns.Add("ItemDescription", GetType(String))
         dt.Columns.Add("Barangay", GetType(String))
         dt.Columns.Add("Location", GetType(String))
         dt.Columns.Add("Area", GetType(String))
@@ -109,77 +185,171 @@ Partial Class Records_PropertyCard_Rev_Intangible
         BindIntangibleLocationGrid()
     End Sub
 
-    Protected Sub gvIntangibleLocationList_SelectedIndexChanged(sender As Object, e As EventArgs)
-        Try
+    Protected Sub gvIntangibleLocationList_SelectedIndexChanged(
+    sender As Object,
+    e As EventArgs)
 
-            If gvIntangibleLocationList.SelectedIndex >= 0 Then
-                Dim selectedItemId As String = gvIntangibleLocationList.SelectedDataKey("Item_ID")
-                Session("Item_ID") = selectedItemId
-                BindIntangibleAssetsGrid()
+        If gvIntangibleLocationList.SelectedIndex >= 0 Then
 
+            Dim selectedItemId As String =
+            gvIntangibleLocationList.DataKeys(
+                gvIntangibleLocationList.SelectedIndex
+            ).Values("Item_ID").ToString()
 
-                Dim dt As DataTable = GetIntangibleLedgerData(Nothing)
+            LoadSelectedItem(selectedItemId)
 
-                If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
-                    'FormatBuildingLedgerTransType(dt)
+        End If
 
-                    grdIntangibleLedger.DataSource = dt
-                    grdIntangibleLedger.DataBind()
-                Else
-                    BindEmptyIntangibleLedgerGrid()
-                End If
-
-            End If
-        Catch ex As Exception
-
-        End Try
     End Sub
 
-    Protected Sub gvIntangibleLocationList_RowDataBound(sender As Object, e As GridViewRowEventArgs)
+    Protected Sub gvIntangibleLocationList_RowDataBound(
+    sender As Object,
+    e As GridViewRowEventArgs)
+
         If e.Row.RowType = DataControlRowType.DataRow Then
-            e.Row.Attributes("onclick") = Page.ClientScript.GetPostBackClientHyperlink(gvIntangibleLocationList, "Select$" & e.Row.RowIndex)
-            e.Row.Style("cursor") = "pointer"
+
+            Dim itemIdObject As Object =
+            DataBinder.Eval(
+                e.Row.DataItem,
+                "Item_ID"
+            )
+
+            Dim itemId As String = ""
+
+            If itemIdObject IsNot Nothing AndAlso
+            Not Convert.IsDBNull(itemIdObject) Then
+
+                itemId = itemIdObject.ToString()
+            End If
+
+            ' Only actual item rows are clickable.
+            If Not String.IsNullOrEmpty(itemId) Then
+                e.Row.Attributes("onclick") =
+                Page.ClientScript.GetPostBackClientHyperlink(
+                    gvIntangibleLocationList,
+                    "Select$" & e.Row.RowIndex
+                )
+
+                e.Row.Style("cursor") = "pointer"
+            End If
+
         End If
+
     End Sub
 
     ' ============================
     ' INTANGIBLE ASSETS LIST GRIDVIEW
     ' ============================
+    'Private Sub BindIntangibleAssetsGrid()
+    '    Dim itemId As String = If(Session("Item_ID"), "0")
+    '    Dim gaId As String = If(Session("GA_ID"), "0")
+
+    '    Dim itemParticularId As String = "0"
+    '    Dim declaredOwner As String = ""
+    '    Dim barangay As String = ""
+
+    '    If gvIntangibleLocationList.SelectedIndex >= 0 Then
+    '        itemParticularId = gvIntangibleLocationList.DataKeys(gvIntangibleLocationList.SelectedIndex).Values("item_particular_id").ToString()
+    '        itemId = gvIntangibleLocationList.DataKeys(gvIntangibleLocationList.SelectedIndex).Values("Item_ID").ToString()
+    '        'declaredOwner = gvIntangibleLocationList.DataKeys(gvIntangibleLocationList.SelectedIndex).Values("DeclaredOwner").ToString()
+    '        barangay = gvIntangibleLocationList.DataKeys(gvIntangibleLocationList.SelectedIndex).Values("Barangay").ToString()
+    '    End If
+
+    '    AddTrace("itemParticularId: " & itemParticularId)
+    '    AddTrace("itemId: " & itemId)
+
+    '    AddTrace("gaId: " & gaId)
+    '    AddTrace("declaredOwner: " & declaredOwner)
+    '    AddTrace("barangay: " & barangay)
+
+    '    Dim dt As DataTable = GetIntangibleAssetsData(itemParticularId, itemId, gaId, declaredOwner, barangay)
+
+    '    If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
+    '        grdListOfIntangibleAssets.DataSource = dt
+    '        grdListOfIntangibleAssets.DataBind()
+    '    Else
+    '        BindEmptyIntangibleAssetsGrid()
+    '    End If
+    'End Sub
+
+    'Added by John
     Private Sub BindIntangibleAssetsGrid()
-        Dim itemId As String = If(Session("Item_ID"), "0")
-        Dim gaId As String = If(Session("GA_ID"), "0")
+
+        Dim itemId As String =
+        If(Session("Item_ID"), "0").ToString()
+
+        Dim gaId As String =
+        If(Session("GA_ID"), "0").ToString()
 
         Dim itemParticularId As String = "0"
         Dim declaredOwner As String = ""
         Dim barangay As String = ""
 
-        Try
-            If gvIntangibleLocationList.SelectedIndex >= 0 Then
-                itemParticularId = gvIntangibleLocationList.DataKeys(gvIntangibleLocationList.SelectedIndex).Values("item_particular_id").ToString()
-                itemId = gvIntangibleLocationList.DataKeys(gvIntangibleLocationList.SelectedIndex).Values("Item_ID").ToString()
-                declaredOwner = gvIntangibleLocationList.DataKeys(gvIntangibleLocationList.SelectedIndex).Values("DeclaredOwner").ToString()
-                barangay = gvIntangibleLocationList.DataKeys(gvIntangibleLocationList.SelectedIndex).Values("Barangay").ToString()
+        AddTrace(
+        "Intangible List -> itemParticularId: " &
+        itemParticularId
+    )
+
+        AddTrace(
+        "Intangible List -> itemId: " &
+        itemId
+    )
+
+        AddTrace(
+        "Intangible List -> gaId: " &
+        gaId
+    )
+
+        AddTrace(
+        "Intangible List -> declaredOwner: " &
+        declaredOwner
+    )
+
+        AddTrace(
+        "Intangible List -> barangay: " &
+        barangay
+    )
+
+        If String.IsNullOrEmpty(itemId) OrElse itemId = "0" Then
+            BindEmptyIntangibleAssetsGrid()
+            Exit Sub
+        End If
+
+        Dim dt As DataTable =
+        GetIntangibleAssetsData(
+            itemParticularId,
+            itemId,
+            gaId,
+            declaredOwner,
+            barangay
+        )
+
+        ' Preserve the existing Barcode-to-SerialNo fallback.
+        If dt IsNot Nothing Then
+
+            If Not dt.Columns.Contains("SerialNo") Then
+                dt.Columns.Add(
+                "SerialNo",
+                GetType(String)
+            )
+
+                If dt.Columns.Contains("Barcode") Then
+                    For Each row As DataRow In dt.Rows
+                        row("SerialNo") =
+                        row("Barcode").ToString()
+                    Next
+                End If
             End If
 
-            AddTrace("itemParticularId: " & itemParticularId)
-            AddTrace("itemId: " & itemId)
+        End If
 
-            AddTrace("gaId: " & gaId)
-            AddTrace("declaredOwner: " & declaredOwner)
-            AddTrace("barangay: " & barangay)
+        If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
+            grdListOfIntangibleAssets.DataSource = dt
+            grdListOfIntangibleAssets.DataBind()
+        Else
+            BindEmptyIntangibleAssetsGrid()
+        End If
 
-            Dim dt As DataTable = GetIntangibleAssetsData(itemParticularId, itemId, gaId, declaredOwner, barangay)
-
-            If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
-                grdListOfIntangibleAssets.DataSource = dt
-                grdListOfIntangibleAssets.DataBind()
-            Else
-                BindEmptyIntangibleAssetsGrid()
-            End If
-
-        Catch ex As Exception
-
-        End Try
     End Sub
 
     Private Function GetIntangibleAssetsData(ByVal itemParticularId As String, ByVal itemId As String, ByVal gaId As String,
@@ -211,10 +381,12 @@ Partial Class Records_PropertyCard_Rev_Intangible
         Dim dt As New DataTable()
 
         dt.Columns.Add("PropertyNo", GetType(String))
-        dt.Columns.Add("Property_code", GetType(String))
+        dt.Columns.Add("Item_Code", GetType(String))
         dt.Columns.Add("AssetName", GetType(String))
         dt.Columns.Add("Description", GetType(String))
+        dt.Columns.Add("SerialNo", GetType(String))
         dt.Columns.Add("LicenseNo", GetType(String))
+
         dt.Columns.Add("Validity", GetType(String))
         dt.Columns.Add("AcqDate", GetType(String))
         dt.Columns.Add("AcqCost", GetType(Decimal))
@@ -233,77 +405,232 @@ Partial Class Records_PropertyCard_Rev_Intangible
         BindIntangibleAssetsGrid()
     End Sub
 
-    Protected Sub grdListOfIntangibleAssets_SelectedIndexChanged(sender As Object, e As EventArgs)
+    Protected Sub grdListOfIntangibleAssets_SelectedIndexChanged(
+    sender As Object,
+    e As EventArgs)
+
         If grdListOfIntangibleAssets.SelectedIndex >= 0 Then
+
             loadUnit()
 
-            Dim selectedPropertyId As String = grdListOfIntangibleAssets.SelectedDataKey("Property_ID")
-            Session("Property_ID") = selectedPropertyId
+            Dim selectedPropertyId As String =
+            grdListOfIntangibleAssets.DataKeys(
+                grdListOfIntangibleAssets.SelectedIndex
+            ).Values("Property_ID").ToString()
 
-            Dim propertyDtlId As String = grdListOfIntangibleAssets.DataKeys(grdListOfIntangibleAssets.SelectedIndex).Values("PropertyDetai_ID").ToString()
-            'Dim itemId As String = grdListOfIntangibleAssets.DataKeys(grdListOfIntangibleAssets.SelectedIndex).Values("Item_ID").ToString()
-            'Session("Item_ID") = itemId
+            Session("Property_ID") =
+            selectedPropertyId
 
-            PopulateIntangibleInformation(propertyDtlId)
+            Dim propertyDtlId As String =
+            grdListOfIntangibleAssets.DataKeys(
+                grdListOfIntangibleAssets.SelectedIndex
+            ).Values("PropertyDetai_ID").ToString()
+
+            Session("PropertyDetai_ID") =
+            propertyDtlId
+
+            PopulateIntangibleInformation(
+            propertyDtlId
+        )
+
+            ' Preserve the existing ledger refresh.
             BindIntangibleLedgerGrid()
-        End If
-    End Sub
 
-    Protected Sub grdListOfIntangibleAssets_RowDataBound(sender As Object, e As GridViewRowEventArgs)
+        End If
+
+    End Sub
+    Protected Sub grdListOfIntangibleAssets_RowDataBound(
+    sender As Object,
+    e As GridViewRowEventArgs)
+
         If e.Row.RowType = DataControlRowType.DataRow Then
-            e.Row.Attributes("onclick") = Page.ClientScript.GetPostBackClientHyperlink(grdListOfIntangibleAssets, "Select$" & e.Row.RowIndex)
-            e.Row.Style("cursor") = "pointer"
+
+            Dim propertyIdObject As Object =
+            DataBinder.Eval(
+                e.Row.DataItem,
+                "Property_ID"
+            )
+
+            Dim propertyId As String = ""
+
+            If propertyIdObject IsNot Nothing AndAlso
+            Not Convert.IsDBNull(propertyIdObject) Then
+
+                propertyId = propertyIdObject.ToString()
+            End If
+
+            ' Keep the four empty placeholder rows inactive.
+            If Not String.IsNullOrEmpty(propertyId) Then
+                e.Row.Attributes("onclick") =
+                Page.ClientScript.GetPostBackClientHyperlink(
+                    grdListOfIntangibleAssets,
+                    "Select$" & e.Row.RowIndex
+                )
+
+                e.Row.Style("cursor") = "pointer"
+            End If
+
         End If
+
     End Sub
 
-    ' SEARCH BY PROPERTY NUMBER (INTANGIBLE)
-    Protected Sub btnIntangiblePropSearch_Click(sender As Object, e As EventArgs)
-        Dim searchText As String = txtIntangiblePropSearch.Text.Trim()
+    '' SEARCH BY PROPERTY NUMBER (INTANGIBLE)
+    'Protected Sub btnIntangiblePropSearch_Click(sender As Object, e As EventArgs)
+    '    Dim searchText As String = txtIntangiblePropSearch.Text.Trim()
 
-        ' If no search value → show full list using existing logic
+    '    ' If no search value → show full list using existing logic
+    '    If String.IsNullOrEmpty(searchText) Then
+    '        AddTrace("Intangible Search: empty, loading full list.")
+    '        BindIntangibleAssetsGrid()
+    '        Exit Sub
+    '    End If
+
+    '    ' Replicate the same parameter logic used in BindIntangibleAssetsGrid
+    '    Dim itemId As String = If(Session("Item_ID"), "0")
+    '    Dim gaId As String = If(Session("GA_ID"), "0")
+
+    '    Dim itemParticularId As String = "0"
+    '    Dim declaredOwner As String = ""
+    '    Dim barangay As String = ""
+
+    '    If gvIntangibleLocationList.SelectedIndex >= 0 Then
+    '        itemParticularId = gvIntangibleLocationList.DataKeys(gvIntangibleLocationList.SelectedIndex).Values("item_particular_id").ToString()
+    '        itemId = gvIntangibleLocationList.DataKeys(gvIntangibleLocationList.SelectedIndex).Values("Item_ID").ToString()
+    '        'declaredOwner = gvIntangibleLocationList.DataKeys(gvIntangibleLocationList.SelectedIndex).Values("DeclaredOwner").ToString()
+    '        barangay = gvIntangibleLocationList.DataKeys(gvIntangibleLocationList.SelectedIndex).Values("Barangay").ToString()
+    '    End If
+
+    '    AddTrace("Intangible Search: " & searchText &
+    '         " | itemParticularId=" & itemParticularId &
+    '         " | itemId=" & itemId &
+    '         " | gaId=" & gaId &
+    '         " | declaredOwner=" & declaredOwner &
+    '         " | barangay=" & barangay)
+
+    '    ' Get the same dataset that BindIntangibleAssetsGrid would bind
+    '    Dim dt As DataTable = GetIntangibleAssetsData(itemParticularId, itemId, gaId, declaredOwner, barangay)
+
+    '    If dt Is Nothing OrElse dt.Rows.Count = 0 Then
+    '        BindEmptyIntangibleAssetsGrid()
+    '        Exit Sub
+    '    End If
+
+    '    ' Filter by PropertyNo LIKE '%txtIntangiblePropSearch%'
+    '    Dim dv As New DataView(dt)
+
+    '    ' Escape special characters for RowFilter
+    '    Dim safeSearch As String = searchText.Replace("'", "''").Replace("[", "[[]").Replace("]", "]]")
+
+    '    dv.RowFilter = "PropertyNo LIKE '%" & safeSearch & "%'"
+
+    '    If dv.Count > 0 Then
+    '        grdListOfIntangibleAssets.DataSource = dv
+    '        grdListOfIntangibleAssets.DataBind()
+    '    Else
+    '        BindEmptyIntangibleAssetsGrid()
+    '    End If
+    'End Sub
+
+
+
+    ' ============================
+    ' INTANGIBLE INFORMATION
+    ' ============================
+
+    'Added by John
+    Protected Sub btnIntangiblePropSearch_Click(
+    sender As Object,
+    e As EventArgs)
+
+        Dim searchText As String =
+        txtIntangiblePropSearch.Text.Trim()
+
+        Dim searchBy As String =
+        ddlIntangibleSearchCriteria.SelectedValue
+
         If String.IsNullOrEmpty(searchText) Then
-            AddTrace("Intangible Search: empty, loading full list.")
+            AddTrace(
+            "Intangible Search: empty, loading full list."
+        )
+
             BindIntangibleAssetsGrid()
             Exit Sub
         End If
 
-        ' Replicate the same parameter logic used in BindIntangibleAssetsGrid
-        Dim itemId As String = If(Session("Item_ID"), "0")
-        Dim gaId As String = If(Session("GA_ID"), "0")
+        Dim itemId As String =
+        If(Session("Item_ID"), "0").ToString()
+
+        Dim gaId As String =
+        If(Session("GA_ID"), "0").ToString()
 
         Dim itemParticularId As String = "0"
         Dim declaredOwner As String = ""
         Dim barangay As String = ""
 
-        If gvIntangibleLocationList.SelectedIndex >= 0 Then
-            itemParticularId = gvIntangibleLocationList.DataKeys(gvIntangibleLocationList.SelectedIndex).Values("item_particular_id").ToString()
-            itemId = gvIntangibleLocationList.DataKeys(gvIntangibleLocationList.SelectedIndex).Values("Item_ID").ToString()
-            declaredOwner = gvIntangibleLocationList.DataKeys(gvIntangibleLocationList.SelectedIndex).Values("DeclaredOwner").ToString()
-            barangay = gvIntangibleLocationList.DataKeys(gvIntangibleLocationList.SelectedIndex).Values("Barangay").ToString()
+        If String.IsNullOrEmpty(itemId) OrElse itemId = "0" Then
+            BindEmptyIntangibleAssetsGrid()
+            Exit Sub
         End If
 
-        AddTrace("Intangible Search: " & searchText &
-             " | itemParticularId=" & itemParticularId &
-             " | itemId=" & itemId &
-             " | gaId=" & gaId &
-             " | declaredOwner=" & declaredOwner &
-             " | barangay=" & barangay)
+        AddTrace(
+        "Intangible Search: " & searchText &
+        " | searchBy=" & searchBy &
+        " | itemId=" & itemId &
+        " | gaId=" & gaId
+    )
 
-        ' Get the same dataset that BindIntangibleAssetsGrid would bind
-        Dim dt As DataTable = GetIntangibleAssetsData(itemParticularId, itemId, gaId, declaredOwner, barangay)
+        Dim dt As DataTable =
+        GetIntangibleAssetsData(
+            itemParticularId,
+            itemId,
+            gaId,
+            declaredOwner,
+            barangay
+        )
+
+        ' Preserve the existing SerialNo fallback.
+        If dt IsNot Nothing Then
+
+            If Not dt.Columns.Contains("SerialNo") Then
+                dt.Columns.Add(
+                "SerialNo",
+                GetType(String)
+            )
+
+                If dt.Columns.Contains("Barcode") Then
+                    For Each row As DataRow In dt.Rows
+                        row("SerialNo") =
+                        row("Barcode").ToString()
+                    Next
+                End If
+            End If
+
+        End If
 
         If dt Is Nothing OrElse dt.Rows.Count = 0 Then
             BindEmptyIntangibleAssetsGrid()
             Exit Sub
         End If
 
-        ' Filter by PropertyNo LIKE '%txtIntangiblePropSearch%'
+        ' Only permit the predefined search columns.
+        If searchBy <> "PropertyNo" AndAlso
+        searchBy <> "SerialNo" Then
+
+            searchBy = "PropertyNo"
+        End If
+
+        Dim safeSearch As String =
+        searchText.Replace("'", "''").
+        Replace("[", "[[]").
+        Replace("]", "]]")
+
         Dim dv As New DataView(dt)
 
-        ' Escape special characters for RowFilter
-        Dim safeSearch As String = searchText.Replace("'", "''").Replace("[", "[[]").Replace("]", "]]")
-
-        dv.RowFilter = "PropertyNo LIKE '%" & safeSearch & "%'"
+        dv.RowFilter =
+        searchBy &
+        " LIKE '%" &
+        safeSearch &
+        "%'"
 
         If dv.Count > 0 Then
             grdListOfIntangibleAssets.DataSource = dv
@@ -311,13 +638,9 @@ Partial Class Records_PropertyCard_Rev_Intangible
         Else
             BindEmptyIntangibleAssetsGrid()
         End If
+
     End Sub
 
-
-
-    ' ============================
-    ' INTANGIBLE INFORMATION
-    ' ============================
     Private Function GetIntangibleInformationData(ByVal propertyDtlId As String) As DataTable
         Dim dt As New DataTable()
         Try
@@ -435,28 +758,63 @@ Partial Class Records_PropertyCard_Rev_Intangible
     ' LEDGER GRIDVIEW (UNCHANGED)
     ' ============================
     Private Sub BindIntangibleLedgerGrid()
-        Dim classificationId As String = If(Session("ClassificationID"), "0")
-        Dim dt As DataTable = GetIntangibleLedgerData(classificationId)
+
+        Dim itemId As String =
+        If(Session("Item_ID"), "0").ToString()
+
+        If String.IsNullOrEmpty(itemId) OrElse itemId = "0" Then
+            BindEmptyIntangibleLedgerGrid()
+            Exit Sub
+        End If
+
+        Dim dt As DataTable =
+        GetIntangibleLedgerData()
 
         If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
+            FormatVehicleLedgerTransType(dt)
+
             grdIntangibleLedger.DataSource = dt
             grdIntangibleLedger.DataBind()
         Else
             BindEmptyIntangibleLedgerGrid()
         End If
+
     End Sub
 
-    Private Function GetIntangibleLedgerData(ByVal classificationId As String) As DataTable
+    Private Function GetIntangibleLedgerData() As DataTable
         Dim dt As New DataTable()
+
         Try
-            Dim sql As String = "Exec [AMS].[PropertyCard_Rev_Ledger_v2] '" & Session("Item_ID") & "'"
-            dt = objDerived.GetDataTable(sql, CommandType.Text)
+            Dim itemId As String =
+            If(Session("Item_ID"), "0").ToString()
+
+            AddTrace(
+            "Intangible Ledger Item_ID: " &
+            itemId
+        )
+
+            Dim sql As String =
+            "Exec [AMS].[PropertyCard_Rev_Ledger_v2] '" &
+            itemId &
+            "'"
+
+            dt = objDerived.GetDataTable(
+            sql,
+            CommandType.Text
+        )
+
         Catch ex As Exception
-            System.Diagnostics.Debug.WriteLine("Error loading intangible ledger: " & ex.Message)
+            System.Diagnostics.Debug.WriteLine(
+            "Error loading Intangible ledger: " &
+            ex.Message
+        )
+
             Return Nothing
         End Try
+
         Return dt
     End Function
+
 
     Private Sub BindEmptyIntangibleLedgerGrid()
         Dim dt As DataTable = CreateIntangibleLedgerSchema()
@@ -497,6 +855,59 @@ Partial Class Records_PropertyCard_Rev_Intangible
 
     Protected Sub btnIntangiblePreview_Click(sender As Object, e As EventArgs) Handles btnIntangiblePreview.Click
         ' reserved
+    End Sub
+
+    Private Sub FormatVehicleLedgerTransType(ByVal dt As DataTable)
+
+        If dt Is Nothing Then
+            Exit Sub
+        End If
+
+        If Not dt.Columns.Contains("Trans_Type") Then
+            Exit Sub
+        End If
+
+        For Each row As DataRow In dt.Rows
+
+            If row.IsNull("Trans_Type") Then
+                Continue For
+            End If
+
+            Dim transType As String = row("Trans_Type").ToString().Trim()
+
+            If String.IsNullOrEmpty(transType) Then
+                Continue For
+            End If
+
+            ' Normalize all line-break formats first.
+            transType = transType.Replace(vbCrLf, vbLf)
+            transType = transType.Replace(vbCr, vbLf)
+
+            ' Print "Originally issued to" on the next line with a dash.
+            transType = Regex.Replace(
+                transType,
+                "\s*-?\s*(Originally issued to)",
+                vbLf & "- $1",
+                RegexOptions.IgnoreCase
+            )
+
+            ' Print "Transferred from" on the next line with a dash.
+            transType = Regex.Replace(
+                transType,
+                "\s*-?\s*(Transferred from)",
+                vbLf & "- $1",
+                RegexOptions.IgnoreCase
+            )
+
+            ' Remove accidental blank lines.
+            Do While transType.Contains(vbLf & vbLf)
+                transType = transType.Replace(vbLf & vbLf, vbLf)
+            Loop
+
+            row("Trans_Type") = transType.Trim()
+
+        Next
+
     End Sub
 
 End Class

@@ -1,5 +1,6 @@
 ﻿Imports System.Data
 Imports System.Web.UI.WebControls
+Imports System.Text.RegularExpressions
 
 Partial Class Records_PropertyCard_Rev_Land
     Inherits System.Web.UI.UserControl
@@ -20,22 +21,9 @@ Partial Class Records_PropertyCard_Rev_Land
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
         If Not Page.IsPostBack Then
             BindLandLocationGrid()
-            BindLandsGrid()
-            BindLandLedgerGrid()
-
-            ' match reference behavior
-            Session("GA_ID") = 0
-            Session("SubClassificationID") = 0
-
-            ddBrgy1.DataSource = objDerived.GetDataTable("Select * from dbo.tbl_Brgy_Invent", CommandType.Text)
-            ddBrgy1.DataTextField = ("Brgy_Name")
-            ddBrgy1.DataValueField = ("Brgy_ID")
-            ddBrgy1.DataBind()
-
-            ddBrgy1.Items.Insert(0, "Select")
-        Else
-            BindLandLocationGrid()
-            BindLandsGrid()
+            BindEmptyLandsGrid()
+            BindEmptyLandLedgerGrid()
+            ClearLandInformationForm()
         End If
     End Sub
 
@@ -45,13 +33,17 @@ Partial Class Records_PropertyCard_Rev_Land
     Public Sub RefreshGridData()
         BindLandLocationGrid()
 
-        If gvLandLocationList.SelectedIndex >= 0 Then
+        Dim itemId As String =
+        If(Session("Item_ID"), "0").ToString()
+
+        If Not String.IsNullOrEmpty(itemId) AndAlso itemId <> "0" Then
             BindLandsGrid()
+            BindLandLedgerGrid()
         Else
             BindEmptyLandsGrid()
+            BindEmptyLandLedgerGrid()
+            ClearLandInformationForm()
         End If
-
-        BindLandLedgerGrid()
     End Sub
 
     ' ============================
@@ -63,12 +55,21 @@ Partial Class Records_PropertyCard_Rev_Land
 
         Dim dt As DataTable = GetLandLocationData(subClassId, gaId)
 
+
+        FormatVehicleLedgerTransType(dt)
         If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
             gvLandLocationList.DataSource = dt
             gvLandLocationList.DataBind()
         Else
             BindEmptyLandLocationGrid()
         End If
+
+        If gaId = 0 Then
+            BindEmptyLandLocationGrid()
+            Session("PropertyDetai_ID") = 0
+        End If
+
+
     End Sub
 
     Private Function GetLandLocationData(ByVal subClassId As String, ByVal gaId As String) As DataTable
@@ -99,10 +100,10 @@ Partial Class Records_PropertyCard_Rev_Land
 
     Private Function CreateLandLocationSchema() As DataTable
         Dim dt As New DataTable()
-        dt.Columns.Add("Property_code", GetType(String))
+        dt.Columns.Add("Item_Code", GetType(String))
         dt.Columns.Add("item_particular_id", GetType(String))
         dt.Columns.Add("Item_ID", GetType(String))
-        dt.Columns.Add("DeclaredOwner", GetType(String))
+        dt.Columns.Add("ItemDescription", GetType(String))
         dt.Columns.Add("Barangay", GetType(String))
         dt.Columns.Add("Location", GetType(String))
         dt.Columns.Add("Area", GetType(String))
@@ -118,12 +119,21 @@ Partial Class Records_PropertyCard_Rev_Land
         BindLandLocationGrid()
     End Sub
 
-    Protected Sub gvLandLocationList_SelectedIndexChanged(sender As Object, e As EventArgs)
+    Protected Sub gvLandLocationList_SelectedIndexChanged(
+    sender As Object,
+    e As EventArgs)
+
         If gvLandLocationList.SelectedIndex >= 0 Then
-            Dim selectedItemId As String = gvLandLocationList.SelectedDataKey("Item_ID")
-            Session("Item_ID") = selectedItemId
-            BindLandsGrid()
+
+            Dim selectedItemId As String =
+            gvLandLocationList.DataKeys(
+                gvLandLocationList.SelectedIndex
+            ).Values("Item_ID").ToString()
+
+            LoadSelectedItem(selectedItemId)
+
         End If
+
     End Sub
 
     Protected Sub gvLandLocationList_RowDataBound(sender As Object, e As GridViewRowEventArgs)
@@ -148,20 +158,24 @@ Partial Class Records_PropertyCard_Rev_Land
         End If
 
         ' Replicate the same parameter logic used in BindLandsGrid
-        Dim itemId As String = If(Session("Item_ID"), "0")
-        Dim gaId As String = If(Session("GA_ID"), "0")
+        Dim itemId As String =
+    If(Session("Item_ID"), "0").ToString()
+
+        Dim gaId As String =
+    If(Session("GA_ID"), "0").ToString()
 
         Dim itemParticularId As String = "0"
         Dim declaredOwner As String = ""
         Dim barangay As String = ""
 
-        ' Adjust gvLandLocationList to your actual location grid ID if different
-        If gvLandLocationList.SelectedIndex >= 0 Then
-            itemParticularId = gvLandLocationList.DataKeys(gvLandLocationList.SelectedIndex).Values("item_particular_id").ToString()
-            itemId = gvLandLocationList.DataKeys(gvLandLocationList.SelectedIndex).Values("Item_ID").ToString()
-            declaredOwner = gvLandLocationList.DataKeys(gvLandLocationList.SelectedIndex).Values("DeclaredOwner").ToString()
-            barangay = gvLandLocationList.DataKeys(gvLandLocationList.SelectedIndex).Values("Barangay").ToString()
+        If String.IsNullOrEmpty(itemId) OrElse itemId = "0" Then
+            BindEmptyLandsGrid()
+            Exit Sub
         End If
+
+
+
+
 
         AddTrace("Land Search: " & searchText &
              " | itemParticularId=" & itemParticularId &
@@ -196,39 +210,43 @@ Partial Class Records_PropertyCard_Rev_Land
 
 
     Private Sub BindLandsGrid()
-        Dim itemId As String = If(Session("Item_ID"), "0").ToString()
-        Dim gaId As String = If(Session("GA_ID"), "0").ToString()
+        ' Item_ID now comes from the main List of Items grid.
+        Dim itemId As String =
+        If(Session("Item_ID"), "0").ToString()
+
+        Dim gaId As String =
+        If(Session("GA_ID"), "0").ToString()
 
         Dim itemParticularId As String = "0"
         Dim declaredOwner As String = ""
         Dim barangay As String = ""
 
-        Try
+        AddTrace("LAND List -> itemParticularId: " & itemParticularId)
+        AddTrace("LAND List -> itemId: " & itemId)
+        AddTrace("LAND List -> gaId: " & gaId)
+        AddTrace("LAND List -> declaredOwner: " & declaredOwner)
+        AddTrace("LAND List -> barangay: " & barangay)
 
-            If gvLandLocationList.SelectedIndex >= 0 Then
-                itemParticularId = gvLandLocationList.DataKeys(gvLandLocationList.SelectedIndex).Values("item_particular_id").ToString()
-                itemId = gvLandLocationList.DataKeys(gvLandLocationList.SelectedIndex).Values("Item_ID").ToString()
-                declaredOwner = gvLandLocationList.DataKeys(gvLandLocationList.SelectedIndex).Values("DeclaredOwner").ToString()
-                barangay = gvLandLocationList.DataKeys(gvLandLocationList.SelectedIndex).Values("Barangay").ToString()
-            End If
+        If String.IsNullOrEmpty(itemId) OrElse itemId = "0" Then
+            BindEmptyLandsGrid()
+            Exit Sub
+        End If
 
-            AddTrace("LAND List -> itemParticularId: " & itemParticularId)
-            AddTrace("LAND List -> itemId: " & itemId)
-            AddTrace("LAND List -> gaId: " & gaId)
-            AddTrace("LAND List -> declaredOwner: " & declaredOwner)
-            AddTrace("LAND List -> barangay: " & barangay)
+        Dim dt As DataTable =
+        GetLandsData(
+            itemParticularId,
+            itemId,
+            gaId,
+            declaredOwner,
+            barangay
+        )
 
-            Dim dt As DataTable = GetLandsData(itemParticularId, itemId, gaId, declaredOwner, barangay)
-
-            If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
-                grdListOfLands.DataSource = dt
-                grdListOfLands.DataBind()
-            Else
-                BindEmptyLandsGrid()
-            End If
-        Catch ex As Exception
-
-        End Try
+        If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
+            grdListOfLands.DataSource = dt
+            grdListOfLands.DataBind()
+        Else
+            BindEmptyLandsGrid()
+        End If
     End Sub
 
     Private Function GetLandsData(ByVal itemParticularId As String, ByVal itemId As String, ByVal gaId As String,
@@ -292,12 +310,11 @@ Partial Class Records_PropertyCard_Rev_Land
         If grdListOfLands.SelectedIndex >= 0 Then
             LoadBarangay()
 
-            Dim selectedPropertyId As String = grdListOfLands.SelectedDataKey("Property_ID")
+            Dim selectedPropertyId As String = grdListOfLands.SelectedDataKey.Value.ToString()
             Session("Property_ID") = selectedPropertyId
 
-            Dim propertyDtlId As String =
-                grdListOfLands.DataKeys(grdListOfLands.SelectedIndex).Values("PropertyDetai_ID").ToString()
-
+            Dim propertyDtlId As String = grdListOfLands.DataKeys(grdListOfLands.SelectedIndex).Values("PropertyDetai_ID").ToString()
+            Session("PropertyDetai_ID") = propertyDtlId
             PopulateLandInformation(propertyDtlId)
 
             RefreshGridData()
@@ -384,8 +401,8 @@ Partial Class Records_PropertyCard_Rev_Land
 
 
         ' Area (sqm)
-        If dt.Columns.Contains("AreaUnit") Then
-            txtArea.Text = r("AreaUnit").ToString()
+        If dt.Columns.Contains("Area") Then
+            txtArea.Text = r("Area").ToString()
         Else
             txtArea.Text = ""
         End If
@@ -479,28 +496,17 @@ Partial Class Records_PropertyCard_Rev_Land
 
         ' Market Value (main)
         txtMarketValue.Text = ""
-
         If dt.Columns.Contains("MarketValue") Then
-            Dim rawMarketValue As String = ""
-
             If Not IsDBNull(r("MarketValue")) Then
-                rawMarketValue = r("MarketValue").ToString().Trim()
+                Dim v As Decimal
+                If Decimal.TryParse(r("MarketValue").ToString(), v) Then
+                    txtMarketValue.Text = FormatNumber(v, 2)
+                Else
+                    txtMarketValue.Text = r("MarketValue").ToString()
+                End If
             End If
-
-            AddTrace("Raw MarketValue from dt: [" & rawMarketValue & "]")
-
-            Dim v As Decimal
-            If rawMarketValue <> "" AndAlso Decimal.TryParse(rawMarketValue, v) Then
-                txtMarketValue.Text = FormatNumber(v, 2)
-                AddTrace("Formatted MarketValue: " & txtMarketValue.Text)
-            Else
-                txtMarketValue.Text = "0.00"
-                AddTrace("Formatted MarketValue defaulted to: 0.00")
-            End If
-        Else
-            txtMarketValue.Text = "0.00"
-            AddTrace("MarketValue column not found. Defaulted to: 0.00")
         End If
+
         ' Property Number
         txtPropertyNumber.Text = ""
         If dt.Columns.Contains("PropertyNo") Then
@@ -744,7 +750,7 @@ Partial Class Records_PropertyCard_Rev_Land
     Private Sub BindLandLedgerGrid()
         Dim classificationId As String = If(Session("ClassificationID"), "0").ToString()
 
-        Dim dt As DataTable = GetLandLedgerData(classificationId)
+        Dim dt As DataTable = GetLandLedgerData()
 
         If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
             grdLandLedger.DataSource = dt
@@ -754,10 +760,10 @@ Partial Class Records_PropertyCard_Rev_Land
         End If
     End Sub
 
-    Private Function GetLandLedgerData(ByVal classificationId As String) As DataTable
+    Private Function GetLandLedgerData() As DataTable
         Dim dt As New DataTable()
         Try
-            Dim sql As String = "Exec [AMS].[PropertyCard_Rev_Ledger] '" & classificationId & "'"
+            Dim sql As String = "Exec [AMS].[PropertyCard_Rev_Ledger_v2] '" & Session("Item_ID") & "'"
             dt = objDerived.GetDataTable(sql, CommandType.Text)
         Catch ex As Exception
             System.Diagnostics.Debug.WriteLine("Error loading land ledger: " & ex.Message)
@@ -807,5 +813,100 @@ Partial Class Records_PropertyCard_Rev_Land
     Protected Sub btnLandPreview_Click(sender As Object, e As EventArgs)
         ' reserved
     End Sub
+
+
+    Private Sub FormatVehicleLedgerTransType(ByVal dt As DataTable)
+
+        If dt Is Nothing Then
+            Exit Sub
+        End If
+
+        If Not dt.Columns.Contains("Trans_Type") Then
+            Exit Sub
+        End If
+
+        For Each row As DataRow In dt.Rows
+
+            If row.IsNull("Trans_Type") Then
+                Continue For
+            End If
+
+            Dim transType As String = row("Trans_Type").ToString().Trim()
+
+            If String.IsNullOrEmpty(transType) Then
+                Continue For
+            End If
+
+            ' Normalize all line-break formats first.
+            transType = transType.Replace(vbCrLf, vbLf)
+            transType = transType.Replace(vbCr, vbLf)
+
+            ' Print "Originally issued to" on the next line with a dash.
+            transType = Regex.Replace(
+                transType,
+                "\s*-?\s*(Originally issued to)",
+                vbLf & "- $1",
+                RegexOptions.IgnoreCase
+            )
+
+            ' Print "Transferred from" on the next line with a dash.
+            transType = Regex.Replace(
+                transType,
+                "\s*-?\s*(Transferred from)",
+                vbLf & "- $1",
+                RegexOptions.IgnoreCase
+            )
+
+            ' Remove accidental blank lines.
+            Do While transType.Contains(vbLf & vbLf)
+                transType = transType.Replace(vbLf & vbLf, vbLf)
+            Loop
+
+            row("Trans_Type") = transType.Trim()
+
+        Next
+
+    End Sub
+
+    ' ============================
+    ' LOAD ITEM FROM MAIN PAGE
+    ' ============================
+    Public Sub LoadSelectedItem(ByVal itemId As String)
+
+        If String.IsNullOrEmpty(itemId) OrElse itemId = "0" Then
+            Session("Item_ID") = 0
+            Session("Property_ID") = 0
+            Session("PropertyDetai_ID") = 0
+
+            BindEmptyLandsGrid()
+            BindEmptyLandLedgerGrid()
+            ClearLandInformationForm()
+
+            Exit Sub
+        End If
+
+        Session("Item_ID") = itemId
+        Session("Property_ID") = 0
+        Session("PropertyDetai_ID") = 0
+
+        ' Reset the previous property selection.
+        grdListOfLands.PageIndex = 0
+        grdListOfLands.SelectedIndex = -1
+
+        ' Reset the property-number search.
+        txtLandPropSearch.Text = ""
+
+        ' Clear information from the previously selected land property.
+        ClearLandInformationForm()
+
+        AddTrace("Land User Control Item_ID: " & itemId)
+
+        ' Same process previously performed by
+        ' gvLandLocationList_SelectedIndexChanged.
+        BindLandsGrid()
+        BindLandLedgerGrid()
+
+    End Sub
+
 
 End Class
