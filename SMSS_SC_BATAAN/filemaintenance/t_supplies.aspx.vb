@@ -266,6 +266,8 @@ Partial Class t_supplies
                 txtItemDesc.Enabled = False
                 DrpClass.Enabled = True
 
+                btnsave.Enabled = False
+
                 txtparticular2.Attributes.Add("onkeypress", "return fun1(event,'" & Button7.ClientID & "')")
                 txtsearch2.Attributes.Add("onkeypress", "return fun1(event,'" & btnsearch.ClientID & "')")
                 txtSearchAccnt.Attributes.Add("onkeypress", "return fun1(event,'" & btnSearchAccnt.ClientID & "')")
@@ -1369,7 +1371,16 @@ Partial Class t_supplies
     Protected Sub txtprice_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles txtprice.TextChanged
         txtprice.Text = FormatNumber(CType(txtprice.Text, Decimal), 2)
         btnadd.Enabled = True
-        btnsave.Enabled = True
+
+        If ddUnit.SelectedIndex > -1 And txtItemDesc.Text.Any() And txtItemDesc.Text <> " " Then
+
+            btnsave.Enabled = True
+
+        Else
+            btnsave.Enabled = False
+        End If
+
+
     End Sub
 
     Public Function replaceapostrophe(ByVal str As String) As String
@@ -1639,6 +1650,13 @@ Partial Class t_supplies
     End Sub
     Protected Sub ddUnit_SelectedIndexChanged1(ByVal sender As Object, ByVal e As System.EventArgs) Handles ddUnit.SelectedIndexChanged
 
+        If ddUnit.SelectedIndex > -1 And txtItemDesc.Text.Any() And txtItemDesc.Text <> " " Then
+
+            btnsave.Enabled = True
+        Else
+
+            btnsave.Enabled = False
+        End If
     End Sub
 
     Protected Sub btnOK_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btnOK.Click
@@ -2522,11 +2540,11 @@ Partial Class t_supplies
 
         Dim ItemCode As Integer
         If ItemCode = 0 Then
-            btnsave.Enabled = True
+            'btnsave.Enabled = True
             Image2.Visible = True
             Label4.Visible = False
         Else
-            btnsave.Enabled = False
+            'btnsave.Enabled = False
             Image2.Visible = False
             Label4.Visible = True
         End If

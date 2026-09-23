@@ -116,6 +116,9 @@ Partial Class filemaintenance_t_goods_master_list
 
             Session("xYear") = ddYear.SelectedValue
             AddTrace("Year changed to: " & Session("Year"))
+
+
+
         End If
     End Sub
 
