@@ -512,8 +512,8 @@
                                                     <td style="width: 100%" align="center">
                                                         <asp:Button runat="server" ID="btnCopyValues" Width="150px" CssClass="CSButton" Text="Copy All Values" OnClientClick="StartProgressBar();" />
                                                         &nbsp;<asp:Button ID="btnsave" runat="server" CssClass="CSButton" Width="150px" Text="SAVE" OnClientClick="StartProgressBar();" SkinID="ButtonImage" ValidationGroup="1"></asp:Button>
-                                                        &nbsp;<asp:Button ID="btnpreview" runat="server" CssClass="CSButton" Width="150px" CausesValidation="False" Text="PREVIEW RIS" Enabled="False" SkinID="ButtonImage"></asp:Button>
-                                                        &nbsp;<asp:Button ID="btnPreviewICS" OnClick="btnPreviewICS_Click" runat="server" CssClass="CSButton" CausesValidation="False" Text="PREVIEW ICS" Enabled="False" SkinID="ButtonImage"></asp:Button>
+                                                        &nbsp;<asp:Button ID="btnpreview" runat="server" CssClass="CSButton" Width="152px" CausesValidation="False" Text="PREVIEW RIS" Enabled="False" SkinID="ButtonImage"></asp:Button>
+                                                        &nbsp;<asp:Button ID="btnPreviewICS" Width="150px" OnClick="btnPreviewICS_Click" runat="server" CssClass="CSButton" CausesValidation="False" Text="PREVIEW ICS" Enabled="False" SkinID="ButtonImage"></asp:Button>
 
                                                     </td>
                                                 </tr>

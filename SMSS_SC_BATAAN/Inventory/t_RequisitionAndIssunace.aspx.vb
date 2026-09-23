@@ -935,6 +935,12 @@ Partial Class Inventory_RIS
         End If
 
 
+        If ddApprovedByPAR.SelectedItem.Value = "Select" Then
+            MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel3, "Please select a Approving Personnel first!")
+            Exit Sub
+        End If
+
+
         'One for all variable
         Dim ddByAckonwledgeValueText As String = ddByAcknowledgement.SelectedValue.ToString
         Dim ddByAckonwledgeValue As String = ddByAcknowledgement.SelectedItem.Value
@@ -974,7 +980,15 @@ Partial Class Inventory_RIS
 
                 .Cancelled = False
                 .MRENumber = txtMRE.Text
-                .ApprovedBy_ID = ddApprovedByPAR.SelectedItem.Value
+
+                If ddApprovedByPAR.SelectedItem.Value = "Select" Then
+
+                    .ApprovedBy_ID = 0
+                Else
+
+                    .ApprovedBy_ID = ddApprovedByPAR.SelectedItem.Value
+                End If
+
 
                 '=== CHECK IF ALL ITEMS BELONGS TO ONE OFFICE OR NOT
                 Dim xRC As Integer = 0
