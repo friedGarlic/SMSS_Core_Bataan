@@ -6,16 +6,37 @@ Partial Class Records_t_StockCard_Rev
 
     Private objDerived As New BaseClasses.AccountClassAcounts
 
+    Private Sub AddTrace(ByVal message As String)
+
+        Dim safeMessage As String =
+            message.Replace("'", "\'")
+
+        ScriptManager.RegisterClientScriptBlock(
+            Me,
+            Me.GetType(),
+            "TraceKey" & Guid.NewGuid().ToString("N"),
+            "console.log('" & safeMessage & "');",
+            True)
+
+    End Sub
+
+
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
         If Not Page.IsPostBack Then
             Dim classification As String = objDerived.GetValue("SELECT ClassificationId FROM dbo.tbl_Classification WHERE ClassificationName = 'Supplies'", CommandType.Text)
             Session("ClassificationID") = classification
 
-            LoadSubClassifications()
+            LoadGLAccounts()
+
+            DrpSubClass.Items.Clear()
+            DrpSubClass.Items.Insert(0, New ListItem("No Subclass", "0"))
+            DrpSubClass.Enabled = True
+
+            'LoadSubClassifications()
             ClearItemDesc()
             BindEmptyLedger()
-
             loadwarehouse()
+
         End If
     End Sub
 
@@ -23,27 +44,42 @@ Partial Class Records_t_StockCard_Rev
     ' SUBCLASSIFICATION
     '========================
     Private Sub LoadSubClassifications()
+        DrpSubClass.Items.Clear()
+
+        If ddGlAccount.SelectedValue Is Nothing OrElse ddGlAccount.SelectedValue = "0" Then
+            DrpSubClass.Items.Insert(0, New ListItem("Select", "0"))
+            Exit Sub
+        End If
+
+        Dim sql As String =
+        "SELECT DISTINCT " &
+        "    SubClassificationID, " &
+        "    SubClassificationName " &
+        "FROM dbo.tbl_SubClassification " &
+        "WHERE ClassificationID = '" & Session("ClassificationID") & "' " &
+        "AND GA_ID = '" & ddGlAccount.SelectedValue & "' " &
+        "ORDER BY SubClassificationName"
+
+        AddTrace(sql)
+
         Dim dt As DataTable = objDerived.GetDataTable(
-            "select distinct a.SubClassificationID,a.SubClassificationName " &
-            "From tbl_SubClassification As a " &
-            " inner join tblclassmatrix as b on a.SubClassificationID = b.SubClassificationID " &
-            " inner join tbl_Classification As c On b.classificationid = c.ClassificationId " &
-            " where c.ClassificationId = '" & Session("ClassificationID") & "'",
-            CommandType.Text
-        )
+        sql,
+        CommandType.Text
+    )
 
-        Dim dr As DataRow = dt.NewRow()
-        dr("SubClassificationID") = 0
-        dr("SubClassificationName") = "Select"
-        dt.Rows.InsertAt(dr, 0)
+        If dt IsNot Nothing Then
+            Dim dr As DataRow = dt.NewRow()
+            dr("SubClassificationID") = 0
+            dr("SubClassificationName") = "No Subclass"
+            dt.Rows.InsertAt(dr, 0)
 
-        DrpSubClass.DataSource = dt
-        DrpSubClass.DataTextField = "SubClassificationName"
-        DrpSubClass.DataValueField = "SubClassificationID"
-        DrpSubClass.DataBind()
-
-        ddGlAccount.Items.Clear()
-        ddGlAccount.Items.Insert(0, New ListItem("Select", "0"))
+            DrpSubClass.DataSource = dt
+            DrpSubClass.DataTextField = "SubClassificationName"
+            DrpSubClass.DataValueField = "SubClassificationID"
+            DrpSubClass.DataBind()
+        Else
+            DrpSubClass.Items.Insert(0, New ListItem("No Subclass", "0"))
+        End If
     End Sub
 
     '========================
@@ -57,51 +93,86 @@ Partial Class Records_t_StockCard_Rev
             Exit Sub
         End If
 
-        AddTrace("Exec dbo.sp_Accounts_Category_v1_02152022 '" & 2 & "','" & Session("ClassificationID") & "','" & DrpSubClass.SelectedItem.Value & "'")
+        Dim sql As String =
+            "SELECT DISTINCT " &
+            "    ga.GA_ID, " &
+            "    ga.GA_Title, " &
+            "    cm.ga_id AS Matrix_GA_ID " &
+            "FROM dbo.tbl_SubClassification AS sc " &
+            "INNER JOIN dbo.view_Accntg_gen_accnt AS ga " &
+            "    ON ga.GA_ID = sc.GA_ID " &
+            "LEFT JOIN dbo.tblclassmatrix AS cm " &
+            "    ON cm.classificationid = sc.ClassificationID " &
+            "    AND cm.ga_id = sc.GA_ID " &
+            "WHERE sc.ClassificationID = '" & Session("ClassificationID") & "' " &
+            "UNION " &
+            "SELECT DISTINCT " &
+            "    ga.GA_ID, " &
+            "    ga.GA_Title, " &
+            "    cm.ga_id AS Matrix_GA_ID " &
+            "FROM dbo.tblclassmatrix AS cm " &
+            "INNER JOIN dbo.view_Accntg_gen_accnt AS ga " &
+            "    ON ga.GA_ID = cm.ga_id " &
+            "WHERE cm.classificationid = '" & Session("ClassificationID") & "' " &
+            "ORDER BY GA_Title;"
+
+        AddTrace(sql)
 
         Dim PListofGL As DataTable = objDerived.GetDataTable(
-            "Exec dbo.sp_Accounts_Category_v1_02152022 '" & 2 & "','" & Session("ClassificationID") & "','" & DrpSubClass.SelectedItem.Value & "'",
-            CommandType.Text
-        )
+        sql,
+        CommandType.Text
+    )
 
         If PListofGL IsNot Nothing Then
             Dim dr As DataRow = PListofGL.NewRow()
             dr("GA_ID") = 0
             dr("GA_Title") = "Select"
             PListofGL.Rows.InsertAt(dr, 0)
+
+            ddGlAccount.DataSource = PListofGL
+            ddGlAccount.DataTextField = "GA_Title"
+            ddGlAccount.DataValueField = "GA_ID"
+            ddGlAccount.DataBind()
+        Else
+            ddGlAccount.Items.Insert(0, New ListItem("Select", "0"))
         End If
 
-        ddGlAccount.DataSource = PListofGL
-        ddGlAccount.DataTextField = "GA_Title"
-        ddGlAccount.DataValueField = "GA_ID"
-        ddGlAccount.DataBind()
-    End Sub
 
+    End Sub
     '========================
     ' ITEM DESCRIPTION (drpItemDesc1)
     '========================
     Private Sub ClearItemDesc()
         drpItemDesc1.Items.Clear()
         drpItemDesc1.Items.Insert(0, New ListItem("Select", "0"))
-        drpItemDesc1.Enabled = False
+        'drpItemDesc1.Enabled = False
     End Sub
 
     Private Sub LoadItemDesc()
-        If DrpSubClass.SelectedValue Is Nothing OrElse DrpSubClass.SelectedValue = "0" Then
+        If ddGlAccount.SelectedValue Is Nothing OrElse ddGlAccount.SelectedValue = "0" Then
             ClearItemDesc()
             Exit Sub
         End If
 
-        Dim dtitemdesc As DataTable = objDerived.GetDataTable(
-            "SELECT DISTINCT dbo.m_item.Item_ID, dbo.m_item.ItemCompleteDesc as Item_Desc " &
-            "FROM dbo.tbl_SubClassification INNER JOIN " &
-            "dbo.m_item ON dbo.tbl_SubClassification.SubClassificationID = dbo.m_item.SubClassificationID INNER JOIN " &
-            "dbo.tbl_Classification ON dbo.tbl_SubClassification.ClassificationID = dbo.tbl_Classification.ClassificationId INNER JOIN " &
-            "dbo.m_item_detail ON dbo.m_item.Item_ID = dbo.m_item_detail.Item_ID " &
-            "WHERE (dbo.tbl_SubClassification.SubClassificationID = " & DrpSubClass.SelectedValue & ") " &
-            "ORDER BY dbo.m_item.ItemCompleteDesc",
-            CommandType.Text
-        )
+        Dim sqlQuery As String = "SELECT DISTINCT " &
+        "dbo.m_item.Item_ID, " &
+        "dbo.m_item.ItemCompleteDesc as Item_Desc " &
+        "FROM " &
+        "dbo.m_item " &
+        "INNER JOIN dbo.tbl_Classification ON dbo.m_item.ClassificationID = dbo.tbl_Classification.ClassificationId " &
+        "INNER JOIN dbo.m_item_detail ON dbo.m_item.Item_ID = dbo.m_item_detail.Item_ID " &
+        "INNER JOIN dbo.tblclassmatrix AS cm ON cm.item_id = dbo.m_item.Item_ID " &
+        "LEFT JOIN dbo.tbl_SubCategory ON dbo.m_item.SubCategoryID = dbo.tbl_SubCategory.SubCategoryID " &
+        "LEFT JOIN dbo.tbl_SubClassification ON dbo.tbl_SubClassification.SubClassificationID = dbo.m_item.SubClassificationID " &
+        "WHERE " &
+        "dbo.m_item.SubClassificationID = " & DrpSubClass.SelectedValue & " " &
+        "AND cm.ga_id = " & ddGlAccount.SelectedValue & " " &
+        "ORDER BY dbo.m_item.ItemCompleteDesc"
+
+        ' Add trace for the SQL query
+        AddTrace("Executing SQL Query: " & sqlQuery)
+
+        Dim dtitemdesc As DataTable = objDerived.GetDataTable(sqlQuery, CommandType.Text)
 
         ' Add first row Select (0)
         Dim dr As DataRow = dtitemdesc.NewRow()
@@ -115,20 +186,20 @@ Partial Class Records_t_StockCard_Rev
         drpItemDesc1.DataBind()
 
         drpItemDesc1.Enabled = True
+        AddTrace("DrpSubClass: " & DrpSubClass.SelectedValue)
+        AddTrace("drpItemDesc1: " & drpItemDesc1.SelectedValue)
     End Sub
     Public Sub loadUnit()
-
-
         Dim dt As New DataTable
-        dt = objDerived.GetDataTable("SELECT Unit_ID, Description FROM ams.m_Unit AS a ORDER BY CASE WHEN Description = '-' THEN 0 ELSE 1 END, Description;", CommandType.Text)
+        dt = objDerived.GetDataTable("select Unit_ID,Description  From ams.m_Unit as a order by Description", CommandType.Text)
         drpUnit.DataSource = dt
         drpUnit.DataTextField = ("Description")
         drpUnit.DataValueField = ("Unit_ID")
         drpUnit.DataBind()
 
+
         Dim Unit_ID As Integer = objDerived.GetValue("SELECT Unit_ID FROM DBO.m_item WHERE Item_ID = '" & Session("Item_ID") & "'", CommandType.Text)
         drpUnit.SelectedValue = Unit_ID
-
 
 
     End Sub
@@ -136,10 +207,17 @@ Partial Class Records_t_StockCard_Rev
     Public Sub loadwarehouse()
         Dim dt As New DataTable
         dt = objDerived.GetDataTable("select warehouse_id,wname From ams.loc_warehouse where isUsed='True'", CommandType.Text)
-        drpWarehouse.DataTextField = ("wname")
-        drpWarehouse.DataValueField = ("warehouse_id")
-        drpWarehouse.DataSource = dt
-        drpWarehouse.DataBind()
+
+        If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
+            drpWarehouse.DataTextField = ("wname")
+            drpWarehouse.DataValueField = ("warehouse_id")
+            drpWarehouse.DataSource = dt
+            drpWarehouse.DataBind()
+        End If
+
+        drpWarehouse.Items.Insert(0, New ListItem("Select", "0"))
+        drpWarehouse.SelectedIndex = 0
+        drpWarehouse.Enabled = True
 
     End Sub
 
@@ -172,29 +250,31 @@ Partial Class Records_t_StockCard_Rev
     Protected Sub DrpSubClass_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs)
         Dim ctrl As Control = CType(sender, Control)
 
-        If ctrl IsNot Nothing AndAlso ctrl.ID = "DrpSubClass" Then
-            LoadGLAccounts()
-            'LoadItemDesc()
-            'loadUnit()
 
+        If ctrl IsNot Nothing AndAlso ctrl.ID = "DrpSubClass" Then
+
+            'LoadItemDesc()
+            LoadItemDesc()
+            loadwarehouse()
         End If
     End Sub
 
-    Protected Sub ddGlAccount_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs)
+
+    Protected Sub ddGlAccount_SelectedIndexChanged(
+    ByVal sender As Object,
+    ByVal e As System.EventArgs
+)
+        LoadSubClassifications()
 
 
+
+        ClearItemDesc()
         LoadItemDesc()
-        'loadUnit()
-        loadwarehouse()
 
+        AddTrace("ddGlAccount: " & ddGlAccount.SelectedValue)
     End Sub
 
-    '========================
-    ' TRACE HELPER
-    '========================
-    Private Sub AddTrace(ByVal msg As String)
-        System.Diagnostics.Debug.WriteLine(msg)
-    End Sub
+
 
     '========================
     ' EMPTY LEDGER (4 rows)
@@ -232,16 +312,33 @@ Partial Class Records_t_StockCard_Rev
     '========================
     Protected Sub drpItemDesc1_SelectedIndexChanged(ByVal sender As Object, ByVal e As EventArgs)
         Session("Item_ID") = drpItemDesc1.SelectedValue
-
-        loadUnit()
-
-
         LoadLedger()
+        loadUnit()
     End Sub
 
     Protected Sub grdLedger_RowDataBound(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewRowEventArgs)
-    End Sub
 
+        If e.Row.RowType = DataControlRowType.DataRow Then
+
+            Dim cbInspection As CheckBox = TryCast(e.Row.FindControl("cbInspection"), CheckBox)
+            Dim TransType As String = ""
+
+            If e.Row.DataItem IsNot Nothing Then
+                TransType = DataBinder.Eval(e.Row.DataItem, "Trans_Type").ToString().Trim()
+            End If
+
+            If cbInspection IsNot Nothing Then
+                If TransType = "Starting Balance" Or TransType = "Starting Inventory" Then
+                    cbInspection.Enabled = True
+                Else
+                    cbInspection.Checked = False
+                    cbInspection.Enabled = False
+                End If
+            End If
+
+        End If
+
+    End Sub
 
 
 
@@ -277,6 +374,11 @@ Partial Class Records_t_StockCard_Rev
     Protected Sub btnSave_Click(ByVal sender As Object, ByVal e As EventArgs)
         If btnSave.Text = "SAVE" Then
             saveSupplies()
+
+        ElseIf btnSave.Text = "EDIT" Then
+            loadApprovalOfficer()
+            ModalPopupExtenderApproval.Show()
+
         ElseIf btnSave.Text = "UPDATE" Then
             editSupplies()
         End If
@@ -287,17 +389,14 @@ Partial Class Records_t_StockCard_Rev
             '========================
             ' 1) REQUIRED FIELDS
             '========================
-            If DrpSubClass.SelectedValue = "0" OrElse ddGlAccount.SelectedValue = "0" OrElse drpItemDesc1.SelectedValue = "0" Then
-                MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Please select Sub Classification / General Account / Name.")
-                Exit Sub
-            End If
+
 
             If String.IsNullOrWhiteSpace(txtBrandName1.Text) OrElse
-               String.IsNullOrWhiteSpace(txtUnitPrice.Text) OrElse
-               String.IsNullOrWhiteSpace(txtQuantity.Text) OrElse
-               String.IsNullOrWhiteSpace(txtSellectDate.Text) Then
+           String.IsNullOrWhiteSpace(txtUnitPrice.Text) OrElse
+           String.IsNullOrWhiteSpace(txtQuantity.Text) OrElse
+           String.IsNullOrWhiteSpace(txtSellectDate.Text) Then
 
-                MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Please Fill up the required Fields: Name / Brand Name / Unit Cost / Quantity / Date")
+                MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Please Fill up the required Fields: Name / Brand Name / Unit Cost / Quantity  / Date")
                 Exit Sub
             End If
 
@@ -316,14 +415,8 @@ Partial Class Records_t_StockCard_Rev
                 Exit Sub
             End If
 
-            Dim reorderVal As Integer = 0
+            Dim reorderVal As Integer
 
-            If Not String.IsNullOrWhiteSpace(txtReOrderPt.Text) Then
-                If Not Integer.TryParse(txtReOrderPt.Text.Replace(",", ""), reorderVal) Then
-                    MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Reorder Point is not numeric.")
-                    Exit Sub
-                End If
-            End If
 
             Dim selectDateValue As Date
             If Not Date.TryParse(txtSellectDate.Text, selectDateValue) Then
@@ -355,26 +448,26 @@ Partial Class Records_t_StockCard_Rev
             End If
 
             Dim category As String = objDerived.GetValue(
-                "SELECT a.item_particular_id " &
-                "FROM dbo.m_item AS a INNER JOIN ams.item_particular AS b ON a.item_particular_id = b.item_particular_id " &
-                "WHERE a.Item_ID = " & hdnItemNo.Value,
-                CommandType.Text
-            )
+            "SELECT a.item_particular_id " &
+            "FROM dbo.m_item AS a INNER JOIN ams.item_particular AS b ON a.item_particular_id = b.item_particular_id " &
+            "WHERE a.Item_ID = " & hdnItemNo.Value,
+            CommandType.Text
+        )
 
             Dim matrix As String = objDerived.GetValue(
-                "SELECT id FROM tblclassmatrix " &
-                "WHERE classificationid = " & classification &
-                " AND ga_id = " & hdnGAId.Value &
-                " AND item_id = " & hdnItemNo.Value,
-                CommandType.Text
-            )
+            "SELECT id FROM tblclassmatrix " &
+            "WHERE classificationid = " & classification &
+            " AND ga_id = " & hdnGAId.Value &
+            " AND item_id = " & hdnItemNo.Value,
+            CommandType.Text
+        )
 
             If String.IsNullOrEmpty(matrix) Then
                 objDerived.Execute(
-                    "INSERT INTO tblclassmatrix(classificationid, ga_id, item_id, categoryid, bga_id) " &
-                    "VALUES(" & classification & "," & hdnGAId.Value & "," & hdnItemNo.Value & "," & category & ",0)",
-                    CommandType.Text
-                )
+                "INSERT INTO tblclassmatrix(classificationid, ga_id, item_id, categoryid, bga_id) " &
+                "VALUES(" & classification & "," & hdnGAId.Value & "," & hdnItemNo.Value & "," & category & ",0)",
+                CommandType.Text
+            )
             End If
 
             '========================
@@ -385,7 +478,7 @@ Partial Class Records_t_StockCard_Rev
                 .Received_Date = Date.Today
                 .ReceivedBY = 0
                 .POHdr_ID = 0
-                .PO_No = ""
+                .PO_No = "Starting Inventory"
                 .Supplier_ID = 0
                 .GA_ID = Convert.ToInt32(ddGlAccount.SelectedValue)
                 .isAccepted = False
@@ -427,79 +520,19 @@ Partial Class Records_t_StockCard_Rev
             Dim total As Decimal = qtyValue * unitPriceValue
             Session("ContractPrice") = total
 
-            '========================
-            ' 8) SAVE / UPDATE PO HEADER (Starting Inventory)
-            '========================
+            '=========================================================
+            ' NOTE: PO_HDR and PO_DTL are intentionally NOT used here
+            '=========================================================
             Dim POnumber As String = "Starting Inventory"
-            Dim pohdr_id As Long = 0
-
-            Dim POhdr As New t_purchase_order_hdr
-            With POhdr
-                .PO_No = POnumber
-                .PO_Date = Date.Today
-                .Supplier_ID = 0
-                .mode_of_procurement_id = 2
-                .DeliveryTerm = 0
-                .paymentTerm = 0
-                .DeliveryDate = Date.Today
-                .DeliveryPlace = ""
-                .isDelivered = True
-                .pre_procurement_hdr_id = 0
-                .withdv = False
-                .ContractPrice = 0
-                .isStag = False
-                .isContinueCutOff = False
-                .isStopForCutOff = False
-                .isShoppingA = False
-                .isPublicInfra = False
-                .isStraight = True
-                .isApproved_PO_Mayor = True
-                .isReceived_PO_Mayor = True
-                .DateApproved_PO_Mayor = Date.Today
-                .DateReceived_PO_Mayor = Date.Today
-                .DateDisApprove = DateTime.Parse("01/01/1900")
-                .isGasoline = False
-                .isReimbursement = False
-            End With
-
-            Dim po_id As DataTable = objDerived.GetDataTable(
-            "SELECT pohdr_id FROM ams.po_hdr WHERE po_no = '" & POnumber & "' AND Supplier_ID = 0",
-            CommandType.Text
-            )
-
-            If po_id Is Nothing OrElse po_id.Rows.Count = 0 Then
-                pohdr_id = POhdr.save()
-            Else
-                Dim poid As Integer = Convert.ToInt32(objDerived.GetValue(
-                    "SELECT pohdr_id FROM ams.po_hdr WHERE po_no = '" & POnumber & "' AND Supplier_ID = 0",
-                    CommandType.Text
-                ))
-
-                Dim TAmount As Decimal = Convert.ToDecimal(objDerived.GetValue(
-                    "SELECT ContractPrice FROM ams.po_hdr WHERE pohdr_id = " & poid,
-                    CommandType.Text
-                ))
-
-                POhdr.ContractPrice = TAmount + total
-                POhdr.POHdr_ID = poid
-                pohdr_id = POhdr.update()
-            End If
-
-            If pohdr_id <= 0 Then Throw New Exception("Failed to save/update AMS.PO_Hdr.")
-            Session("POHdr_ID") = pohdr_id
-
-            objDerived.Execute(
-            "UPDATE AMS.PO_Hdr SET GA_ID = " & hdnGAId.Value & ", ProjectName = 'Manual Encode' WHERE POHdr_ID = " & pohdr_id,
-            CommandType.Text
-            )
+            Dim pohdr_id As Long = 0 ' keep pattern; do not save/update PO tables
 
             '========================
-            ' 9) SAVE AIR HEADER (Inspection & Acceptance)
+            ' 8) SAVE AIR HEADER (Inspection & Acceptance)
             '========================
             Dim airNo As String = objDerived.GetValue(
             "EXEC [AMS].[sp_Generate_AIR_No] '" & selectDateValue.ToString("MM/dd/yyyy") & "'",
             CommandType.Text
-            )
+        )
 
             Dim objhdr As New t_inspection_and_acceptance_hdr
             With objhdr
@@ -516,7 +549,7 @@ Partial Class Records_t_StockCard_Rev
                 .Signatory2 = ""
                 .Signatory3 = ""
                 .isComplete = True
-                .POHdr_ID = pohdr_id
+                .POHdr_ID = 0
                 .RC_ID = 0
                 .Function_ID = 0
             End With
@@ -526,21 +559,13 @@ Partial Class Records_t_StockCard_Rev
             Session("AIRHDR_ID") = airhdr_id
 
             objDerived.Execute(
-                "UPDATE AMS.AIR_Hdr SET UserID = '" & Convert.ToString(Session("@UserName")) & "', Received_ID = " & rcvID & " WHERE AIRHdr_ID = " & airhdr_id,
-                CommandType.Text
-            )
+            "UPDATE AMS.AIR_Hdr SET UserID = '" & Replace(Convert.ToString(Session("@UserName")), "'", "''") & "', Received_ID = " & rcvID & " WHERE AIRHdr_ID = " & airhdr_id,
+            CommandType.Text
+        )
 
             '========================
-            ' 10) SAVE PO DETAIL + AIR DETAIL
+            ' 9) SAVE AIR DETAIL
             '========================
-            Dim POdtl As New t_purchase_order_dtl
-            POdtl.POHdr_ID = pohdr_id
-            POdtl.Item_ID = Convert.ToInt64(drpItemDesc1.SelectedValue)
-            POdtl.cost = unitPriceValue
-            POdtl.qty = qtyValue
-            POdtl.remarks = "Manual Encode"
-            POdtl.save()
-
             Dim objdtl As New t_inspection_and_acceptance_dtl
             objdtl.Item_ID = Convert.ToInt64(drpItemDesc1.SelectedValue)
             objdtl.Qty = qtyValue
@@ -553,16 +578,16 @@ Partial Class Records_t_StockCard_Rev
             Session("AIRDtl_ID") = iaDtl_ID
 
             '========================
-            ' 11) SAVE STOCK
+            ' 10) SAVE STOCK
             '========================
             Dim whVal As Integer = 0
             Integer.TryParse(Convert.ToString(drpWarehouse.SelectedValue), whVal)
 
             Dim rcParsed As Integer = 0
             Dim rcValString As String = objDerived.GetValue(
-                "SELECT TOP 1 [RC_id] FROM [dbo].[View_RespCenter_withFunctions] WHERE [RC_Name] = 'PROVINCIAL GENERAL SERVICES OFFICE'",
-                CommandType.Text
-            )
+            "SELECT TOP 1 [RC_id] FROM [dbo].[View_RespCenter_withFunctions] WHERE [RC_Name] = 'PROVINCIAL GENERAL SERVICES OFFICE'",
+            CommandType.Text
+        )
             If Not String.IsNullOrEmpty(rcValString) AndAlso IsNumeric(rcValString) Then rcParsed = Convert.ToInt32(rcValString)
 
             Dim objStock As New Supplies_Stock
@@ -579,7 +604,7 @@ Partial Class Records_t_StockCard_Rev
                 .Function_ID = 0
                 .Project_ID = 0
                 .Program_id = 0
-                .F_ID = 4
+                .F_ID = 1
                 .AIRDtl_ID = iaDtl_ID
                 .GA_ID = Convert.ToInt32(ddGlAccount.SelectedValue)
                 .Warehouseid = whVal
@@ -589,17 +614,17 @@ Partial Class Records_t_StockCard_Rev
             Dim StockID As Long = objStock.save()
             If StockID <= 0 Then Throw New Exception("Failed to save AMS.Stock.")
 
-            objDerived.Execute("UPDATE AMS.Stock SET Received_ID = " & rcvID & " WHERE StockID = " & StockID, CommandType.Text)
+            objDerived.Execute("UPDATE AMS.Stock SET AIR_HDR_ID = 0, Received_ID = " & rcvID & " WHERE StockID = " & StockID, CommandType.Text)
 
             '========================
-            ' 12) SAVE LEDGER
+            ' 11) SAVE LEDGER
             '========================
             Dim unitDesc As String = objDerived.GetValue(
-                "SELECT TOP 1 AMS.m_Unit.Description FROM AMS.m_Unit " &
-                "INNER JOIN dbo.m_item ON AMS.m_Unit.Unit_ID = dbo.m_item.Unit_ID " &
-                "WHERE dbo.m_item.Item_ID = " & hdnItemNo.Value,
-                CommandType.Text
-            )
+            "SELECT TOP 1 AMS.m_Unit.Description FROM AMS.m_Unit " &
+            "INNER JOIN dbo.m_item ON AMS.m_Unit.Unit_ID = dbo.m_item.Unit_ID " &
+            "WHERE dbo.m_item.Item_ID = " & hdnItemNo.Value,
+            CommandType.Text
+        )
 
             Dim objStockLedger As New t_StockLedger
             With objStockLedger
@@ -625,30 +650,27 @@ Partial Class Records_t_StockCard_Rev
             End With
             objStockLedger.save()
 
-
-
             '========================
-            ' 12.5) SAVE SUPPLIES INFO (AMS.TBSupplies_Info)
+            ' 12) SAVE SUPPLIES INFO (AMS.TBSupplies_Info)
             '========================
             Dim unitIdVal As Integer = 0
             Integer.TryParse(Convert.ToString(drpUnit.SelectedValue), unitIdVal)
 
             Dim sqlSuppliesInfo As String =
-                "INSERT INTO AMS.TBSupplies_Info " &
-                "(AIRDtl_ID, ItemId, Received_ID, StockID, Unit_ID, BrandName, Color, Length, Size, Width, Height, Weight) " &
-                "VALUES " &
-                "(" & iaDtl_ID & ", " & Convert.ToInt64(drpItemDesc1.SelectedValue) & ", " & rcvID & ", " & StockID & ", " & unitIdVal & ", " &
-                "'" & Replace(txtBrandName1.Text.Trim(), "'", "''") & "', " &
-                "'" & Replace(txtColor.Text.Trim(), "'", "''") & "', " &
-                "'" & Replace(txtLenght.Text.Trim(), "'", "''") & "', " &
-                "'" & Replace(txtSize.Text.Trim(), "'", "''") & "', " &
-                "'" & Replace(txtWidth.Text.Trim(), "'", "''") & "', " &
-                "'" & Replace(txtHeight.Text.Trim(), "'", "''") & "', " &
-                "'" & Replace(txtWeight.Text.Trim(), "'", "''") & "'" &
-                ")"
+            "INSERT INTO AMS.TBSupplies_Info " &
+            "(AIRDtl_ID, ItemId, Received_ID, StockID, Unit_ID, BrandName, Color, Length, Size, Width, Height, Weight) " &
+            "VALUES " &
+            "(" & iaDtl_ID & ", " & Convert.ToInt64(drpItemDesc1.SelectedValue) & ", " & rcvID & ", " & StockID & ", " & unitIdVal & ", " &
+            "'" & Replace(txtBrandName1.Text.Trim(), "'", "''") & "', " &
+            "'" & Replace(txtColor.Text.Trim(), "'", "''") & "', " &
+            "'" & Replace(txtLenght.Text.Trim(), "'", "''") & "', " &
+            "'" & Replace(txtSize.Text.Trim(), "'", "''") & "', " &
+            "'" & Replace(txtWidth.Text.Trim(), "'", "''") & "', " &
+            "'" & Replace(txtHeight.Text.Trim(), "'", "''") & "', " &
+            "'" & Replace(txtWeight.Text.Trim(), "'", "''") & "'" &
+            ")"
 
             objDerived.Execute(sqlSuppliesInfo, CommandType.Text)
-
 
             '========================
             ' 13) REFRESH LEDGER GRID
@@ -695,14 +717,8 @@ Partial Class Records_t_StockCard_Rev
                 Exit Sub
             End If
 
-            Dim reorderVal As Integer = 0
+            Dim reorderVal As Integer
 
-            If Not String.IsNullOrWhiteSpace(txtReOrderPt.Text) Then
-                If Not Integer.TryParse(txtReOrderPt.Text.Replace(",", ""), reorderVal) Then
-                    MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Reorder Point is not numeric.")
-                    Exit Sub
-                End If
-            End If
 
             Dim selectDateValue As Date
             If Not Date.TryParse(txtSellectDate.Text, selectDateValue) Then
@@ -864,11 +880,11 @@ Partial Class Records_t_StockCard_Rev
         Dim r As DataRow = dt.Rows(0)
 
         Dim unitIdStr As String = Convert.ToString(r("Unit_ID")).Trim()
-        'If drpUnit.Items.Count > 0 AndAlso unitIdStr <> "" AndAlso drpUnit.Items.FindByValue(unitIdStr) IsNot Nothing Then
-        '    drpUnit.SelectedValue = unitIdStr
-        'ElseIf drpUnit.Items.Count > 0 Then
-        '    drpUnit.SelectedIndex = 0
-        'End If
+        If drpUnit.Items.Count > 0 AndAlso unitIdStr <> "" AndAlso drpUnit.Items.FindByValue(unitIdStr) IsNot Nothing Then
+            drpUnit.SelectedValue = unitIdStr
+        ElseIf drpUnit.Items.Count > 0 Then
+            drpUnit.SelectedIndex = 0
+        End If
 
         txtBrandName1.Text = Convert.ToString(r("BrandName"))
         txtLenght.Text = Convert.ToString(r("Length"))
@@ -904,12 +920,12 @@ Partial Class Records_t_StockCard_Rev
         txtRack.Text = Convert.ToString(r("Rack"))
         txtBin.Text = Convert.ToString(r("Bin"))
 
-        btnSave.Text = "UPDATE"
+        btnSave.Text = "EDIT"
     End Sub
 
 
     Private Sub ClearTextBoxes()
-        ' If drpUnit.Items.Count > 0 Then drpUnit.SelectedIndex = 0
+        If drpUnit.Items.Count > 0 Then drpUnit.SelectedIndex = 0
         If drpWarehouse.Items.Count > 0 Then drpWarehouse.SelectedIndex = 0
 
         txtBrandName1.Text = ""
@@ -935,6 +951,61 @@ Partial Class Records_t_StockCard_Rev
 
         btnSave.Text = "SAVE"
     End Sub
+
+
+
+
+
+
+    Private Sub loadApprovalOfficer()
+        Dim dt As New DataTable
+        dt = objDerived.GetDataTable("SELECT approvalid,full_name FROM ams.tbl_approval", CommandType.Text)
+
+        drpApprovedOfficer.DataSource = dt
+        drpApprovedOfficer.DataTextField = ("full_name")
+        drpApprovedOfficer.DataValueField = ("approvalid")
+        drpApprovedOfficer.DataBind()
+    End Sub
+
+
+
+    Protected Sub btnApprovalProceed_Click(sender As Object, e As EventArgs)
+        Dim approved As String
+        approved = objDerived.GetValue("select approvalid from ams.tbl_approval where approvalid='" & drpApprovedOfficer.SelectedValue() & "' and npassword = '" & DecryptEncrypt(txtApprovedPass.Text) & "'", CommandType.Text)
+
+        If approved = "" Then
+            MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Invalid Approving Officer / Password")
+            ModalPopupExtenderApproval.Show()
+        Else
+            btnSave.Text = "UPDATE"
+            btnSave.Enabled = True
+            txtApprovedPass.Text = ""
+            ModalPopupExtenderApproval.Hide()
+        End If
+    End Sub
+
+    Protected Sub btnApprovalCancel_Click(sender As Object, e As EventArgs)
+        txtApprovedPass.Text = ""
+        ModalPopupExtenderApproval.Hide()
+    End Sub
+
+
+    Private Function DecryptEncrypt(ByVal TheText As String) As String
+        Dim tempChar As String = Nothing
+        Dim i As Integer = 0
+
+        For i = 1 To TheText.Length
+            If Convert.ToInt32(TheText.Chars(i - 1)) < 128 Then
+                tempChar = System.Convert.ToString(Convert.ToInt32(TheText.Chars(i - 1)) + 100)
+            ElseIf Convert.ToInt32(TheText.Chars(i - 1)) > 128 Then
+                tempChar = System.Convert.ToString(Convert.ToInt32(TheText.Chars(i - 1)) - 100)
+            End If
+
+            TheText = TheText.Remove(i - 1, 1).Insert(i - 1, (CChar(ChrW(tempChar))).ToString())
+        Next i
+
+        Return TheText
+    End Function
 
 
 End Class

@@ -7,8 +7,39 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
 
     <script type="text/javascript" src="../Membership/MasterPage/js/autoCurrency.js"></script>
+     <script type="text/javascript">
+        window.onbeforeunload = function (e) {
+            var e = e || window.event;
+
+            // For IE and FireFox
+            var value = "There is some data to be saved!"
+
+            if (e) {
+                e.returnValue = value;
+            }
+
+            // For Safari
+            return value;
+        }
+    </script>
 
     <asp:ScriptManager ID="ScriptManagerMRO" runat="server"></asp:ScriptManager>
+
+    <style type="text/css">
+        .required-label {
+            position: relative;
+            display: inline-block;
+        }
+
+        .required-label::before {
+            content: "*";
+            position: absolute;
+            left: -9px;
+            top: 0;
+            color: Red;
+            font-weight: bold;
+        }
+    </style>
 
     <asp:UpdatePanel ID="UpdatePanel1" runat="server">
         <ContentTemplate>
@@ -27,16 +58,16 @@
                         <td style="width: 1%"></td>
 
                         <td style="width: 98%" class="column_LeftBold">
-                            Sub Classification :
-                            <asp:DropDownList ID="DrpSubClass" runat="server" Width="20%" AutoPostBack="True"
-                                CssClass="drpdownCSS" OnSelectedIndexChanged="DrpSubClass_SelectedIndexChanged">
+                            <span class="required-label">General Account :</span>
+                            <asp:DropDownList ID="ddGlAccount" runat="server" Width="20%" AutoPostBack="True"
+                                CssClass="drpdownCSS" OnSelectedIndexChanged="ddGlAccount_SelectedIndexChanged">
                             </asp:DropDownList>
 
                             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
-                            General Account :
-                            <asp:DropDownList ID="ddGlAccount" runat="server" Width="20%" AutoPostBack="True"
-                                CssClass="drpdownCSS" OnSelectedIndexChanged="ddGlAccount_SelectedIndexChanged">
+                            <span>Sub Classification :</span>
+                            <asp:DropDownList ID="DrpSubClass" runat="server" Width="20%" AutoPostBack="True"
+                                CssClass="drpdownCSS" OnSelectedIndexChanged="DrpSubClass_SelectedIndexChanged">
                             </asp:DropDownList>
                         </td>
 
@@ -60,94 +91,94 @@
 
                                             <tr>
                                                 <td style="width: 15%" class="column_RightBold">
-                                                    Name :
+                                                    <span class="required-label">Name :</span>
                                                     <asp:HiddenField ID="hdnItemNo" runat="server" />
                                                     <asp:HiddenField ID="hdnGAId" runat="server" />
                                                 </td>
 
                                                 <td style="width: 35%" class="column_Left">
-                                                    <asp:DropDownList ID="drpItemDesc2" AutoPostBack="true" runat="server" Width="98%"
+                                                    <asp:DropDownList ID="drpItemDesc2" AutoPostBack="true" runat="server" Width="98%"  CssClass="drpdownCSS"
                                                         OnSelectedIndexChanged="drpItemDesc2_SelectedIndexChanged">
                                                     </asp:DropDownList>
                                                 </td>
 
-                                                <td style="width: 15%;" class="column_RightBold">Unit :</td>
+                                                <td style="width: 15%;" class="column_RightBold"><span class="required-label">Unit :</span>  </td>
                                                 <td style="width: 35%;" class="column_Left">
-                                                    <asp:DropDownList ID="drpUnit" runat="server" Width="40%" Enabled="false"></asp:DropDownList>
+                                                    <asp:DropDownList ID="drpUnit" runat="server" Enabled="false" Width="40%"></asp:DropDownList>
                                                 </td>
                                             </tr>
 
                                             <tr>
-                                                <td style="width: 15%" class="column_RightBold">Brand Name :</td>
+                                                <td style="width: 15%" class="column_RightBold"><span class="required-label">Brand Name :</span></td>
                                                 <td style="width: 35%" class="column_Left">
-                                                    <asp:TextBox ID="txtBrandName2" runat="server" Width="98%" CssClass="txtbox_Var" ReadOnly="False"></asp:TextBox>
+                                                    <asp:TextBox ID="txtBrandName2" runat="server" AutoPostBack="True" Width="98%" CssClass="txtbox_Var"   ReadOnly="False"></asp:TextBox>
                                                 </td>
                                                 <td style="width: 15%" class="column_RightBold">Length :</td>
                                                 <td style="width: 35%" class="column_Left">
-                                                    <asp:TextBox ID="txtLenght" runat="server" Width="40%" CssClass="txtbox_Var" ReadOnly="False"></asp:TextBox>
+                                                    <asp:TextBox ID="txtLenght" runat="server" AutoPostBack="True"  Width="40%" CssClass="txtbox_Var" ReadOnly="False"></asp:TextBox>
                                                 </td>
                                             </tr>
 
                                             <tr>
                                                 <td style="width: 15%" class="column_RightBold">Size :</td>
                                                 <td style="width: 35%" class="column_Left">
-                                                    <asp:TextBox ID="txtSize" runat="server" Width="98%" CssClass="txtbox_Var" ReadOnly="False"></asp:TextBox>
+                                                    <asp:TextBox ID="txtSize" runat="server" AutoPostBack="True"   Width="98%" CssClass="txtbox_Var" ReadOnly="False"></asp:TextBox>
                                                 </td>
 
                                                 <td style="width: 15%" class="column_RightBold">Width :</td>
                                                 <td style="width: 35%" class="column_Left">
-                                                    <asp:TextBox ID="txtWidth" runat="server" Width="40%" CssClass="txtbox_Var" ReadOnly="False"></asp:TextBox>
+                                                    <asp:TextBox ID="txtWidth" runat="server" AutoPostBack="True"  Width="40%" CssClass="txtbox_Var" ReadOnly="False"></asp:TextBox>
                                                 </td>
                                             </tr>
 
                                             <tr>
                                                 <td style="width: 15%" class="column_RightBold">Color :</td>
                                                 <td style="width: 35%" class="column_Left">
-                                                    <asp:TextBox ID="txtColor" runat="server" Width="98%" CssClass="txtbox_Var" ReadOnly="False"></asp:TextBox>
+                                                    <asp:TextBox ID="txtColor" runat="server"  AutoPostBack="True" Width="98%" CssClass="txtbox_Var" ReadOnly="False"></asp:TextBox>
                                                 </td>
 
                                                 <td style="width: 15%" class="column_RightBold">Weight :</td>
                                                 <td style="width: 35%" class="column_Left">
-                                                    <asp:TextBox ID="txtWeight" runat="server" Width="40%" CssClass="txtbox_Var" ReadOnly="False"></asp:TextBox>
+                                                    <asp:TextBox ID="txtWeight" runat="server" AutoPostBack="True"  Width="40%" CssClass="txtbox_Var" ReadOnly="False"></asp:TextBox>
                                                 </td>
                                             </tr>
 
                                             <tr>
                                                 <td style="width: 15%" class="column_RightBold">Component of :</td>
                                                 <td style="width: 35%" class="column_Left">
-                                                    <asp:TextBox ID="txtComponentof" runat="server" Width="98%" CssClass="txtbox_Var" ReadOnly="False"></asp:TextBox>
+                                                    <asp:TextBox ID="txtComponentof" AutoPostBack="True"  runat="server" Width="98%" CssClass="txtbox_Var" ReadOnly="False"></asp:TextBox>
                                                 </td>
 
                                                 <td style="width: 15%" class="column_RightBold">Height :</td>
                                                 <td style="width: 35%" class="column_Left">
-                                                    <asp:TextBox ID="txtHeight" runat="server" Width="40%" CssClass="txtbox_Var" ReadOnly="False"></asp:TextBox>
+                                                    <asp:TextBox ID="txtHeight" runat="server"  AutoPostBack="True" Width="40%" CssClass="txtbox_Var" ReadOnly="False"></asp:TextBox>
                                                 </td>
                                             </tr>
 
                                             <tr>
-                                                <td style="width: 15%" class="column_RightBold">Unit Cost :</td>
+                                                <td style="width: 15%" class="column_RightBold"><span class="required-label">Unit Cost :</span></td>
                                                 <td style="width: 35%" class="column_Left">
-                                                    <asp:TextBox ID="txtUnitPrice" runat="server" Width="40%" CssClass="txtbox_Amt"
+                                                    <asp:TextBox ID="txtUnitPrice" runat="server" Width="40%" CssClass="txtbox_Amt"   AutoPostBack="True"
                                                         Onkeyup="javascript:this.value=Comma(this.value);" Onchange="this.value=formatCurrency(this.value);">
                                                     </asp:TextBox>
                                                 </td>
 
-                                                <td style="width: 15%" class="column_RightBold">Quantity :</td>
+                                                <td style="width: 15%" class="column_RightBold"><span class="required-label">Quantity :</span></td>
                                                 <td style="width: 35%" class="column_Left">
-                                                    <asp:TextBox ID="txtQuantity" runat="server" CssClass="txtbox_Amt" Width="40%"></asp:TextBox>
+                                                    <asp:TextBox ID="txtQuantity" runat="server" CssClass="txtbox_Amt"  AutoPostBack="True"   Width="40%"></asp:TextBox>
                                                 </td>
                                             </tr>
 
                                             <tr>
                                                 <td style="width: 15%" class="column_RightBold">Reorder Pt. :</td>
                                                 <td style="width: 35%" class="column_Left">
-                                                    <asp:TextBox ID="txtReOrderPt" runat="server" CssClass="txtbox_Amt" ReadOnly="False" Width="50px"></asp:TextBox>
+                                                    <asp:TextBox ID="txtReOrderPt" runat="server" AutoPostBack="True"  CssClass="txtbox_Amt" ReadOnly="False" Width="50px"></asp:TextBox>
                                                     <asp:Button ID="btnROP" runat="server" CssClass="CSButton" OnClick="btnROP_Click" Text="R.O.P" Width="40" />
                                                 </td>
 
-                                                <td style="width: 15%" class="column_RightBold">Date :</td>
+                                                <td style="width: 15%" class="column_RightBold"><span class="required-label">Date :</span></td>
                                                 <td style="width: 35%" class="column_Left">
-                                                    <asp:TextBox ID="txtSellectDate" runat="server" CssClass="txtbox_Var0"></asp:TextBox>
+                                                    <asp:TextBox ID="txtSellectDate" runat="server"   CssClass="txtbox_Var0"></asp:TextBox>
                                                     <cc1:CalendarExtender ID="CalendarExtender7" runat="server"
                                                         TargetControlID="txtSellectDate" PopupButtonID="txtSellectDate"></cc1:CalendarExtender>
                                                 </td>
@@ -169,39 +200,39 @@
 
                                                                 <td class="column_RightBold">Bay :</td>
                                                                 <td class="column_Left">
-                                                                    <asp:TextBox ID="txtBay" runat="server" Width="50px" CssClass="txtbox_Var"></asp:TextBox>
+                                                                    <asp:TextBox ID="txtBay" AutoPostBack="True"  runat="server" Width="50px" CssClass="txtbox_Var"></asp:TextBox>
                                                                 </td>
 
                                                                 <td class="column_RightBold" style="width: 10%">Column :</td>
                                                                 <td class="column_Left">
-                                                                    <asp:TextBox ID="txtColumn" runat="server" Width="50px" CssClass="txtbox_Var"></asp:TextBox>
+                                                                    <asp:TextBox ID="txtColumn" AutoPostBack="True"  runat="server" Width="50px" CssClass="txtbox_Var"></asp:TextBox>
                                                                 </td>
 
                                                                 <td class="column_RightBold" style="width: 10%">Floor :</td>
                                                                 <td class="column_Left">
-                                                                    <asp:TextBox ID="txtFloor" runat="server" Width="50px" CssClass="txtbox_Var"></asp:TextBox>
+                                                                    <asp:TextBox ID="txtFloor" AutoPostBack="True"  runat="server" Width="50px" CssClass="txtbox_Var"></asp:TextBox>
                                                                 </td>
                                                             </tr>
 
                                                             <tr>
                                                                 <td class="column_RightBold">Room :</td>
                                                                 <td class="column_Left">
-                                                                    <asp:TextBox ID="txtRoom" runat="server" Width="50px" CssClass="txtbox_Var"></asp:TextBox>
+                                                                    <asp:TextBox ID="txtRoom"  AutoPostBack="True" runat="server" Width="50px" CssClass="txtbox_Var"></asp:TextBox>
                                                                 </td>
 
                                                                 <td class="column_RightBold" style="width: 10%">Shelves :</td>
                                                                 <td class="column_Left">
-                                                                    <asp:TextBox ID="txtShelves" runat="server" Width="50px" CssClass="txtbox_Var"></asp:TextBox>
+                                                                    <asp:TextBox ID="txtShelves" AutoPostBack="True"  runat="server" Width="50px" CssClass="txtbox_Var"></asp:TextBox>
                                                                 </td>
 
                                                                 <td class="column_RightBold">Rack :</td>
                                                                 <td class="column_Left">
-                                                                    <asp:TextBox ID="txtRack" runat="server" Width="50px" CssClass="txtbox_Var"></asp:TextBox>
+                                                                    <asp:TextBox ID="txtRack"  AutoPostBack="True" runat="server" Width="50px" CssClass="txtbox_Var"></asp:TextBox>
                                                                 </td>
 
                                                                 <td class="column_RightBold">Bin :</td>
                                                                 <td class="column_Left">
-                                                                    <asp:TextBox ID="txtBin" runat="server" Width="50px" CssClass="txtbox_Var"></asp:TextBox>
+                                                                    <asp:TextBox ID="txtBin" AutoPostBack="True"  runat="server" Width="50px" CssClass="txtbox_Var"></asp:TextBox>
                                                                 </td>
                                                             </tr>
                                                         </table>
@@ -242,8 +273,7 @@
 
                                         <asp:TemplateField>
                                             <HeaderTemplate>
-                                                <asp:CheckBox ID="CheckBox2" runat="server" Font-Bold="true" ForeColor="White"
-                                                    Font-Size="10pt" Font-Names="tahoma" Text="All"></asp:CheckBox>
+                                               
                                             </HeaderTemplate>
                                             <ItemTemplate>
                                                 <asp:CheckBox ID="cbInspection" runat="server" AutoPostBack="True"
@@ -366,6 +396,43 @@
                 CancelControlID="BtnImageClose"
                 BackgroundCssClass="modalBackground">
             </cc1:ModalPopupExtender>
+
+            <asp:Label ID="lblApprovalTarget" runat="server" Style="display:none;"></asp:Label>
+
+<cc1:ModalPopupExtender ID="ModalPopupExtenderApproval" runat="server"
+    TargetControlID="lblApprovalTarget"
+    PopupControlID="PanelApproval"
+    BackgroundCssClass="modalBackground">
+</cc1:ModalPopupExtender>
+
+<asp:Panel ID="PanelApproval" runat="server" Width="350px" CssClass="Panel_Popup"  DefaultButton="btnApprovalProceed" >
+    <table width="100%">
+        <tr>
+            <td style="width: 100%; height: 30px" colspan="3" class="DivTitle">
+                APPROVAL
+            </td>
+        </tr>
+        <tr>
+            <td class="column_RightBold">Approving Officer :</td>
+            <td class="column_Left">
+                <asp:DropDownList ID="drpApprovedOfficer" runat="server" Width="150px" CssClass="ddropbox"></asp:DropDownList>
+            </td>
+        </tr>
+        <tr>
+            <td class="column_RightBold">Password :</td>
+            <td class="column_Left">
+                <asp:TextBox ID="txtApprovedPass" runat="server" CssClass="txtbox_Var" Width="150px" TextMode="Password"></asp:TextBox>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <asp:Button ID="btnApprovalProceed" runat="server" Width="150px" CssClass="CSButton" Text="PROCEED" OnClick="btnApprovalProceed_Click"></asp:Button>
+                <asp:Button ID="btnApprovalCancel" runat="server" Width="150px" CssClass="CSButton" Text="CANCEL" CausesValidation="False" OnClick="btnApprovalCancel_Click"></asp:Button>
+            </td>
+        </tr>
+    </table>
+</asp:Panel>
+
 
         </ContentTemplate>
     </asp:UpdatePanel>
