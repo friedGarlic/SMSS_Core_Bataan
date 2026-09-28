@@ -183,6 +183,7 @@ Partial Class Inventory_Encoding_RoadsBridges
         )
 
             LoadGLAccounts()
+            'LoadGeneralAccounts()
 
             drpSubClass.Items.Clear()
             drpSubClass.Items.Insert(
@@ -902,7 +903,14 @@ Partial Class Inventory_Encoding_RoadsBridges
 
         With item
             .Item_Code = ""
-            .Item_Desc = txtRoadName.Text
+
+            If txtRoadName.Text = "" Then
+
+                .Item_Desc = txtDescriptionRoads.Text
+            Else
+
+                .Item_Desc = txtRoadName.Text
+            End If
             .Unit_ID = objDerived.GetValue("select * From ams.m_Unit where Description like '%Square Meter%'", CommandType.Text)
             .ClassificationID = 22
         End With
@@ -1490,7 +1498,16 @@ Partial Class Inventory_Encoding_RoadsBridges
 
         With item
             .Item_Code = ""
-            .Item_Desc = txtBridgeName.Text
+
+
+            If txtRoadName.Text = "" Then
+
+                .Item_Desc = txtDescription.Text
+            Else
+
+                .Item_Desc = txtBridgeName.Text
+            End If
+
             .Unit_ID = objDerived.GetValue("select * From ams.m_Unit where Description like '%Square Meter%'", CommandType.Text)
             .ClassificationID = 22
         End With
