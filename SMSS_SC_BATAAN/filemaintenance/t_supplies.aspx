@@ -113,17 +113,34 @@
                                             <tr>
                                                 <td style="width: 15%" class="column_RightBold">Calendar Year :</td>
                                                 <td style="width: 101%;" align="left">
-                                                    <asp:DropDownList ID="ddyear" runat="server" Width="70px" AutoPostBack="True" AppendDataBoundItems="True" OnSelectedIndexChanged="DropDownList1_SelectedIndexChanged" Height="16px">
+                                                    <asp:DropDownList ID="ddyear" runat="server" Width="70px" AutoPostBack="True" CssClass="drpdownCSS"  AppendDataBoundItems="True" OnSelectedIndexChanged="ddyear_SelectedIndexChanged" Height="16px">
                                                         <asp:ListItem>Select</asp:ListItem>
                                                     </asp:DropDownList>
 
                                                     <asp:HiddenField ID="HiddenField1" runat="server"></asp:HiddenField>
                                                     <asp:HiddenField ID="HiddenField2" runat="server"></asp:HiddenField>
                                                     <asp:HiddenField ID="HiddenField3" runat="server"></asp:HiddenField>
+                                                    <asp:HiddenField ID="hdnSaveToken" runat="server"></asp:HiddenField>
                                                 </td>
 
 
                                             </tr>
+
+                                              <tr>
+                                                <td style="width: 15%" class="column_RightBold">General Account:</td>
+
+
+                                                <td style="width: 85%;" align="left">
+
+
+                                                    <asp:DropDownList ID="GenAccnt" runat="server" Width="468px" AutoPostBack="True" CssClass="drpdownCSS"  AppendDataBoundItems="True" OnSelectedIndexChanged="GenAccnt_SelectedIndexChanged" Style="margin-left: 0px" Height="17px">
+                                                    </asp:DropDownList>
+                                                </td>
+
+                                                <td style="width: 1%"></td>
+
+                                            </tr>
+
                                             <tr>
                                                 <td style="width: 20%" class="column_RightBold">Classifications: 
                                                     <td style="width: 101%;" align="left">
@@ -131,7 +148,7 @@
                                                         <asp:HiddenField ID="hdnItemSubClass" runat="server" />
                                                         <asp:HiddenField ID="hdnGAId" runat="server" />
 
-                                                        <asp:DropDownList ID="DrpClass" CssClass="drpdownCSS" runat="server" Width="190px" AutoPostBack="True" Endabled="False" OnSelectedIndexChanged="DrpClass_SelectedIndexChanged"></asp:DropDownList>
+                                                        <asp:DropDownList ID="DrpClass" CssClass="drpdownCSS" runat="server" Width="190px" AutoPostBack="True"  OnSelectedIndexChanged="DrpClass_SelectedIndexChanged" Enabled="false"></asp:DropDownList>
                                                         <asp:LinkButton Style="font-family: 'Arial'" Font-Size="9pt" ID="LinkButton4" runat="server" Width="150px" Visible="false" Text="New Classification" OnClick="LinkButton4_Click"></asp:LinkButton>
                                                     </td>
                                             </tr>
@@ -141,7 +158,7 @@
                                                 <td style="width: 15%" class="column_RightBold">Sub-Classifications:</td>
                                                 <td style="width: 101%;" align="left">
 
-                                                    <asp:DropDownList ID="DrpSubClass" CssClass="drpdownCSS" runat="server" Width="190px" AutoPostBack="True" Endabled="False" OnSelectedIndexChanged="DrpClasssub_SelectedIndexChanged" Style="margin-left: 0px">
+                                                    <asp:DropDownList ID="DrpSubClass" CssClass="drpdownCSS" runat="server" Width="190px" AutoPostBack="True" Endabled="False" OnSelectedIndexChanged="DrpSubClass_SelectedIndexChanged" Style="margin-left: 0px" Enabled="false" >
                                                         <asp:ListItem>Select</asp:ListItem>
                                                     </asp:DropDownList>
                                                     <asp:LinkButton Style="font-family: 'Arial'" Font-Size="9pt" ID="LinkButton6" runat="server" Width="150px" Text="New Sub Classification" OnClick="LinkButton6_Click"></asp:LinkButton>
@@ -164,19 +181,7 @@
                                                 </td>
                                             </tr>
 
-                                            <tr>
-                                                <td style="width: 15%" class="column_RightBold">General Account:</td>
-
-
-                                                <td style="width: 85%;" align="left">
-
-
-                                                    <asp:DropDownList ID="GenAccnt" runat="server" Width="468px" AutoPostBack="True" AppendDataBoundItems="True" OnSelectedIndexChanged="GenAccnt_SelectedIndexChanged" Style="margin-left: 0px" Height="17px">
-                                                    </asp:DropDownList>
-                                                </td>
-
-                                                <td style="width: 1%"></td>
-                                            </tr>
+                                          
 
                                             <tr>
                                                 <td style="width: 15%" class="column_RightBold">Category :
@@ -237,7 +242,7 @@
                                                 <td style="width: 15%" class="column_RightBold">Unit :
                                                 </td>
                                                 <td style="width: 85%" class="column_Left">
-                                                    <asp:DropDownList ID="ddUnit" runat="server" CssClass="drpdownCSS" Width="25%" AppendDataBoundItems="True">
+                                                    <asp:DropDownList ID="ddUnit" runat="server" CssClass="drpdownCSS" AutoPostBack="true" Width="25%" AppendDataBoundItems="True">
                                                         <asp:ListItem Value="0">Select</asp:ListItem>
                                                     </asp:DropDownList>
                                                     &nbsp;<asp:CheckBox ID="chkInactive" runat="server" Visible="False" Text="In active"></asp:CheckBox>
@@ -317,11 +322,13 @@
                     <tr>
                         <td style="width: 1%; height: 34px;"></td>
                         <td align="right" style="width: 101%; height: 34px;">
-                            <asp:Button ID="btnadd" runat="server" Font-Bold="true" ForeColor="blue" OnClick="btnadd_Click" Text="New" Width="80px" />
-                            &nbsp;<asp:Button ID="btnedit" runat="server" Font-Bold="true" ForeColor="blue" Text="Edit" Width="80px" />
+                            <asp:Button ID="btnadd" runat="server" Font-Bold="true" ForeColor="blue" Text="New" Width="80px" Enabled="true" Height="26px" />
+                            &nbsp;<asp:Button ID="btnedit" runat="server" Font-Bold="true" ForeColor="blue" Text="Edit" Width="80px" Height="26px" />
                             &nbsp;<asp:Button ID="btnsave" runat="server" Font-Bold="true" ForeColor="blue" Height="26px" OnClick="btnsave_Click" OnClientClick="StartProgressBar();" Text="Save" Width="80px" />
+                             &nbsp;<asp:Button ID="btnClear" runat="server" Font-Bold="true" ForeColor="blue" Height="26px" OnClick="btnClear_Click" OnClientClick="StartProgressBar();" Text="Clear" Width="80px" />
+                           
                             &nbsp;<asp:Button ID="btnDelete" runat="server" CssClass="CSButton" Font-Bold="true" OnClick="btnDelete_Click" Text="DELETE" Visible="False" Width="80px" />
-                            &nbsp;<asp:Button ID="btncopyall" runat="server" Enabled="False" Font-Bold="true" ForeColor="blue" OnClick="btncopyall_Click" OnClientClick="StartProgressBar();" Text="Copy All previous price under this Account" Width="300px" />
+                            &nbsp;<asp:Button ID="btncopyall" runat="server" Enabled="False" Font-Bold="true" Height="26px"  ForeColor="blue" OnClick="btncopyall_Click" OnClientClick="StartProgressBar();" Text="Copy All previous price under this Account" Width="300px" />
                         </td>
                         <%--<td style="width: 1%; height: 34px;"></td>--%>
                     </tr>

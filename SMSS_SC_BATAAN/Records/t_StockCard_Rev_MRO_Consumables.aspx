@@ -1,4 +1,5 @@
-﻿<%@ Page Language="VB" MasterPageFile="~/MasterPage.master" EnableEventValidation="false"
+﻿
+<%@ Page Language="VB" MasterPageFile="~/MasterPage.master" EnableEventValidation="false"
     AutoEventWireup="false" CodeFile="t_StockCard_Rev_MRO_Consumables.aspx.vb" Inherits="Records_t_StockCard_Rev_MRO_Consumables"
     Title="Encoding of MRO Consumables" StylesheetTheme="SkinFile" %>
 
@@ -7,8 +8,69 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
 
     <script type="text/javascript" src="../Membership/MasterPage/js/autoCurrency.js"></script>
+     <script type="text/javascript">
+        window.onbeforeunload = function (e) {
+            var e = e || window.event;
+
+            // For IE and FireFox
+            var value = "There is some data to be saved!"
+
+            if (e) {
+                e.returnValue = value;
+            }
+
+            // For Safari
+            return value;
+        }
+    </script>
 
     <asp:ScriptManager ID="ScriptManagerMROCons" runat="server"></asp:ScriptManager>
+
+    <style type="text/css">
+        .required-label {
+            position: relative;
+            display: inline-block;
+        }
+
+        .required-label::before {
+            content: "*";
+            position: absolute;
+            left: -9px;
+            top: 0;
+            color: Red;
+            font-weight: bold;
+        }
+    </style>
+
+    <script type="text/javascript">
+        function StartProgressBar() {
+            var progressPopup = $find('ProgressBarModalPopupExtender');
+
+            if (progressPopup != null) {
+                progressPopup.show();
+            }
+        }
+
+        function BeginRequestHandler(sender, args) {
+            var progressPopup = $find('ProgressBarModalPopupExtender');
+
+            if (progressPopup != null) {
+                progressPopup.show();
+            }
+        }
+
+        function EndRequestHandler(sender, args) {
+            var progressPopup = $find('ProgressBarModalPopupExtender');
+
+            if (progressPopup != null) {
+                progressPopup.hide();
+            }
+        }
+
+        var prm = Sys.WebForms.PageRequestManager.getInstance();
+        prm.add_beginRequest(BeginRequestHandler);
+        prm.add_endRequest(EndRequestHandler);
+    </script>
 
     <asp:UpdatePanel ID="UpdatePanel1" runat="server">
         <ContentTemplate>
@@ -27,16 +89,16 @@
                         <td style="width: 1%"></td>
 
                         <td style="width: 98%" class="column_LeftBold">
-                            Sub Classification :
-                            <asp:DropDownList ID="DrpSubClass" runat="server" Width="20%" AutoPostBack="True"
-                                CssClass="drpdownCSS" OnSelectedIndexChanged="DrpSubClass_SelectedIndexChanged">
+                          <span class="required-label">General Account :</span>
+                            <asp:DropDownList ID="ddGlAccount" runat="server" Width="20%" AutoPostBack="True"
+                                CssClass="drpdownCSS" OnSelectedIndexChanged="ddGlAccount_SelectedIndexChanged">
                             </asp:DropDownList>
 
                             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
-                            General Account :
-                            <asp:DropDownList ID="ddGlAccount" runat="server" Width="20%" AutoPostBack="True"
-                                CssClass="drpdownCSS" OnSelectedIndexChanged="ddGlAccount_SelectedIndexChanged">
+                            <span>Sub Classification :</span>
+                            <asp:DropDownList ID="DrpSubClass" runat="server" Width="20%" AutoPostBack="True"
+                                CssClass="drpdownCSS" OnSelectedIndexChanged="DrpSubClass_SelectedIndexChanged">
                             </asp:DropDownList>
                         </td>
 
@@ -59,27 +121,27 @@
                                         <table width="100%">
                                             <tr>
                                                 <td style="width: 15%" class="column_RightBold">
-                                                    Name :
+                                                    <span class="required-label">Name :</span>
                                                     <asp:HiddenField ID="hdnItemNo" runat="server" />
                                                     <asp:HiddenField ID="hdnGAId" runat="server" />
                                                 </td>
 
                                                 <td style="width: 35%" class="column_Left">
-                                                    <asp:DropDownList ID="drpConsOthersName" AutoPostBack="true" runat="server" Width="98%"
-                                                        OnSelectedIndexChanged="drpConsOthersName_SelectedIndexChanged">
+                                                    <asp:DropDownList ID="drpConsOthersName" AutoPostBack="true" runat="server" Width="98%" CssClass="drpdownCSS"
+                                                        OnSelectedIndexChanged="drpConsOthersName_SelectedIndexChanged"  >
                                                     </asp:DropDownList>
                                                 </td>
 
-                                                <td style="width: 15%;" class="column_RightBold">Unit :</td>
+                                                <td style="width: 15%;" class="column_RightBold"> <span class="required-label">Unit :</span>  </td>
                                                 <td style="width: 35%;" class="column_Left">
-                                                    <asp:DropDownList ID="drpConsOthersUnit" runat="server" Width="40%" Enabled="false" ></asp:DropDownList>
+                                                    <asp:DropDownList ID="drpConsOthersUnit" Enabled ="false" runat="server" Width="40%"></asp:DropDownList>
                                                 </td>
                                             </tr>
 
                                             <tr>
-                                                <td style="width: 15%" class="column_RightBold">Brand Name :</td>
+                                                <td style="width: 15%" class="column_RightBold"><span class="required-label">Brand Name :</span></td>
                                                 <td style="width: 35%" class="column_Left">
-                                                    <asp:TextBox ID="txtConsOthersBrandName" runat="server" Width="98%" CssClass="txtbox_Var"></asp:TextBox>
+                                                    <asp:TextBox ID="txtConsOthersBrandName" AutoPostBack="true"  runat="server" Width="98%" CssClass="txtbox_Var"  ></asp:TextBox>
                                                 </td>
 
                                                 <td colspan="2" rowspan="5" style="padding-left: 50px;">
@@ -92,33 +154,33 @@
                                                             <tr>
                                                                 <td style="width: 35%" class="column_RightBold">Batch :</td>
                                                                 <td style="width: 65%" class="column_Left">
-                                                                    <asp:TextBox ID="txtConsOthersBatch" runat="server" Width="98%" CssClass="txtbox_Var"></asp:TextBox>
+                                                                    <asp:TextBox ID="txtConsOthersBatch"  AutoPostBack="true" runat="server" Width="98%" CssClass="txtbox_Var"></asp:TextBox>
                                                                 </td>
                                                             </tr>
                                                             <tr>
                                                                 <td class="column_RightBold">Lot :</td>
                                                                 <td class="column_Left">
-                                                                    <asp:TextBox ID="txtConsOthersLot" runat="server" Width="98%" CssClass="txtbox_Var"></asp:TextBox>
+                                                                    <asp:TextBox ID="txtConsOthersLot" AutoPostBack="true"  runat="server" Width="98%" CssClass="txtbox_Var"></asp:TextBox>
                                                                 </td>
                                                             </tr>
                                                             <tr>
                                                                 <td class="column_RightBold">Mftg. Date :</td>
                                                                 <td class="column_Left">
-                                                                    <asp:TextBox ID="txtMDateConsOthers" runat="server" Width="50%" CssClass="txtbox_Date"></asp:TextBox>
+                                                                    <asp:TextBox ID="txtMDateConsOthers"  AutoPostBack="true" runat="server" Width="50%" CssClass="txtbox_Date"></asp:TextBox>
                                                                     &nbsp;<span class="CalendarFormat">(MM/DD/YYYY)</span>
                                                                 </td>
                                                             </tr>
                                                             <tr>
                                                                 <td class="column_RightBold">Expiry Date :</td>
                                                                 <td class="column_Left">
-                                                                    <asp:TextBox ID="txtEDateConsOthers" runat="server" Width="50%" CssClass="txtbox_Date"></asp:TextBox>
+                                                                    <asp:TextBox ID="txtEDateConsOthers"  AutoPostBack="true" runat="server" Width="50%" CssClass="txtbox_Date"></asp:TextBox>
                                                                     &nbsp;<span class="CalendarFormat">(MM/DD/YYYY)</span>
                                                                 </td>
                                                             </tr>
                                                             <tr>
                                                                 <td style="color: red;" class="column_RightBold">Alert :</td>
                                                                 <td class="column_Left">
-                                                                    <asp:TextBox ID="txtAlertConsOthers" runat="server" Width="50%" CssClass="txtbox_Date"></asp:TextBox>
+                                                                    <asp:TextBox ID="txtAlertConsOthers"  AutoPostBack="true" runat="server" Width="50%" CssClass="txtbox_Date"></asp:TextBox>
                                                                     &nbsp;<span class="CalendarFormat">(MM/DD/YYYY)</span>
                                                                 </td>
                                                             </tr>
@@ -130,14 +192,14 @@
                                             <tr>
                                                 <td style="width: 15%" class="column_RightBold">Form :</td>
                                                 <td style="width: 35%" class="column_Left">
-                                                    <asp:TextBox ID="txtConsOthersForm" runat="server" Width="98%" CssClass="txtbox_Var"></asp:TextBox>
+                                                    <asp:TextBox ID="txtConsOthersForm" AutoPostBack="true"  runat="server" Width="98%" CssClass="txtbox_Var"></asp:TextBox>
                                                 </td>
                                             </tr>
 
                                             <tr>
-                                                <td style="width: 15%" class="column_RightBold">Unit Cost :</td>
+                                                <td style="width: 15%" class="column_RightBold"><span class="required-label">Unit Cost :</span></td>
                                                 <td style="width: 35%" class="column_Left">
-                                                    <asp:TextBox ID="txtConsOthersUnitPrice" runat="server" Width="40%" CssClass="txtbox_Amt"
+                                                    <asp:TextBox ID="txtConsOthersUnitPrice" AutoPostBack="true"  runat="server" Width="40%" CssClass="txtbox_Amt"  
                                                         Onkeyup="javascript:this.value=Comma(this.value);" Onchange="this.value=formatCurrency(this.value);">
                                                     </asp:TextBox>
                                                 </td>
@@ -146,22 +208,22 @@
                                             <tr>
                                                 <td style="width: 15%" class="column_RightBold">Reorder Pt. :</td>
                                                 <td style="width: 35%" class="column_Left">
-                                                    <asp:TextBox ID="txtConsOthersReOrderPt" runat="server" CssClass="txtbox_Amt" Width="50px"></asp:TextBox>
+                                                    <asp:TextBox ID="txtConsOthersReOrderPt" AutoPostBack="true"  runat="server" CssClass="txtbox_Amt" Width="50px"></asp:TextBox>
                                                     <asp:Button ID="btnROP" runat="server" CssClass="CSButton" OnClick="btnROP_Click" Text="R.O.P" Width="40" />
                                                 </td>
                                             </tr>
 
                                             <tr>
-                                                <td style="width: 15%" class="column_RightBold">Quantity :</td>
+                                                <td style="width: 15%" class="column_RightBold"><span class="required-label">Quantity :</span></td>
                                                 <td style="width: 35%" class="column_Left">
-                                                    <asp:TextBox ID="txtConsOthersQuantity" runat="server" CssClass="txtbox_Amt" Width="40%"></asp:TextBox>
+                                                    <asp:TextBox ID="txtConsOthersQuantity" AutoPostBack="true"  runat="server" CssClass="txtbox_Amt" Width="40%"  ></asp:TextBox>
                                                 </td>
                                             </tr>
 
                                             <tr>
-                                                <td class="column_RightBold">Date :</td>
+                                                <td class="column_RightBold"><span class="required-label">Date :</span></td>
                                                 <td class="column_Left">
-                                                    <asp:TextBox ID="txtSellectDateCons" runat="server" CssClass="txtbox_Var0"></asp:TextBox>
+                                                    <asp:TextBox ID="txtSellectDateCons" runat="server" CssClass="txtbox_Var0"  ></asp:TextBox>
                                                     <cc1:CalendarExtender ID="CalendarExtender8" runat="server"
                                                         TargetControlID="txtSellectDateCons" PopupButtonID="txtSellectDateCons">
                                                     </cc1:CalendarExtender>
@@ -186,39 +248,39 @@
 
                                                                 <td class="column_RightBold">Bay :</td>
                                                                 <td class="column_Left">
-                                                                    <asp:TextBox ID="txtConsOthersBay" runat="server" Width="50px" CssClass="txtbox_Var"></asp:TextBox>
+                                                                    <asp:TextBox ID="txtConsOthersBay" AutoPostBack="true"  runat="server" Width="50px" CssClass="txtbox_Var"></asp:TextBox>
                                                                 </td>
 
                                                                 <td class="column_RightBold" style="width: 10%">Column :</td>
                                                                 <td class="column_Left">
-                                                                    <asp:TextBox ID="txtConsOthersColumn" runat="server" Width="50px" CssClass="txtbox_Var"></asp:TextBox>
+                                                                    <asp:TextBox ID="txtConsOthersColumn" AutoPostBack="true"  runat="server" Width="50px" CssClass="txtbox_Var"></asp:TextBox>
                                                                 </td>
 
                                                                 <td class="column_RightBold" style="width: 10%">Floor :</td>
                                                                 <td class="column_Left">
-                                                                    <asp:TextBox ID="txtConsOthersFloor" runat="server" Width="50px" CssClass="txtbox_Var"></asp:TextBox>
+                                                                    <asp:TextBox ID="txtConsOthersFloor"  AutoPostBack="true" runat="server" Width="50px" CssClass="txtbox_Var"></asp:TextBox>
                                                                 </td>
                                                             </tr>
 
                                                             <tr>
                                                                 <td class="column_RightBold">Room :</td>
                                                                 <td class="column_Left">
-                                                                    <asp:TextBox ID="txtConsOthersRoom" runat="server" Width="50px" CssClass="txtbox_Var"></asp:TextBox>
+                                                                    <asp:TextBox ID="txtConsOthersRoom" AutoPostBack="true"  runat="server" Width="50px" CssClass="txtbox_Var"></asp:TextBox>
                                                                 </td>
 
                                                                 <td class="column_RightBold" style="width: 10%">Shelves :</td>
                                                                 <td class="column_Left">
-                                                                    <asp:TextBox ID="txtConsOthersShelves" runat="server" Width="50px" CssClass="txtbox_Var"></asp:TextBox>
+                                                                    <asp:TextBox ID="txtConsOthersShelves" AutoPostBack="true"  runat="server" Width="50px" CssClass="txtbox_Var"></asp:TextBox>
                                                                 </td>
 
                                                                 <td class="column_RightBold">Rack :</td>
                                                                 <td class="column_Left">
-                                                                    <asp:TextBox ID="txtConsOthersRack" runat="server" Width="50px" CssClass="txtbox_Var"></asp:TextBox>
+                                                                    <asp:TextBox ID="txtConsOthersRack" AutoPostBack="true"  runat="server" Width="50px" CssClass="txtbox_Var"></asp:TextBox>
                                                                 </td>
 
                                                                 <td class="column_RightBold">Bin :</td>
                                                                 <td class="column_Left">
-                                                                    <asp:TextBox ID="txtConsOthersBin" runat="server" Width="50px" CssClass="txtbox_Var" AutoCompleteType="Disabled"></asp:TextBox>
+                                                                    <asp:TextBox ID="txtConsOthersBin"  AutoPostBack="true" runat="server" Width="50px" CssClass="txtbox_Var" AutoCompleteType="Disabled"></asp:TextBox>
                                                                 </td>
                                                             </tr>
                                                         </table>
@@ -237,9 +299,9 @@
 
                                 <tr>
                                     <td colspan="2" style="text-align: right;">
-                                        <asp:Button ID="btnConsOthersSave" runat="server" Width="120px" CssClass="CSButton" Text="SAVE" OnClick="btnConsOthersSave_Click"></asp:Button>
+                                        <asp:Button ID="btnConsOthersSave" runat="server" Width="120px" CssClass="CSButton" Text="SAVE" OnClick="btnConsOthersSave_Click" ></asp:Button>
                                         &nbsp; &nbsp; &nbsp;
-                                        <asp:Button ID="btnConsOthersCancel" runat="server" Width="120px" CssClass="CSButton" Text="CANCEL" OnClick="btnConsOthersCancel_Click"></asp:Button>
+                                        <asp:Button ID="btnConsOthersCancel" runat="server" Width="120px" CssClass="CSButton" Text="CANCEL" OnClick="btnConsOthersCancel_Click" OnClientClick="StartProgressBar();"></asp:Button>
                                     </td>
                                 </tr>
 
@@ -260,8 +322,7 @@
 
                                         <asp:TemplateField>
                                             <HeaderTemplate>
-                                                <asp:CheckBox ID="CheckBox2" runat="server" Font-Bold="true" ForeColor="White"
-                                                    Font-Size="10pt" Font-Names="tahoma" Text="All"></asp:CheckBox>
+                                             
                                             </HeaderTemplate>
                                             <ItemTemplate>
                                                 <asp:CheckBox ID="cbInspection" runat="server" AutoPostBack="True"
@@ -385,9 +446,64 @@
                 BackgroundCssClass="modalBackground">
             </cc1:ModalPopupExtender>
 
+
+            <asp:Label ID="lblApprovalTarget" runat="server" Style="display:none;"></asp:Label>
+
+<cc1:ModalPopupExtender ID="ModalPopupExtenderApproval" runat="server"
+    TargetControlID="lblApprovalTarget"
+    PopupControlID="PanelApproval"
+    BackgroundCssClass="modalBackground">
+</cc1:ModalPopupExtender>
+
+<asp:Panel ID="PanelApproval" runat="server" Width="350px" CssClass="Panel_Popup"  DefaultButton="btnApprovalProceed" >
+    <table width="100%">
+        <tr>
+            <td style="width: 100%; height: 30px" colspan="3" class="DivTitle">
+                APPROVAL
+            </td>
+        </tr>
+        <tr>
+            <td class="column_RightBold">Approving Officer :</td>
+            <td class="column_Left">
+                <asp:DropDownList ID="drpApprovedOfficer" runat="server" Width="150px" CssClass="ddropbox"></asp:DropDownList>
+            </td>
+        </tr>
+        <tr>
+            <td class="column_RightBold">Password :</td>
+            <td class="column_Left">
+                <asp:TextBox ID="txtApprovedPass" runat="server" CssClass="txtbox_Var" Width="150px" TextMode="Password"></asp:TextBox>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <asp:Button ID="btnApprovalProceed" runat="server" Width="150px" CssClass="CSButton" Text="PROCEED" OnClick="btnApprovalProceed_Click"></asp:Button>
+                <asp:Button ID="btnApprovalCancel" runat="server" Width="150px" CssClass="CSButton" Text="CANCEL"   CausesValidation="False" OnClick="btnApprovalCancel_Click"></asp:Button>
+            </td>
+        </tr>
+    </table>
+</asp:Panel>
+
+
             <cc1:CalendarExtender ID="CalendarExtender4" runat="server" TargetControlID="txtMDateConsOthers" PopupButtonID="txtMDateConsOthers"></cc1:CalendarExtender>
             <cc1:CalendarExtender ID="CalendarExtender5" runat="server" TargetControlID="txtEDateConsOthers" PopupButtonID="txtEDateConsOthers"></cc1:CalendarExtender>
             <cc1:CalendarExtender ID="CalendarExtender6" runat="server" TargetControlID="txtAlertConsOthers" PopupButtonID="txtAlertConsOthers"></cc1:CalendarExtender>
+
+            <asp:Panel ID="PanelProgress" runat="server" Width="109px"
+                Style="border-top-width: 1px; border-left-width: 1px; border-left-color: #0033cc; border-bottom-width: 1px; border-bottom-color: #0033cc; border-top-color: #0033cc; position: relative; background-color: transparent; text-align: center; border-right-width: 1px; border-right-color: #0033cc">
+                <img alt="Loading..." src="../images/ajax-loader.gif" />
+            </asp:Panel>
+
+            <cc1:ModalPopupExtender ID="ProgressBarModalPopupExtender"
+                runat="server"
+                BackgroundCssClass="modalBackground"
+                TargetControlID="ButtonProgress"
+                PopupControlID="PanelProgress"
+                BehaviorID="ProgressBarModalPopupExtender">
+            </cc1:ModalPopupExtender>
+
+            <asp:Button ID="ButtonProgress" runat="server" Width="16px"
+                Enabled="False" Style="display: none;">
+            </asp:Button>
 
         </ContentTemplate>
     </asp:UpdatePanel>

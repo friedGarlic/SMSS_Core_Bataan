@@ -44,105 +44,208 @@ Partial Class Records_t_StockCard_Rev_Medicines
 
 
 
-    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+    Protected Sub Page_Load(
+    ByVal sender As Object,
+    ByVal e As System.EventArgs
+) Handles Me.Load
+
         If Not Page.IsPostBack Then
-            Dim classification As String = objDerived.GetValue("SELECT ClassificationId FROM dbo.tbl_Classification WHERE ClassificationName = 'Medicines'", CommandType.Text)
+
+            Dim classification As String = objDerived.GetValue(
+            "SELECT ClassificationId " &
+            "FROM dbo.tbl_Classification " &
+            "WHERE ClassificationName = 'Medicines'",
+            CommandType.Text
+        )
+
             Session("ClassificationID") = classification
 
-            LoadSubClassifications()
+            LoadGLAccounts()
+
+            DrpSubClass.Items.Clear()
+            DrpSubClass.Items.Insert(
+            0,
+            New ListItem("No Subclass", "0")
+        )
+            DrpSubClass.Enabled = True
+
             ClearGenericName()
-            'LoadUnit()
-            LoadWarehouse()
             BindEmptyLedger()
             BindEmptyPPQ()
+
         End If
     End Sub
 
     Private Sub LoadSubClassifications()
-        Dim dt As DataTable = objDerived.GetDataTable(
-            "select distinct a.SubClassificationID,a.SubClassificationName " &
-            "From tbl_SubClassification As a " &
-            " inner join tblclassmatrix as b on a.SubClassificationID = b.SubClassificationID " &
-            " inner join tbl_Classification As c On b.classificationid = c.ClassificationId " &
-            " where c.ClassificationId = '" & Session("ClassificationID") & "'",
-            CommandType.Text
+        DrpSubClass.Items.Clear()
+
+        If ddGlAccount.SelectedValue Is Nothing OrElse
+       ddGlAccount.SelectedValue = "" OrElse
+       ddGlAccount.SelectedValue = "0" Then
+
+            DrpSubClass.Items.Insert(
+            0,
+            New ListItem("No Subclass", "0")
         )
 
-        Dim dr As DataRow = dt.NewRow()
-        dr("SubClassificationID") = 0
-        dr("SubClassificationName") = "Select"
-        dt.Rows.InsertAt(dr, 0)
-
-        DrpSubClass.DataSource = dt
-        DrpSubClass.DataTextField = "SubClassificationName"
-        DrpSubClass.DataValueField = "SubClassificationID"
-        DrpSubClass.DataBind()
-
-        ddGlAccount.Items.Clear()
-        ddGlAccount.Items.Insert(0, New ListItem("Select", "0"))
-    End Sub
-
-    Private Sub LoadGLAccounts()
-        ddGlAccount.Items.Clear()
-
-        If DrpSubClass.SelectedValue Is Nothing OrElse DrpSubClass.SelectedValue = "0" Then
-            ddGlAccount.Items.Insert(0, New ListItem("Select", "0"))
+            DrpSubClass.Enabled = True
             Exit Sub
         End If
 
-        AddTrace("Exec dbo.sp_Accounts_Category_v1_02152022 '" & 2 & "','" & Session("ClassificationID") & "','" & DrpSubClass.SelectedItem.Value & "'")
+        Dim sql As String =
+        "SELECT DISTINCT " &
+        "    SubClassificationID, " &
+        "    SubClassificationName " &
+        "FROM dbo.tbl_SubClassification " &
+        "WHERE ClassificationID = '" & Session("ClassificationID") & "' " &
+        "AND GA_ID = '" & ddGlAccount.SelectedValue & "' " &
+        "ORDER BY SubClassificationName"
+
+        AddTrace(sql)
 
         Dim dt As DataTable = objDerived.GetDataTable(
-            "Exec dbo.sp_Accounts_Category_v1_02152022 '" & 2 & "','" & Session("ClassificationID") & "','" & DrpSubClass.SelectedItem.Value & "'",
-            CommandType.Text
-        )
+        sql,
+        CommandType.Text
+    )
 
         If dt IsNot Nothing Then
+
+            Dim dr As DataRow = dt.NewRow()
+            dr("SubClassificationID") = 0
+            dr("SubClassificationName") = "No Subclass"
+            dt.Rows.InsertAt(dr, 0)
+
+            DrpSubClass.DataSource = dt
+            DrpSubClass.DataTextField = "SubClassificationName"
+            DrpSubClass.DataValueField = "SubClassificationID"
+            DrpSubClass.DataBind()
+
+        Else
+
+            DrpSubClass.Items.Insert(
+            0,
+            New ListItem("No Subclass", "0")
+        )
+
+        End If
+
+        DrpSubClass.Enabled = True
+    End Sub
+    Private Sub LoadGLAccounts()
+        ddGlAccount.Items.Clear()
+
+        Dim sql As String =
+            "SELECT DISTINCT " &
+            "    ga.GA_ID, " &
+            "    ga.GA_Title, " &
+            "    cm.ga_id AS Matrix_GA_ID " &
+            "FROM dbo.tbl_SubClassification AS sc " &
+            "INNER JOIN dbo.view_Accntg_gen_accnt AS ga " &
+            "    ON ga.GA_ID = sc.GA_ID " &
+            "LEFT JOIN dbo.tblclassmatrix AS cm " &
+            "    ON cm.classificationid = sc.ClassificationID " &
+            "    AND cm.ga_id = sc.GA_ID " &
+            "WHERE sc.ClassificationID = '" & Session("ClassificationID") & "' " &
+            "UNION " &
+            "SELECT DISTINCT " &
+            "    ga.GA_ID, " &
+            "    ga.GA_Title, " &
+            "    cm.ga_id AS Matrix_GA_ID " &
+            "FROM dbo.tblclassmatrix AS cm " &
+            "INNER JOIN dbo.view_Accntg_gen_accnt AS ga " &
+            "    ON ga.GA_ID = cm.ga_id " &
+            "WHERE cm.classificationid = '" & Session("ClassificationID") & "' " &
+            "ORDER BY GA_Title;"
+
+        AddTrace(sql)
+
+        Dim dt As DataTable = objDerived.GetDataTable(
+        sql,
+        CommandType.Text
+    )
+
+        If dt IsNot Nothing Then
+
             Dim dr As DataRow = dt.NewRow()
             dr("GA_ID") = 0
             dr("GA_Title") = "Select"
             dt.Rows.InsertAt(dr, 0)
+
+            ddGlAccount.DataSource = dt
+            ddGlAccount.DataTextField = "GA_Title"
+            ddGlAccount.DataValueField = "GA_ID"
+            ddGlAccount.DataBind()
+
+        Else
+
+            ddGlAccount.Items.Insert(
+            0,
+            New ListItem("Select", "0")
+        )
+
         End If
 
-        ddGlAccount.DataSource = dt
-        ddGlAccount.DataTextField = "GA_Title"
-        ddGlAccount.DataValueField = "GA_ID"
-        ddGlAccount.DataBind()
+        ddGlAccount.Enabled = True
+
+        LoadWarehouse()
     End Sub
 
     Private Sub ClearGenericName()
         drpGenericName.Items.Clear()
-        drpGenericName.Items.Insert(0, New ListItem("Select", "0"))
-        drpGenericName.Enabled = False
+
+        drpGenericName.Items.Insert(
+        0,
+        New ListItem("Select", "0")
+    )
+
+        drpGenericName.Enabled = True
     End Sub
 
     Private Sub LoadGenericNames()
-        If DrpSubClass.SelectedValue Is Nothing OrElse DrpSubClass.SelectedValue = "0" Then
+        If ddGlAccount.SelectedValue Is Nothing OrElse
+           ddGlAccount.SelectedValue = "" OrElse
+           ddGlAccount.SelectedValue = "0" Then
+
             ClearGenericName()
             Exit Sub
         End If
 
-        Dim dt As DataTable = objDerived.GetDataTable(
-            "SELECT DISTINCT dbo.m_item.Item_ID, " &
-            "CASE " &
-            "WHEN NULLIF(LTRIM(RTRIM(dbo.m_item.GenericName)), '') IS NOT NULL " &
-            "THEN CONCAT(dbo.m_item.GenericName, ', ', dbo.m_item.ItemCompleteDesc) " &
-            "ELSE dbo.m_item.ItemCompleteDesc " &
-            "END AS Item_Desc " &
-            "FROM dbo.tbl_SubClassification INNER JOIN " &
-            "dbo.m_item ON dbo.tbl_SubClassification.SubClassificationID = dbo.m_item.SubClassificationID INNER JOIN " &
-            "dbo.tbl_Classification ON dbo.tbl_SubClassification.ClassificationID = dbo.tbl_Classification.ClassificationId INNER JOIN " &
-            "dbo.m_item_detail ON dbo.m_item.Item_ID = dbo.m_item_detail.Item_ID " &
-            "WHERE (dbo.tbl_SubClassification.SubClassificationID = " & DrpSubClass.SelectedValue & ") " &
-            "ORDER BY " &
-            "CASE " &
-            "WHEN NULLIF(LTRIM(RTRIM(dbo.m_item.GenericName)), '') IS NOT NULL " &
-            "THEN CONCAT(dbo.m_item.GenericName, ', ', dbo.m_item.ItemCompleteDesc) " &
-            "ELSE dbo.m_item.ItemCompleteDesc " &
-            "END",
-            CommandType.Text
-        )
+        Dim sql As String =
+        "SELECT DISTINCT " &
+        "    i.Item_ID, " &
+        "    CASE " &
+        "        WHEN NULLIF(LTRIM(RTRIM(i.GenericName)), '') IS NOT NULL " &
+        "        THEN CONCAT(i.GenericName, ', ', i.ItemCompleteDesc) " &
+        "        ELSE i.ItemCompleteDesc " &
+        "    END AS Item_Desc " &
+        "FROM " &
+        "    dbo.m_item AS i " &
+        "INNER JOIN dbo.tbl_Classification ON i.ClassificationID = dbo.tbl_Classification.ClassificationId " &
+        "INNER JOIN dbo.m_item_detail AS id ON i.Item_ID = id.Item_ID " &
+        "INNER JOIN dbo.tblclassmatrix AS cm ON cm.item_id = i.Item_ID " &
+        "LEFT JOIN dbo.tbl_SubCategory ON i.SubCategoryID = dbo.tbl_SubCategory.SubCategoryID " &
+        "LEFT JOIN dbo.tbl_SubClassification ON dbo.tbl_SubClassification.SubClassificationID = i.SubClassificationID " &
+        "WHERE " &
+        "    i.SubClassificationID = " & DrpSubClass.SelectedValue & " " &
+        "AND cm.ga_id = " & ddGlAccount.SelectedValue & " " &
+        "ORDER BY " &
+        "    CASE " &
+        "        WHEN NULLIF(LTRIM(RTRIM(i.GenericName)), '') IS NOT NULL " &
+        "        THEN CONCAT(i.GenericName, ', ', i.ItemCompleteDesc) " &
+        "        ELSE i.ItemCompleteDesc " &
+        "    END"
 
+        AddTrace(sql)
+
+        Dim dt As DataTable = objDerived.GetDataTable(
+        sql,
+        CommandType.Text
+    )
+
+        If dt Is Nothing Then
+            ClearGenericName()
+            Exit Sub
+        End If
 
         Dim dr As DataRow = dt.NewRow()
         dr("Item_ID") = 0
@@ -156,26 +259,33 @@ Partial Class Records_t_StockCard_Rev_Medicines
 
         drpGenericName.Enabled = True
     End Sub
-
     Public Sub LoadUnit()
-        Dim dt As New DataTable
-        dt = objDerived.GetDataTable("SELECT Unit_ID, Description FROM ams.m_Unit AS a ORDER BY CASE WHEN Description = '-' THEN 0 ELSE 1 END, Description;", CommandType.Text)
+        Dim dt As DataTable = objDerived.GetDataTable("select Unit_ID,Description From ams.m_Unit as a order by Description", CommandType.Text)
         drpUnit.DataSource = dt
-        drpUnit.DataTextField = ("Description")
-        drpUnit.DataValueField = ("Unit_ID")
+        drpUnit.DataTextField = "Description"
+        drpUnit.DataValueField = "Unit_ID"
         drpUnit.DataBind()
+
 
         Dim Unit_ID As Integer = objDerived.GetValue("SELECT Unit_ID FROM DBO.m_item WHERE Item_ID = '" & Session("Item_ID") & "'", CommandType.Text)
         drpUnit.SelectedValue = Unit_ID
+
 
     End Sub
 
     Public Sub LoadWarehouse()
         Dim dt As DataTable = objDerived.GetDataTable("select warehouse_id,wname From ams.loc_warehouse where isUsed='True'", CommandType.Text)
-        drpMedicineWarehouse.DataTextField = "wname"
-        drpMedicineWarehouse.DataValueField = "warehouse_id"
-        drpMedicineWarehouse.DataSource = dt
-        drpMedicineWarehouse.DataBind()
+
+        If dt IsNot Nothing AndAlso dt.Rows.Count > 0 Then
+            drpMedicineWarehouse.DataTextField = "wname"
+            drpMedicineWarehouse.DataValueField = "warehouse_id"
+            drpMedicineWarehouse.DataSource = dt
+            drpMedicineWarehouse.DataBind()
+        End If
+        drpMedicineWarehouse.Items.Insert(0, New ListItem("Select", "0"))
+        drpMedicineWarehouse.SelectedIndex = 0
+        drpMedicineWarehouse.Enabled = True
+
     End Sub
 
     Public Sub LoadLedger()
@@ -216,37 +326,39 @@ Partial Class Records_t_StockCard_Rev_Medicines
 
     End Sub
 
-    Protected Sub DrpSubClass_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs)
-        Dim ctrl As Control = CType(sender, Control)
-
-        If ctrl IsNot Nothing AndAlso ctrl.ID = "DrpSubClass" Then
-            LoadGLAccounts()
-            ClearGenericName()
-            'LoadUnit()
-            LoadWarehouse()
-            BindEmptyLedger()
-            BindEmptyPPQ()
-            ClearTextBoxesMedicine()
-        End If
-    End Sub
-
-    Protected Sub ddGlAccount_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs)
+    Protected Sub DrpSubClass_SelectedIndexChanged(
+    ByVal sender As Object,
+    ByVal e As System.EventArgs
+)
 
         LoadGenericNames()
-        'LoadUnit()
-        LoadWarehouse()
+
         BindEmptyLedger()
         BindEmptyPPQ()
         ClearTextBoxesMedicine()
+
     End Sub
 
+    Protected Sub ddGlAccount_SelectedIndexChanged(
+    ByVal sender As Object,
+    ByVal e As System.EventArgs
+)
+
+        LoadSubClassifications()
+        ClearGenericName()
+        LoadGenericNames()
+
+        BindEmptyLedger()
+        BindEmptyPPQ()
+        ClearTextBoxesMedicine()
+
+    End Sub
     Protected Sub drpGenericName_SelectedIndexChanged(ByVal sender As Object, ByVal e As EventArgs)
         Session("Item_ID") = drpGenericName.SelectedValue
-
-        LoadUnit()
         LoadLedger()
         LoadPPQ()
 
+        LoadUnit()
         ClearMedicineDetailsOnly()
     End Sub
 
@@ -267,6 +379,9 @@ Partial Class Records_t_StockCard_Rev_Medicines
         txtUnitCost.Text = Convert.ToString(unitCostObj)
         txtPercent.Text = Convert.ToString(percentObj)
         txtSellingPrice1.Text = Convert.ToString(sellingObj)
+
+
+        ViewState("SelectedPPQ_ID") = GridPPQ.SelectedDataKey("PPQ_ID")
 
         btnMedicineRemove.Enabled = True
 
@@ -350,7 +465,7 @@ Partial Class Records_t_StockCard_Rev_Medicines
             ' Selling Price: allow auto-calc if blank/invalid
             If Not Decimal.TryParse(txtSellingPrice1.Text.Replace(",", ""), sellingPrice) Then
                 ' Option A (markup):
-                sellingPrice = unitCost * (1D + (percent / 100D))
+                sellingPrice = ComputePPQSellingPrice(qtyPack, unitCost, percent)
                 txtSellingPrice1.Text = sellingPrice.ToString("N2")
             End If
 
@@ -369,37 +484,46 @@ Partial Class Records_t_StockCard_Rev_Medicines
             GridPPQ.DataBind()
 
         Else
-            ' UPDATE logic with similar validation...
-            ' Example for UPDATE case:
-            ' Validate before updating
             Dim updatedQtyPack As Integer
             Dim updatedUnitCost As Decimal
             Dim updatedPercent As Decimal
             Dim updatedSellingPrice As Decimal
+            Dim ppqID As Long = 0
 
-            If String.IsNullOrWhiteSpace(txtQtyPack.Text) OrElse Not Integer.TryParse(txtQtyPack.Text, updatedQtyPack) Then
+            If ViewState("SelectedPPQ_ID") Is Nothing OrElse Not Long.TryParse(ViewState("SelectedPPQ_ID").ToString(), ppqID) Then
+                MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Please select a price per quantity record to update.")
+                Exit Sub
+            End If
+
+            If String.IsNullOrWhiteSpace(txtQtyPack.Text) OrElse Not Integer.TryParse(txtQtyPack.Text.Replace(",", ""), updatedQtyPack) Then
                 MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Please enter a valid integer for Quantity Pack.")
                 Exit Sub
             End If
 
-            If String.IsNullOrWhiteSpace(txtUnitCost.Text) OrElse Not Decimal.TryParse(txtUnitCost.Text, updatedUnitCost) Then
+            If String.IsNullOrWhiteSpace(txtUnitCost.Text) OrElse Not Decimal.TryParse(txtUnitCost.Text.Replace(",", ""), updatedUnitCost) Then
                 MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Please enter a valid number for Unit Cost.")
                 Exit Sub
             End If
 
-            If String.IsNullOrWhiteSpace(txtPercent.Text) OrElse Not Decimal.TryParse(txtPercent.Text, updatedPercent) Then
+            If String.IsNullOrWhiteSpace(txtPercent.Text) OrElse Not Decimal.TryParse(txtPercent.Text.Replace(",", ""), updatedPercent) Then
                 MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Please enter a valid number for Percent.")
                 Exit Sub
             End If
 
-            If String.IsNullOrWhiteSpace(txtSellingPrice1.Text) OrElse Not Decimal.TryParse(txtSellingPrice1.Text, updatedSellingPrice) Then
-                MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Please enter a valid number for Selling Price.")
-                Exit Sub
-            End If
+            updatedSellingPrice = ComputePPQSellingPrice(updatedQtyPack, updatedUnitCost, updatedPercent)
+            txtSellingPrice1.Text = updatedSellingPrice.ToString("N2")
 
-            ' Execute UPDATE command with validated values
-            objDerived.Execute("UPDATE ams.tbl_price_per_qty SET QtyPack=" & updatedQtyPack & ", Unit_cost=" & updatedUnitCost & ", PPQ_percent=" & updatedPercent & ", Selling_Price=" & updatedSellingPrice & " WHERE PPQ_ID=" & GridPPQ.SelectedDataKey(0) & "", CommandType.Text)
+            objDerived.Execute("UPDATE ams.tbl_price_per_qty SET " &
+                       "QtyPack = " & updatedQtyPack & ", " &
+                       "Unit_cost = " & updatedUnitCost.ToString(System.Globalization.CultureInfo.InvariantCulture) & ", " &
+                       "PPQ_percent = " & updatedPercent.ToString(System.Globalization.CultureInfo.InvariantCulture) & ", " &
+                       "Selling_Price = " & updatedSellingPrice.ToString(System.Globalization.CultureInfo.InvariantCulture) & " " &
+                       "WHERE PPQ_ID = " & ppqID, CommandType.Text)
+
             btnMedicineAdd.Text = "ADD"
+            btnMedicineRemove.Enabled = False
+            ViewState("SelectedPPQ_ID") = Nothing
+
             LoadPPQ()
             GridPPQ.SelectedIndex = -1
 
@@ -419,7 +543,12 @@ Partial Class Records_t_StockCard_Rev_Medicines
     Protected Sub btnMedicineSave_Click(ByVal sender As Object, ByVal e As EventArgs)
         If btnMedicineSave.Text = "SAVE" Then
             save()
-        Else
+
+        ElseIf btnMedicineSave.Text = "EDIT" Then
+            loadApprovalOfficer()
+            ModalPopupExtenderApproval.Show()
+
+        ElseIf btnMedicineSave.Text = "UPDATE" Then
             update()
         End If
     End Sub
@@ -427,13 +556,13 @@ Partial Class Records_t_StockCard_Rev_Medicines
 
     Public Sub save()
         Try
-            If DrpSubClass.SelectedValue = "0" OrElse ddGlAccount.SelectedValue = "0" OrElse drpGenericName.SelectedValue = "0" OrElse
+            If drpGenericName.SelectedValue = "0" OrElse
            String.IsNullOrWhiteSpace(txtMedicineUnitprice.Text) OrElse
            String.IsNullOrWhiteSpace(txtMedicineQuantity.Text) OrElse
            String.IsNullOrWhiteSpace(txtSellectDate.Text) Then
 
                 MsgeBox.CreateMessageAlertInUpdatePanel(UpdatePanel1,
-                "Please complete required fields: Sub Classification, General Account, Generic Name, Unit Cost, Quantity, Reorder Point, and Date.")
+                "Please complete required fields: Generic Name, Unit Cost, Quantity and Date.")
                 Exit Sub
             End If
 
@@ -453,15 +582,6 @@ Partial Class Records_t_StockCard_Rev_Medicines
             End If
 
 
-
-            Dim reorderVal As Integer = 0
-
-            If Not String.IsNullOrWhiteSpace(txtReOrderPt.Text) Then
-                If Not Integer.TryParse(txtReOrderPt.Text.Replace(",", ""), reorderVal) Then
-                    MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Reorder Point is not numeric.")
-                    Exit Sub
-                End If
-            End If
 
             If Not Date.TryParse(txtSellectDate.Text, acqDate) Then
                 MsgeBox.CreateMessageAlertInUpdatePanel(UpdatePanel1, "Invalid Date.")
@@ -583,7 +703,7 @@ Partial Class Records_t_StockCard_Rev_Medicines
             If stockID <= 0 Then Throw New Exception("Failed to save Stock.")
 
             objDerived.Execute(
-            "UPDATE AMS.Stock SET Received_ID=" & rcvID &
+            "UPDATE AMS.Stock SET AIR_HDR_ID = 0, Received_ID=" & rcvID &
             " WHERE StockID=" & stockID,
             CommandType.Text)
 
@@ -692,6 +812,8 @@ Partial Class Records_t_StockCard_Rev_Medicines
         End Try
     End Sub
 
+
+
     Public Sub update()
         Try
             Dim stockObj As Object = grdLedger.SelectedDataKey("StockID")
@@ -705,13 +827,13 @@ Partial Class Records_t_StockCard_Rev_Medicines
                 Exit Sub
             End If
 
-            If DrpSubClass.SelectedValue = "0" OrElse ddGlAccount.SelectedValue = "0" OrElse drpGenericName.SelectedValue = "0" OrElse
+            If drpGenericName.SelectedValue = "0" OrElse
            String.IsNullOrWhiteSpace(txtMedicineUnitprice.Text) OrElse
            String.IsNullOrWhiteSpace(txtMedicineQuantity.Text) OrElse
            String.IsNullOrWhiteSpace(txtSellectDate.Text) Then
 
                 MsgeBox.CreateMessageAlertInUpdatePanel(UpdatePanel1,
-            "Please complete required fields: Sub Classification, General Account, Generic Name, Unit Cost, Quantity, Reorder Point, and Date.")
+            "Please complete required fields: Generic Name, Unit Cost, Quantity and Date.")
                 Exit Sub
             End If
 
@@ -730,14 +852,6 @@ Partial Class Records_t_StockCard_Rev_Medicines
                 Exit Sub
             End If
 
-            Dim reorderVal As Integer = 0
-
-            If Not String.IsNullOrWhiteSpace(txtReOrderPt.Text) Then
-                If Not Integer.TryParse(txtReOrderPt.Text.Replace(",", ""), reorderVal) Then
-                    MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Reorder Point is not numeric.")
-                    Exit Sub
-                End If
-            End If
 
             If Not Date.TryParse(txtSellectDate.Text, acqDate) Then
                 MsgeBox.CreateMessageAlertInUpdatePanel(UpdatePanel1, "Invalid Date.")
@@ -918,11 +1032,11 @@ Partial Class Records_t_StockCard_Rev_Medicines
         End If
 
         Dim unitIdStr As String = Convert.ToString(r("Unit_ID")).Trim()
-        'If drpUnit.Items.Count > 0 AndAlso unitIdStr <> "" AndAlso drpUnit.Items.FindByValue(unitIdStr) IsNot Nothing Then
-        '    drpUnit.SelectedValue = unitIdStr
-        'ElseIf drpUnit.Items.Count > 0 Then
-        '    drpUnit.SelectedIndex = 0
-        'End If
+        If drpUnit.Items.Count > 0 AndAlso unitIdStr <> "" AndAlso drpUnit.Items.FindByValue(unitIdStr) IsNot Nothing Then
+            drpUnit.SelectedValue = unitIdStr
+        ElseIf drpUnit.Items.Count > 0 Then
+            drpUnit.SelectedIndex = 0
+        End If
 
         '  added
         txtBFADNo.Text = Convert.ToString(r("bfadno"))
@@ -994,13 +1108,33 @@ Partial Class Records_t_StockCard_Rev_Medicines
         txtMedicineRack.Text = Convert.ToString(r("Rack"))
         txtMedicineBin.Text = Convert.ToString(r("Bin"))
 
-        btnMedicineSave.Text = "UPDATE"
+        btnMedicineSave.Text = "EDIT"
     End Sub
 
 
     Protected Sub grdLedger_RowDataBound(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewRowEventArgs)
-    End Sub
 
+        If e.Row.RowType = DataControlRowType.DataRow Then
+
+            Dim cbInspection As CheckBox = TryCast(e.Row.FindControl("cbInspection"), CheckBox)
+            Dim TransType As String = ""
+
+            If e.Row.DataItem IsNot Nothing Then
+                TransType = DataBinder.Eval(e.Row.DataItem, "Trans_Type").ToString().Trim()
+            End If
+
+            If cbInspection IsNot Nothing Then
+                If TransType = "Starting Balance" Or TransType = "Starting Inventory" Then
+                    cbInspection.Enabled = True
+                Else
+                    cbInspection.Checked = False
+                    cbInspection.Enabled = False
+                End If
+            End If
+
+        End If
+
+    End Sub
     Private Sub AddTrace(ByVal msg As String)
         System.Diagnostics.Debug.WriteLine(msg)
     End Sub
@@ -1094,10 +1228,10 @@ Partial Class Records_t_StockCard_Rev_Medicines
     Private Sub ClearTextBoxesMedicine()
         ClearMedicineDetailsOnly()
 
-        'If drpUnit IsNot Nothing AndAlso drpUnit.Items.Count > 0 Then
-        '    drpUnit.ClearSelection()
-        '    drpUnit.SelectedIndex = 0
-        'End If
+        If drpUnit IsNot Nothing AndAlso drpUnit.Items.Count > 0 Then
+            drpUnit.ClearSelection()
+            drpUnit.SelectedIndex = 0
+        End If
 
         If drpMedicineWarehouse IsNot Nothing AndAlso drpMedicineWarehouse.Items.Count > 0 Then
             drpMedicineWarehouse.ClearSelection()
@@ -1109,5 +1243,73 @@ Partial Class Records_t_StockCard_Rev_Medicines
             btnMedicineSave.Enabled = True
         End If
     End Sub
+
+
+
+
+
+    Private Sub loadApprovalOfficer()
+        Dim dt As New DataTable
+        dt = objDerived.GetDataTable("SELECT approvalid,full_name FROM ams.tbl_approval", CommandType.Text)
+
+        drpApprovedOfficer.DataSource = dt
+        drpApprovedOfficer.DataTextField = ("full_name")
+        drpApprovedOfficer.DataValueField = ("approvalid")
+        drpApprovedOfficer.DataBind()
+    End Sub
+
+    Protected Sub btnApprovalProceed_Click(sender As Object, e As EventArgs)
+        Dim approved As String
+        approved = objDerived.GetValue("select approvalid from ams.tbl_approval where approvalid='" & drpApprovedOfficer.SelectedValue() & "' and npassword = '" & DecryptEncrypt(txtApprovedPass.Text) & "'", CommandType.Text)
+
+        If approved = "" Then
+            MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Invalid Approving Officer / Password")
+            ModalPopupExtenderApproval.Show()
+        Else
+            btnMedicineSave.Text = "UPDATE"
+            btnMedicineSave.Enabled = True
+            txtApprovedPass.Text = ""
+            ModalPopupExtenderApproval.Hide()
+        End If
+    End Sub
+
+    Protected Sub btnApprovalCancel_Click(sender As Object, e As EventArgs)
+        txtApprovedPass.Text = ""
+        ModalPopupExtenderApproval.Hide()
+    End Sub
+
+    Private Function DecryptEncrypt(ByVal TheText As String) As String
+        Dim tempChar As String = Nothing
+        Dim i As Integer = 0
+
+        For i = 1 To TheText.Length
+            If Convert.ToInt32(TheText.Chars(i - 1)) < 128 Then
+                tempChar = System.Convert.ToString(Convert.ToInt32(TheText.Chars(i - 1)) + 100)
+            ElseIf Convert.ToInt32(TheText.Chars(i - 1)) > 128 Then
+                tempChar = System.Convert.ToString(Convert.ToInt32(TheText.Chars(i - 1)) - 100)
+            End If
+
+            TheText = TheText.Remove(i - 1, 1).Insert(i - 1, (CChar(ChrW(tempChar))).ToString())
+        Next i
+
+        Return TheText
+    End Function
+
+
+
+
+
+    Private Function ComputePPQSellingPrice(ByVal qtyPack As Decimal, ByVal unitCost As Decimal, ByVal percent As Decimal) As Decimal
+        Dim totalCostPerPack As Decimal = qtyPack * unitCost
+        Dim markupPerPack As Decimal = totalCostPerPack * (percent / 100D)
+        Dim sellingPricePerPack As Decimal = totalCostPerPack + markupPerPack
+
+        If qtyPack <= 0 Then
+            Return 0D
+        End If
+
+        Return Math.Round(sellingPricePerPack / qtyPack, 2)
+    End Function
+
 
 End Class

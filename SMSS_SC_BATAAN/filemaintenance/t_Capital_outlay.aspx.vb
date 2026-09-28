@@ -168,6 +168,9 @@ Partial Class t_Capital_outlay
                 Me.Page.Response.Redirect("~/UnauthorizedAccess.aspx")
             End If
 
+            hdnSaveToken.Value = Guid.NewGuid().ToString()
+            Session("LastSaveToken") = Nothing
+
             Dim stocks As Boolean
             stocks = True
 
@@ -182,7 +185,7 @@ Partial Class t_Capital_outlay
             txtdescription.Enabled = False
             Button2.Enabled = True
             txtprice.Enabled = False
-            btnadd.Enabled = False
+            'btnadd.Enabled = False
             btnedit.Enabled = False
             btnsave.Enabled = False
             btnaddP.Enabled = True
@@ -204,7 +207,7 @@ Partial Class t_Capital_outlay
             'txtprice.Attributes.Add("onchange", "this.value = formatCurrency(this.value); ")
 
             Try
-                PYear = objDerived.GetDataTable("select year from ams.APP where isContinuing <> 1", CommandType.Text)
+                PYear = objDerived.GetDataTable("select year from ams.APP where isContinuing <> 1 ORDER BY YEAR DESC", CommandType.Text)
                 Me.ddyear.DataSource = PYear
                 Me.ddyear.DataTextField = "year"
                 Me.ddyear.DataValueField = "year"
@@ -363,7 +366,7 @@ Partial Class t_Capital_outlay
 
         CType(gvstock.HeaderRow.Cells(3).FindControl("lblPrevious"), Label).Text = Session("CYPrev")
         CType(gvstock.HeaderRow.Cells(3).FindControl("lblCurrent"), Label).Text = Session("CYNow")
-        btnadd.Enabled = True
+        'btnadd.Enabled = True
 
 
     End Sub
@@ -419,7 +422,7 @@ Partial Class t_Capital_outlay
                 txtItemCode.Text = False
                 txtdescription.Enabled = False
                 txtprice.Enabled = False
-                btnadd.Enabled = True
+                'btnadd.Enabled = True
                 btnedit.Enabled = True
                 btnsave.Enabled = False
                 btncopyall.Enabled = True
@@ -477,7 +480,7 @@ Partial Class t_Capital_outlay
                 txtItemCode.Text = False
                 txtdescription.Enabled = False
                 txtprice.Enabled = False
-                btnadd.Enabled = True
+                'btnadd.Enabled = True
                 btnedit.Enabled = True
                 btnsave.Enabled = False
                 btncopyall.Enabled = True
@@ -529,6 +532,7 @@ Partial Class t_Capital_outlay
             PrevYear = "CY" & Me.ddyear.SelectedValue.ToString - 1
             currentYear = "CY" & Me.ddyear.SelectedValue.ToString
             Session("oldValuePrice") = gvstock.SelectedDataKey("price2")
+            btnadd.Enabled = True
         End If
 
     End Sub
@@ -558,13 +562,13 @@ Partial Class t_Capital_outlay
             ddUnit.Enabled = False
             txtdescription.Enabled = False
             txtprice.Enabled = False
-            btnadd.Enabled = False
+            'btnadd.Enabled = False
             btnedit.Enabled = False
             btnsave.Enabled = False
             txtprice.Text = "0.00"
             txtdescription.Text = ""
 
-            btnadd.Enabled = True
+            'btnadd.Enabled = True
 
             btnaddparticular.Enabled = True
             btnsaveparticular.Enabled = True
@@ -607,7 +611,7 @@ Partial Class t_Capital_outlay
             txtdescription.Enabled = True
             txtRpt.Enabled = True
             ddUnit.Enabled = True
-            btnadd.Enabled = True
+            'btnadd.Enabled = True
             btnedit.Enabled = False
             TextBoxGen.Text = ""
             TextBoxBrand.Text = ""
@@ -640,7 +644,7 @@ Partial Class t_Capital_outlay
             txtItemCode.Enabled = True
             txtprice.Enabled = True
             txtRpt.Enabled = True
-            btnadd.Enabled = True
+            'btnadd.Enabled = True
             btnedit.Enabled = False
             btnsave.Enabled = True
             txtprice.Text = "0.00"
@@ -649,6 +653,8 @@ Partial Class t_Capital_outlay
             txtItemCode.Text = ""
 
             Session("Action") = "Add"
+
+            btnadd.Enabled = False
         Catch ex As Exception
 
         End Try
@@ -671,7 +677,7 @@ Partial Class t_Capital_outlay
         btnadd.Enabled = False
         btnedit.Enabled = True
         btnsave.Enabled = True
-        btnadd.Enabled = False
+        'btnadd.Enabled = False
         btnedit.Enabled = True
         btnsave.Enabled = True
         FileUpload1.Enabled = True
@@ -705,6 +711,16 @@ Partial Class t_Capital_outlay
                 MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Please Select a Unit.")
                 Exit Sub
             End If
+
+            If hdnSaveToken.Value <> "" AndAlso hdnSaveToken.Value = CStr(Session("LastSaveToken")) Then
+                Session("LastSaveToken") = Nothing
+                Response.Redirect("~/filemaintenance/t_Capital_outlay.aspx", False)
+                Context.ApplicationInstance.CompleteRequest()
+                Exit Sub
+            End If
+
+            Session("LastSaveToken") = hdnSaveToken.Value
+            hdnSaveToken.Value = Guid.NewGuid().ToString()
 
 
             If Session("action") = "Add" Then
@@ -1384,7 +1400,7 @@ Partial Class t_Capital_outlay
                         ddUnit.Enabled = False
                         txtprice.Enabled = False
                         txtdescription.Enabled = False
-                        btnadd.Enabled = True
+                        'btnadd.Enabled = True
                         btnedit.Enabled = False
                         btnsave.Enabled = False
                         gvstock.SelectedIndex = -1
@@ -1398,6 +1414,8 @@ Partial Class t_Capital_outlay
                 Else
                     MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Please select particular.")
                 End If
+
+                btnadd.Enabled = True
                 '*****EDIT SAVING***
             ElseIf Session("action") = "Edit" Then
 
@@ -1449,7 +1467,7 @@ Partial Class t_Capital_outlay
 
                 ModalPopupExtender3.Show()
 
-
+                btnadd.Enabled = True
             End If
 
             Dim b As Integer
@@ -2188,7 +2206,7 @@ Partial Class t_Capital_outlay
         txtItemCode.Enabled = False
         txtdescription.Enabled = False
         txtprice.Enabled = False
-        btnadd.Enabled = True
+        'btnadd.Enabled = True
         btnedit.Enabled = False
         btnsave.Enabled = False
         txtremarks.Text = ""
@@ -2468,7 +2486,7 @@ Partial Class t_Capital_outlay
         txtItemCode.Enabled = False
         txtdescription.Enabled = False
         txtprice.Enabled = False
-        btnadd.Enabled = True
+        'btnadd.Enabled = True
         btnedit.Enabled = False
         btnsave.Enabled = False
         txtremarks.Text = ""
@@ -2498,7 +2516,7 @@ Partial Class t_Capital_outlay
 
     End Sub
 
-    Protected Sub DropDownList1_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles ddyear.SelectedIndexChanged
+    Protected Sub ddyear_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles ddyear.SelectedIndexChanged
         drpclass.Items.Clear()
         Me.gvstock.Columns(7).HeaderText = "Price " & "(" & HiddenField2.Value & ")"
         Me.gvstock.Columns(8).HeaderText = "Price " & "(" & HiddenField2.Value + 1 & ")"
@@ -2508,18 +2526,24 @@ Partial Class t_Capital_outlay
 
         Session("CYNow") = "CY" & ddyear.SelectedValue
 
-        dtClass = objDerived.GetDataTable("Select * from dbo.tbl_Classification where AllotmentClass_id = 3 order by ClassificationName  ", CommandType.Text)
-        drpclass.DataSource = dtClass
-        drpclass.DataTextField = "ClassificationName"
-        drpclass.DataValueField = "ClassificationID"
-        drpclass.Items.Insert(0, New ListItem("Select", "0"))
-        drpclass.DataBind()
 
         ddUnit.DataSource = objDerived.GetRecords("exec [AMS].[loadunit]", CommandType.Text)
         ddUnit.DataTextField = "description"
         ddUnit.DataValueField = "Unit_ID"
         ddUnit.DataBind()
         ddUnit.Items.Insert(0, New ListItem("Select", "0"))
+
+
+        DrpGenAcc = objDerived.GetDataTable(" SELECT DISTINCT GA_ID, GA_Title FROM dbo.vw_AccountWithClass WHERE AllotmentClass_ID = 3 ORDER BY GA_Title", CommandType.Text)
+
+        GenAccnt.DataSource = DrpGenAcc
+        GenAccnt.DataTextField = "GA_Title"
+        GenAccnt.DataValueField = "GA_ID"
+        GenAccnt.Items.Clear()
+        GenAccnt.DataBind()
+        GenAccnt.Items.Insert(0, New ListItem("Select", "0"))
+
+
 
     End Sub
 
@@ -2636,10 +2660,10 @@ Partial Class t_Capital_outlay
         Dim prc As Decimal = 0.00
         txtprice.Text = prc
         ddSubCategory.Items.Clear()
-        btnadd.Enabled = True
+        'btnadd.Enabled = True
         btnedit.Enabled = True
         ddParticular.Items.Clear()
-        GenAccnt.Items.Clear()
+
 
         If drpclass.SelectedItem.Value = 5 Then
             TextBoxGen.Enabled = "True"
@@ -2653,51 +2677,54 @@ Partial Class t_Capital_outlay
         'CHECK FOR SUBCLASS
         Dim count = objDerived.GetValue("Select count(*) from dbo.tbl_SubClassification where ClassificationID = '" & drpclass.SelectedItem.Value & "'", CommandType.Text)
         If count = 0 Then
-            If DrpSubClass.Text = "" Or DrpSubClass.Text = "Select" Then
+            'If DrpSubClass.Text = "" Or DrpSubClass.Text = "Select" Then
 
-                AddTrace("drpclass: " & drpclass.SelectedItem.Value)
-                DrpGenAcc = objDerived.GetDataTable("Exec [AMS].[FMgetGenAccntNoSubclass]'" & drpclass.SelectedItem.Value & "','" & 0 & "'", CommandType.Text)
-                GenAccnt.DataSource = DrpGenAcc
-                GenAccnt.DataTextField = "GA_title"
-                GenAccnt.DataValueField = "GA_ID"
-                GenAccnt.Items.Clear()
-                GenAccnt.DataBind()
-                GenAccnt.Items.Insert(0, New ListItem("Select", "0"))
+            '    AddTrace("drpclass: " & drpclass.SelectedItem.Value)
+            '    DrpGenAcc = objDerived.GetDataTable("Exec [AMS].[FMgetGenAccntNoSubclass]'" & drpclass.SelectedItem.Value & "','" & 0 & "'", CommandType.Text)
+            '    GenAccnt.DataSource = DrpGenAcc
+            '    GenAccnt.DataTextField = "GA_title"
+            '    GenAccnt.DataValueField = "GA_ID"
+            '    GenAccnt.Items.Clear()
+            '    GenAccnt.DataBind()
+            '    GenAccnt.Items.Insert(0, New ListItem("Select", "0"))
 
 
-            Else
+            'Else
 
-                DrpGenAcc = objDerived.GetDataTable("Exec [AMS].[FMgetGenAccnt]'" & drpclass.SelectedItem.Value & "','" & DrpSubClass.SelectedItem.Value & "','" & 0 & "'", CommandType.Text)
-                GenAccnt.DataSource = DrpGenAcc
-                GenAccnt.DataTextField = "GA_title"
-                GenAccnt.DataValueField = "GA_ID"
-                GenAccnt.Items.Clear()
-                GenAccnt.DataBind()
-                GenAccnt.Items.Insert(0, New ListItem("Select", "0"))
+            '    DrpGenAcc = objDerived.GetDataTable("Exec [AMS].[FMgetGenAccnt]'" & drpclass.SelectedItem.Value & "','" & DrpSubClass.SelectedItem.Value & "','" & 0 & "'", CommandType.Text)
+            '    GenAccnt.DataSource = DrpGenAcc
+            '    GenAccnt.DataTextField = "GA_title"
+            '    GenAccnt.DataValueField = "GA_ID"
+            '    GenAccnt.Items.Clear()
+            '    GenAccnt.DataBind()
+            '    GenAccnt.Items.Insert(0, New ListItem("Select", "0"))
 
-            End If
+            'End If
         Else
 
-            'IF HAS A SUBCLASS
-            DrpSubClassF = objDerived.GetDataTable("Select SubClassificationID, SubclassificationName from dbo.tbl_SubClassification where ClassificationID = '" & drpclass.SelectedItem.Value & "'", CommandType.Text)
-            DrpSubClass.DataSource = DrpSubClassF
-            DrpSubClass.DataTextField = "SubClassificationName"
-            DrpSubClass.DataValueField = "SubClassificationID"
-            DrpSubClass.Items.Clear()
-            DrpSubClass.DataBind()
-            DrpSubClass.Items.Insert(0, New ListItem("Select", "0"))
-
-            AddTrace("drpclass: " & drpclass.SelectedItem.Value)
-            DrpGenAcc = objDerived.GetDataTable("Exec [AMS].[FMgetGenAccntNoSubclass]'" & drpclass.SelectedItem.Value & "','" & 0 & "'", CommandType.Text)
-            GenAccnt.DataSource = DrpGenAcc
-            GenAccnt.DataTextField = "GA_title"
-            GenAccnt.DataValueField = "GA_ID"
-            GenAccnt.Items.Clear()
-            GenAccnt.DataBind()
-            GenAccnt.Items.Insert(0, New ListItem("Select", "0"))
 
 
         End If
+
+        'IF HAS A SUBCLASS
+        DrpSubClassF = objDerived.GetDataTable("Select SubClassificationID, SubclassificationName from dbo.tbl_SubClassification where GA_ID = '" & GenAccnt.SelectedValue & "' AND ClassificationID = '" & drpclass.SelectedItem.Value & "'", CommandType.Text)
+        DrpSubClass.DataSource = DrpSubClassF
+        DrpSubClass.DataTextField = "SubClassificationName"
+        DrpSubClass.DataValueField = "SubClassificationID"
+        DrpSubClass.Items.Clear()
+        DrpSubClass.DataBind()
+        DrpSubClass.Items.Insert(0, New ListItem("No Subclass", "0"))
+
+        'AddTrace("drpclass: " & drpclass.SelectedItem.Value)
+        'DrpGenAcc = objDerived.GetDataTable("Exec [AMS].[FMgetGenAccntNoSubclass]'" & drpclass.SelectedItem.Value & "','" & 0 & "'", CommandType.Text)
+        'GenAccnt.DataSource = DrpGenAcc
+        'GenAccnt.DataTextField = "GA_title"
+        'GenAccnt.DataValueField = "GA_ID"
+        'GenAccnt.Items.Clear()
+        'GenAccnt.DataBind()
+        'GenAccnt.Items.Insert(0, New ListItem("Select", "0"))
+
+
 
         Dim b As Integer
 
@@ -2726,10 +2753,61 @@ Partial Class t_Capital_outlay
 
         Session("Action") = "Add"
 
+        LoadItems()
 
     End Sub
 
     Protected Sub GenAccnt_SelectedIndexChanged(sender As Object, e As EventArgs)
+
+
+        dtClass = objDerived.GetDataTable("Select * from dbo.tbl_Classification where AllotmentClass_id = 3 order by ClassificationName", CommandType.Text)
+        drpclass.DataSource = dtClass
+        drpclass.DataTextField = "ClassificationName"
+        drpclass.DataValueField = "ClassificationID"
+        drpclass.Items.Clear()
+        drpclass.DataBind()
+        drpclass.Items.Insert(0, New ListItem("Select", "0"))
+
+        Dim selectedClassID As Object = objDerived.GetValue(" SELECT TOP 1 ClassificationID FROM dbo.vw_AccountWithClass WHERE GA_ID = '" & GenAccnt.SelectedValue & "'", CommandType.Text)
+
+        If selectedClassID Is Nothing OrElse IsDBNull(selectedClassID) OrElse selectedClassID.ToString() = "" Then
+            drpclass.SelectedIndex = -1
+        Else
+            Dim itemClass As ListItem = drpclass.Items.FindByValue(selectedClassID.ToString())
+
+            If itemClass IsNot Nothing Then
+                drpclass.ClearSelection()
+                itemClass.Selected = True
+            Else
+                drpclass.SelectedIndex = -1
+            End If
+        End If
+
+        DrpSubClass.Items.Clear()
+
+        Dim selectedSubClassID As Object = objDerived.GetValue("SELECT TOP 1 SubClassificationID FROM dbo.vw_AccountWithClass WHERE GA_ID = '" & GenAccnt.SelectedValue & "'", CommandType.Text)
+
+        If selectedSubClassID Is Nothing OrElse IsDBNull(selectedSubClassID) OrElse selectedSubClassID.ToString() = "" Then
+            DrpSubClass.SelectedIndex = -1
+        Else
+            DrpSubClassF = objDerived.GetDataTable("SELECT SubClassificationID, SubClassificationName FROM dbo.tbl_SubClassification WHERE GA_ID = '" & GenAccnt.SelectedValue & "' AND ClassificationID = '" & drpclass.SelectedValue & "' ORDER BY SubClassificationName", CommandType.Text)
+
+            DrpSubClass.DataSource = DrpSubClassF
+            DrpSubClass.DataTextField = "SubClassificationName"
+            DrpSubClass.DataValueField = "SubClassificationID"
+            DrpSubClass.Items.Clear()
+            DrpSubClass.DataBind()
+            DrpSubClass.Items.Insert(0, New ListItem("No Subclass", "0"))
+
+            Dim itemSubClass As ListItem = DrpSubClass.Items.FindByValue(selectedSubClassID.ToString())
+
+            If itemSubClass IsNot Nothing Then
+                DrpSubClass.ClearSelection()
+                itemSubClass.Selected = True
+            Else
+                DrpSubClass.SelectedIndex = -1
+            End If
+        End If
 
 
         Dim a As Integer
@@ -2786,13 +2864,30 @@ Partial Class t_Capital_outlay
             b = DrpSubClass.SelectedItem.Value
         End If
 
-        Dim d As Integer
 
+        drpclass.Enabled = True
+        DrpSubClass.Enabled = True
+
+        LoadItems()
+
+    End Sub
+
+    Public Sub LoadItems()
+
+        Dim a As Integer
+        If DrpSubClass.Text = "" Or DrpSubClass.Text = "Select" Then
+            a = 0
+        Else
+            a = DrpSubClass.SelectedItem.Value
+        End If
+
+        Dim d As Integer
         If DrpSubClass.Text = "" Or DrpSubClass.Text = "Select" Then
             d = 0
         Else
             d = DrpSubClass.SelectedItem.Value
         End If
+
 
 
 
@@ -2871,6 +2966,8 @@ Partial Class t_Capital_outlay
 
         gvstock.DataSource = pstock
         gvstock.DataBind()
+
+
         Dim cb As CheckBox
         For i As Integer = 0 To gvstock.Rows.Count - 1
             If pstock.Rows(i)("isused") = 0 Then
@@ -2885,6 +2982,13 @@ Partial Class t_Capital_outlay
 
         Next
 
+
+
+        If drpclass.SelectedValue = 0 And GenAccnt.SelectedValue = 0 Then
+            'btnadd.Enabled = False
+        Else
+            'btnadd.Enabled = True
+        End If
 
     End Sub
 
@@ -2984,6 +3088,8 @@ Partial Class t_Capital_outlay
         DropGA.Items.Clear()
         DropGA.DataBind()
 
+        DropGA.SelectedIndex = GenAccnt.SelectedValue
+
 
 
     End Sub
@@ -3011,6 +3117,7 @@ Partial Class t_Capital_outlay
 
         ddGASubClass.Items.Clear()
         ddGASubClass.DataBind()
+        ddGASubClass.SelectedValue = GenAccnt.SelectedValue
 
         DropGA.Items.Clear()
         DropGA.DataBind()
@@ -3019,6 +3126,21 @@ Partial Class t_Capital_outlay
     End Sub
 
     Protected Sub LinkButton6_Click(sender As Object, e As EventArgs)
+
+        If GenAccnt.SelectedIndex = 0 Or GenAccnt.SelectedIndex = -1 Then
+            MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Please Select a General Account.")
+            Exit Sub
+        End If
+
+        If drpclass.SelectedIndex = 0 Or drpclass.SelectedIndex = -1 OrElse
+            drpclass.SelectedItem Is Nothing OrElse
+            String.IsNullOrEmpty(drpclass.SelectedValue) OrElse
+            drpclass.SelectedValue = "0" Then
+
+            MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Please Select a Classification.")
+            Exit Sub
+        End If
+
         ddClassNewSub.Enabled = True
         NewSubClassificationTxt.Enabled = True
         ddClassNewSub.Enabled = False
@@ -3035,6 +3157,7 @@ Partial Class t_Capital_outlay
         ddGASubClass.DataValueField = "GA_ID"
         ddGASubClass.Items.Clear()
         ddGASubClass.DataBind()
+        ddGASubClass.SelectedValue = GenAccnt.SelectedValue
 
         SubClassificationGrd = objDerived.GetDataTable("Exec AMS.FMSubClassification '" & ddClassNewSub.SelectedItem.Value & "'", CommandType.Text)
         GvSubClass.DataSource = SubClassificationGrd
@@ -3063,6 +3186,7 @@ Partial Class t_Capital_outlay
         ddGASubClass.DataValueField = "GA_ID"
         ddGASubClass.Items.Clear()
         ddGASubClass.DataBind()
+        ddGASubClass.SelectedValue = GenAccnt.SelectedValue
 
         'Else
 
@@ -3364,6 +3488,7 @@ Partial Class t_Capital_outlay
         ddGASubClass.DataValueField = "GA_ID"
         ddGASubClass.Items.Clear()
         ddGASubClass.DataBind()
+        ddGASubClass.SelectedValue = GenAccnt.SelectedValue
 
         SubClassificationGrd = objDerived.GetDataTable("Exec AMS.FMSubClassification '" & ddClassNewSub.SelectedItem.Value & "'", CommandType.Text)
         GvSubClass.DataSource = SubClassificationGrd
@@ -3395,12 +3520,12 @@ Partial Class t_Capital_outlay
 
         'DrpGenAcc = objDerived.GetDataTable(" [AMS].[sp_FM_GvClass] null,'" & drpclass.SelectedItem.Value & "','" & DrpSubClass.SelectedItem.Value & "','" & 0 & "'", CommandType.Text)
 
-        GenAccnt.DataSource = DrpGenAcc
-        GenAccnt.DataTextField = "GA_title2"
-        GenAccnt.DataValueField = "GA_ID"
-        GenAccnt.Items.Clear()
-        GenAccnt.DataBind()
-        GenAccnt.Items.Insert(0, New ListItem("Select", "0"))
+        'GenAccnt.DataSource = DrpGenAcc
+        'GenAccnt.DataTextField = "GA_title2"
+        'GenAccnt.DataValueField = "GA_ID"
+        'GenAccnt.Items.Clear()
+        'GenAccnt.DataBind()
+        'GenAccnt.Items.Insert(0, New ListItem("Select", "0"))
 
         ModalPopupExtender7.Show()
     End Sub
@@ -3461,84 +3586,28 @@ Partial Class t_Capital_outlay
 
 
     End Sub
-    Protected Sub DrpClassSub_SelectedIndexChanged(sender As Object, e As EventArgs)
-        If Session("action") = "Edit" Then
-            If drpclass.SelectedItem.Value = 5 Then
+    Protected Sub DrpSubClass_SelectedIndexChanged(sender As Object, e As EventArgs)
 
+        Dim b As Integer
 
-                GenAccnt.SelectedItem.Value = objDerived.GetValue("select Ga_id from tblclassmatrix where item_id = '" & gvstock.SelectedDataKey(4) & "'", CommandType.Text)
-                ddParticular.SelectedItem.Value = gvstock.SelectedDataKey(5)
-                ddSubCategory.SelectedItem.Value = gvstock.SelectedDataKey(8)
-                TextBoxGen.Text = gvstock.SelectedDataKey(19)
-                Dim brand As Object = gvstock.SelectedDataKey(14)
-                TextBoxBrand.Text = If(DBNull.Value.Equals(brand), "", brand)
-                Dim Color As Object = gvstock.SelectedDataKey(15)
-                TextBoxColor.Text = If(DBNull.Value.Equals(Color), "", Color)
-                Dim size As Object = gvstock.SelectedDataKey(16)
-                TextBoxSize.Text = If(DBNull.Value.Equals(size), "", size)
-                txtdescription.Text = gvstock.SelectedDataKey("itemdesc")
-                ddUnit.SelectedItem.Value = gvstock.SelectedDataKey(2)
-                txtprice.Text = gvstock.SelectedDataKey(12)
-                txtItemCode.Text = gvstock.SelectedDataKey("Item_Code")
-            Else
-                GenAccnt.SelectedItem.Value = objDerived.GetValue("select Ga_id from tblclassmatrix where item_id = '" & gvstock.SelectedDataKey(4) & "'", CommandType.Text)
-                ddParticular.SelectedItem.Value = gvstock.SelectedDataKey(5)
-                ddSubCategory.SelectedItem.Value = gvstock.SelectedDataKey(8)
-
-                Dim brand As Object = gvstock.SelectedDataKey(14)
-                TextBoxBrand.Text = If(DBNull.Value.Equals(brand), "", brand)
-                Dim Color As Object = gvstock.SelectedDataKey(15)
-                TextBoxColor.Text = If(DBNull.Value.Equals(Color), "", Color)
-                Dim size As Object = gvstock.SelectedDataKey(16)
-                TextBoxSize.Text = If(DBNull.Value.Equals(size), "", size)
-
-                txtdescription.Text = gvstock.SelectedDataKey("itemdesc")
-                ddUnit.SelectedItem.Value = gvstock.SelectedDataKey(2)
-                txtprice.Text = gvstock.SelectedDataKey(12)
-                txtItemCode.Text = gvstock.SelectedDataKey("Item_Code")
-            End If
+        If DrpSubClass.Text = "" Or DrpSubClass.Text = "Select" Then
+            b = 0
         Else
-
-            Dim b As Integer
-
-            If DrpSubClass.Text = "" Or DrpSubClass.Text = "Select" Then
-                b = 0
-            Else
-                b = DrpSubClass.SelectedItem.Value
-            End If
-
-            Dim MultipleSubClassCheck As Integer = CInt(objDerived.GetValue("SELECT COUNT(SubClassificationID) FROM dbo.tbl_SubClassification WHERE ClassificationID = '" & drpclass.SelectedValue & "' AND SubclassificationName = '" & DrpSubClass.SelectedItem.Text & "'", CommandType.Text))
-
-            If MultipleSubClassCheck > 1 Then
-                b = 0
-            End If
-
-            AddTrace("Executed: [AMS].[sp_FM_GvClass] null,'" & drpclass.SelectedItem.Value & "','" & b & "','" & 0 & "'")
-            DrpGenAcc = objDerived.GetDataTable(" [AMS].[sp_FM_GvClass] null,'" & drpclass.SelectedItem.Value & "','" & b & "','" & 0 & "'", CommandType.Text)
-
-            GenAccnt.DataSource = DrpGenAcc
-            GenAccnt.DataTextField = "GA_title2"
-            GenAccnt.DataValueField = "GA_ID"
-            GenAccnt.Items.Clear()
-            GenAccnt.DataBind()
-            GenAccnt.Items.Insert(0, New ListItem("Select", "0"))
-
-            Session("CYNow") = "CY" & ddyear.SelectedItem.Text
-            Session("CYPrev") = "CY" & ddyear.SelectedItem.Text - 1
-            'pstock = objDerived.GetDataTable("exec [AMS].[FM_Stocks_perParticular] '" & GenAccnt.SelectedItem.value & "','" & 0 & "','" & drpclass.selectedItem.value & "','" & b & "','" & c & "','" & Session("CYPrev") & "','" & Session("CYNow") & "'", CommandType.Text)
-            ''pstock = objDerived.GetDataTable("exec [AMS].[FM_Stocks_perParticular] '" & GenAccnt.SelectedItem.value & "','" & "0" & "','" & Session("CYPrev") & "' , '" & Session("CYNow") & "','" & ddParticular.SelectedValue & "'", CommandType.Text)
-            'gvstock.DataSource = pstock
-            'gvstock.DataBind()
+            b = DrpSubClass.SelectedItem.Value
         End If
 
-        'Restriction for GA Dropdown if Subclass is empty.
-        If DrpSubClass.SelectedIndex = 0 Then
-            GenAccnt.Items.Clear()
-            GenAccnt.DataSource = Nothing
-            GenAccnt.DataBind()
-            GenAccnt.Items.Insert(0, New ListItem("Select", "0")) ' optional: keep a placeholder
-            Return
+        Dim MultipleSubClassCheck As Integer = CInt(objDerived.GetValue("SELECT COUNT(SubClassificationID) FROM dbo.tbl_SubClassification WHERE ClassificationID = '" & drpclass.SelectedValue & "' AND SubclassificationName = '" & DrpSubClass.SelectedItem.Text & "'", CommandType.Text))
+
+        If MultipleSubClassCheck > 1 Then
+            b = 0
         End If
+
+
+
+        Session("CYNow") = "CY" & ddyear.SelectedItem.Text
+        Session("CYPrev") = "CY" & ddyear.SelectedItem.Text - 1
+
+        LoadItems()
 
 
     End Sub
@@ -3686,5 +3755,14 @@ Partial Class t_Capital_outlay
         txtLife.Text = ""
 
     End Sub
+
+    Protected Sub btnClear_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btnClear.Click
+
+        RefreshPage()
+    End Sub
+    Protected Sub RefreshPage()
+        Response.Redirect("~/filemaintenance/t_Capital_outlay.aspx")
+    End Sub
+
 
 End Class

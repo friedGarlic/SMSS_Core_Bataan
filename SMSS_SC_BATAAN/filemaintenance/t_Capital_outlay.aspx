@@ -65,19 +65,28 @@
                                 <tr>
                                     <td style="width: 20%" class="column_RightBold">Calendar Year :</td>
                                     <td style="width: 80%" class="column_Left">
-                                        <asp:DropDownList ID="ddyear" runat="server" Width="100px" CssClass="drpdownCSS" AppendDataBoundItems="True" AutoPostBack="True" OnSelectedIndexChanged="DropDownList1_SelectedIndexChanged">
+                                        <asp:DropDownList ID="ddyear" runat="server" Width="100px" CssClass="drpdownCSS" AppendDataBoundItems="True" AutoPostBack="True" >
                                             <asp:ListItem>Select</asp:ListItem>
                                         </asp:DropDownList>
 
 
                                     </td>
                                 </tr>
+                                  <tr>
+                                    <td style="width: 20%" class="column_RightBold">General Account :</td>
+                                    <td style="width: 80%" class="column_Left">
+                                        <asp:DropDownList ID="GenAccnt" runat="server" Width="374px" CssClass="drpdownCSS" AppendDataBoundItems="True" AutoPostBack="True" OnSelectedIndexChanged="GenAccnt_SelectedIndexChanged">
+                                            <asp:ListItem>Select</asp:ListItem>
+                                        </asp:DropDownList>
+                                    </td>
+                                </tr>
+
                                 <tr>
                                     <td style="width: 20%" class="column_RightBold">Classification :</td>
                                     <td style="width: 80%" class="column_Left">
-                                        <asp:DropDownList ID="drpclass" runat="server" Width="200px" CssClass="drpdownCSS" AppendDataBoundItems="True" AutoPostBack="True" OnSelectedIndexChanged="drpclass_SelectedIndexChanged">
+                                        <asp:DropDownList ID="drpclass" runat="server" Width="200px" CssClass="drpdownCSS" AppendDataBoundItems="True" AutoPostBack="True" Enabled="false" OnSelectedIndexChanged="drpclass_SelectedIndexChanged">
                                         </asp:DropDownList>
-                                        <asp:LinkButton Style="font-family: 'Arial'" Font-Size="9pt" ID="LinkButton4" runat="server" Visible="True" Width="150px" Text="New Classification" OnClick="LinkButton4_Click"></asp:LinkButton>
+                                        <asp:LinkButton Style="font-family: 'Arial'" Font-Size="9pt" ID="LinkButton4" runat="server" Visible="False" Width="150px" Text="New Classification" OnClick="LinkButton4_Click"></asp:LinkButton>
                                     </td>
                                 </tr>
                                 <asp:HiddenField ID="hdnItemSubClass" runat="server" />
@@ -87,20 +96,13 @@
                                 <tr>
                                     <td style="width: 20%" class="column_RightBold">Sub Classification :</td>
                                     <td style="width: 80%" class="column_Left">
-                                        <asp:DropDownList ID="DrpSubClass" runat="server" Width="200px" CssClass="drpdownCSS" AppendDataBoundItems="True" AutoPostBack="True"  OnSelectedIndexChanged="DrpClassSub_SelectedIndexChanged">
+                                        <asp:DropDownList ID="DrpSubClass" runat="server" Width="200px" CssClass="drpdownCSS" AppendDataBoundItems="True" AutoPostBack="True" Enabled="false" OnSelectedIndexChanged="DrpSubClass_SelectedIndexChanged">
                                             <asp:ListItem>Select</asp:ListItem>
                                         </asp:DropDownList>
                                         <asp:LinkButton Style="font-family: 'Arial'" Font-Size="9pt" ID="LinkButton6" runat="server" Width="150px" Text="New Sub Classification" OnClick="LinkButton6_Click"></asp:LinkButton>
                                     </td>
                                 </tr>
-                                <tr>
-                                    <td style="width: 20%" class="column_RightBold">General Account :</td>
-                                    <td style="width: 80%" class="column_Left">
-                                        <asp:DropDownList ID="GenAccnt" runat="server" Width="374px" CssClass="drpdownCSS" AppendDataBoundItems="True" AutoPostBack="True" OnSelectedIndexChanged="GenAccnt_SelectedIndexChanged">
-                                            <asp:ListItem>Select</asp:ListItem>
-                                        </asp:DropDownList>
-                                    </td>
-                                </tr>
+                              
                                 <tr>
 
 
@@ -240,29 +242,33 @@
                         
                          
                             
-                            <tr>
-                                <td style="width: 105%"></td>
-                                <table width="100%">
-                                <tr>
-                                <td align="center" style="width: 98%">
-                                    <asp:Button ID="btnadd" runat="server" CausesValidation="False" CssClass="CSButton" Text="ADD" Width="150px" />
-                                    &nbsp;<asp:Button ID="btnedit" runat="server" CssClass="CSButton" Text="EDIT" Width="150px" />
-                                    &nbsp;<asp:Button ID="btnsave" runat="server"  CssClass="CSButton" OnClientClick="StartProgressBar();"   Text ="SAVE"  Width="150px" />
-                                    &nbsp;<asp:Button ID="btncopyall" runat="server" CssClass="CSButton" Enabled="False" Font-Overline="False" OnClick="btncopyall_Click" OnClientClick="StartProgressBar();" Text="Copy All previous price under this Account" Width="300px" />
-                                    <cc1:ConfirmButtonExtender ID="ConfirmButtonExtender1" runat="server" ConfirmText="Are you sure you want to save this transaction?" Enabled="True" TargetControlID="btnsave">
-                                    </cc1:ConfirmButtonExtender>
-                                    <cc1:FilteredTextBoxExtender ID="FilteredTextBoxExtender2" runat="server" FilterType="Numbers" TargetControlID="txtRpt" ValidChars="0123456789">
-                                    </cc1:FilteredTextBoxExtender>
-                                    <cc1:FilteredTextBoxExtender ID="FilteredTextBoxExtender1" runat="server" TargetControlID="txtprice" ValidChars="0123456789.,">
-                                    </cc1:FilteredTextBoxExtender>
-                                    <asp:HiddenField ID="HiddenField1" runat="server" />
-                                    <asp:HiddenField ID="HiddenField2" runat="server" />
-                                    <asp:HiddenField ID="HiddenField3" runat="server" />
-                                </td>
-                                <td style="width: 1%"></td>
-                                    </td>
-                        </tr>
-                            </tr>
+                          <tr>
+    <td style="width: 105%"></td>
+    <table width="100%">
+    <tr>
+    <td align="center" style="width: 98%">
+        <asp:Button ID="btnadd" runat="server" CausesValidation="False" Font-Bold="true" ForeColor="blue" Enabled="true" Text="New" Width="80px" Height="26px" />
+        &nbsp;<asp:Button ID="btnedit" runat="server" Font-Bold="true" ForeColor="blue" Text="Edit" Width="80px" Height="26px" />
+        &nbsp;<asp:Button ID="btnsave" runat="server" Font-Bold="true" ForeColor="blue" Height="26px" OnClientClick="StartProgressBar();" Text="Save" Width="80px" />
+        &nbsp;<asp:Button ID="btnClear" runat="server" Font-Bold="true" ForeColor="blue" Height="26px" OnClientClick="StartProgressBar();" Text="Clear" Width="80px" />
+        &nbsp;<asp:Button ID="btncopyall" runat="server" Enabled="False" Font-Bold="true" Height="26px" ForeColor="blue" OnClick="btncopyall_Click" OnClientClick="StartProgressBar();" Text="Copy All previous price under this Account" Width="300px" />
+
+        <cc1:ConfirmButtonExtender ID="ConfirmButtonExtender1" runat="server" ConfirmText="Are you sure you want to save this transaction?" Enabled="True" TargetControlID="btnsave">
+        </cc1:ConfirmButtonExtender>
+        <cc1:FilteredTextBoxExtender ID="FilteredTextBoxExtender2" runat="server" FilterType="Numbers" TargetControlID="txtRpt" ValidChars="0123456789">
+        </cc1:FilteredTextBoxExtender>
+        <cc1:FilteredTextBoxExtender ID="FilteredTextBoxExtender1" runat="server" TargetControlID="txtprice" ValidChars="0123456789.,">
+        </cc1:FilteredTextBoxExtender>
+        <asp:HiddenField ID="HiddenField1" runat="server" />
+        <asp:HiddenField ID="HiddenField2" runat="server" />
+        <asp:HiddenField ID="HiddenField3" runat="server" />
+        <asp:HiddenField ID="hdnSaveToken" runat="server" />
+
+    </td>
+    <td style="width: 1%"></td>
+        </td>
+    </tr>
+</tr>
                             <tr>
                                 <td style="width: 1%"></td>
                                 <td style="width: 98%; height: 10px"></td>

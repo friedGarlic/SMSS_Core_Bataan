@@ -6,83 +6,150 @@ Partial Class Records_t_StockCard_Rev_Food
 
     Private objDerived As New BaseClasses.AccountClassAcounts
 
-    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+    Protected Sub Page_Load(
+    ByVal sender As Object,
+    ByVal e As System.EventArgs
+) Handles Me.Load
+
         If Not Page.IsPostBack Then
-            Dim classification As String = objDerived.GetValue("SELECT ClassificationId FROM dbo.tbl_Classification WHERE ClassificationName = 'Food'", CommandType.Text)
+
+            Dim classification As String = objDerived.GetValue(
+            "SELECT ClassificationId " &
+            "FROM dbo.tbl_Classification " &
+            "WHERE ClassificationName = 'Food'",
+            CommandType.Text
+        )
+
             Session("ClassificationID") = classification
 
-            LoadSubClassifications()
             LoadGLAccounts()
+
+            DrpSubClass.Items.Clear()
+            DrpSubClass.Items.Insert(
+            0,
+            New ListItem("No Subclass", "0")
+        )
+            DrpSubClass.Enabled = True
+
             ClearItemDesc()
-            LoadWarehouse()
             ClearTextBoxesFood()
             BindEmptyLedger()
+
         End If
     End Sub
-
     Private Sub LoadSubClassifications()
+        DrpSubClass.Items.Clear()
+
+        If ddGlAccount.SelectedValue Is Nothing OrElse
+       ddGlAccount.SelectedValue = "" OrElse
+       ddGlAccount.SelectedValue = "0" Then
+
+            DrpSubClass.Items.Insert(
+            0,
+            New ListItem("No Subclass", "0")
+        )
+
+            DrpSubClass.Enabled = True
+            Exit Sub
+        End If
+
+        Dim sql As String =
+        "SELECT DISTINCT " &
+        "    SubClassificationID, " &
+        "    SubClassificationName " &
+        "FROM dbo.tbl_SubClassification " &
+        "WHERE ClassificationID = '" & Session("ClassificationID") & "' " &
+        "AND GA_ID = '" & ddGlAccount.SelectedValue & "' " &
+        "ORDER BY SubClassificationName"
+
+        AddTrace(sql)
+
         Dim dt As DataTable = objDerived.GetDataTable(
-                "select distinct a.SubClassificationID,a.SubClassificationName " &
-                "From tbl_SubClassification As a " &
-                " inner join tblclassmatrix as b on a.SubClassificationID = b.SubClassificationID " &
-                " inner join tbl_Classification As c On b.classificationid = c.ClassificationId " &
-                " where c.ClassificationId = '" & Session("ClassificationID") & "'",
-                CommandType.Text
-            )
+        sql,
+        CommandType.Text
+    )
 
-        Dim dr As DataRow = dt.NewRow()
-        dr("SubClassificationID") = 0
-        dr("SubClassificationName") = "Select"
-        dt.Rows.InsertAt(dr, 0)
+        If dt IsNot Nothing Then
 
-        DrpSubClass.DataSource = dt
-        DrpSubClass.DataTextField = "SubClassificationName"
-        DrpSubClass.DataValueField = "SubClassificationID"
-        DrpSubClass.DataBind()
+            Dim dr As DataRow = dt.NewRow()
+            dr("SubClassificationID") = 0
+            dr("SubClassificationName") = "No Subclass"
+            dt.Rows.InsertAt(dr, 0)
 
-        ddGlAccount.Items.Clear()
-        ddGlAccount.Items.Insert(0, New ListItem("Select", "0"))
+            DrpSubClass.DataSource = dt
+            DrpSubClass.DataTextField = "SubClassificationName"
+            DrpSubClass.DataValueField = "SubClassificationID"
+            DrpSubClass.DataBind()
 
+        Else
 
+            DrpSubClass.Items.Insert(
+            0,
+            New ListItem("No Subclass", "0")
+        )
 
+        End If
 
+        DrpSubClass.Enabled = True
     End Sub
 
     Private Sub LoadGLAccounts()
         ddGlAccount.Items.Clear()
+        Dim sql As String =
+            "SELECT DISTINCT " &
+            "    ga.GA_ID, " &
+            "    ga.GA_Title, " &
+            "    cm.ga_id AS Matrix_GA_ID " &
+            "FROM dbo.tbl_SubClassification AS sc " &
+            "INNER JOIN dbo.view_Accntg_gen_accnt AS ga " &
+            "    ON ga.GA_ID = sc.GA_ID " &
+            "LEFT JOIN dbo.tblclassmatrix AS cm " &
+            "    ON cm.classificationid = sc.ClassificationID " &
+            "    AND cm.ga_id = sc.GA_ID " &
+            "WHERE sc.ClassificationID = '" & Session("ClassificationID") & "' " &
+            "UNION " &
+            "SELECT DISTINCT " &
+            "    ga.GA_ID, " &
+            "    ga.GA_Title, " &
+            "    cm.ga_id AS Matrix_GA_ID " &
+            "FROM dbo.tblclassmatrix AS cm " &
+            "INNER JOIN dbo.view_Accntg_gen_accnt AS ga " &
+            "    ON ga.GA_ID = cm.ga_id " &
+            "WHERE cm.classificationid = '" & Session("ClassificationID") & "' " &
+            "ORDER BY GA_Title;"
 
-        Dim dt As DataTable = Nothing
+        AddTrace(sql)
 
-        If DrpSubClass.SelectedValue Is Nothing OrElse DrpSubClass.SelectedValue = "0" Then
+        Dim dt As DataTable = objDerived.GetDataTable(
+        sql,
+        CommandType.Text
+    )
 
-            dt = objDerived.GetDataTable(
-            "EXEC AMS.FMgetGenAccntNoSubClass '" & Session("ClassificationID") & "', 0",
-            CommandType.Text
-        )
-
-        Else
-            AddTrace("Exec dbo.sp_Accounts_Category_v1_02152022 '" & 2 & "','" & Session("ClassificationID") & "','" & DrpSubClass.SelectedItem.Value & "'")
-
-            dt = objDerived.GetDataTable(
-            "Exec dbo.sp_Accounts_Category_v1_02152022 '" & 2 & "','" & Session("ClassificationID") & "','" & DrpSubClass.SelectedItem.Value & "'",
-            CommandType.Text
-        )
-        End If
-
-        'Insert "Select" row
         If dt IsNot Nothing Then
+
             Dim dr As DataRow = dt.NewRow()
             dr("GA_ID") = 0
             dr("GA_Title") = "Select"
             dt.Rows.InsertAt(dr, 0)
+
+            ddGlAccount.DataSource = dt
+            ddGlAccount.DataTextField = "GA_Title"
+            ddGlAccount.DataValueField = "GA_ID"
+            ddGlAccount.DataBind()
+
+        Else
+
+            ddGlAccount.Items.Insert(
+            0,
+            New ListItem("Select", "0")
+        )
+
         End If
 
-        ddGlAccount.DataSource = dt
-        ddGlAccount.DataTextField = "GA_Title"
-        ddGlAccount.DataValueField = "GA_ID"
-        ddGlAccount.DataBind()
-    End Sub
+        ddGlAccount.Enabled = True
 
+        LoadWarehouse()
+    End Sub
 
     Public Sub LoadWarehouse()
         Dim dt As DataTable = objDerived.GetDataTable("select warehouse_id,wname From ams.loc_warehouse where isUsed='True' order by wname", CommandType.Text)
@@ -100,8 +167,7 @@ Partial Class Records_t_StockCard_Rev_Food
             BindEmptyLedger()
             Exit Sub
         End If
-        AddTrace("asdasdas")
-        AddTrace(ddlItemDesc2.SelectedValue)
+
         Dim dtStock As DataTable = objDerived.GetDataTable(
             "EXEC [AMS].[sp_SuppliesLedger] '" & ddlItemDesc2.SelectedValue & "'",
             CommandType.Text
@@ -124,49 +190,55 @@ Partial Class Records_t_StockCard_Rev_Food
 
     Private Sub ClearItemDesc()
         ddlItemDesc2.Items.Clear()
-        ddlItemDesc2.Items.Insert(0, New ListItem("Select", "0"))
-        ddlItemDesc2.Enabled = False
+
+        ddlItemDesc2.Items.Insert(
+        0,
+        New ListItem("Select", "0")
+    )
+
+        ddlItemDesc2.Enabled = True
     End Sub
 
     Private Sub LoadItemDesc()
 
-        Dim classId As String = Session("ClassificationID").ToString()
-        Dim subClassId As String = If(DrpSubClass.SelectedValue Is Nothing, "0", DrpSubClass.SelectedValue.ToString())
+        If ddGlAccount.SelectedValue Is Nothing OrElse
+       ddGlAccount.SelectedValue = "" OrElse
+       ddGlAccount.SelectedValue = "0" Then
 
-        Dim sql As String = ""
-
-        'If no subclass selected (0), show items with NULL/0 SubClassificationID under the selected ClassificationID
-        If subClassId = "0" Then
-            sql =
-            "SELECT DISTINCT " &
-            "   i.Item_ID, i.ItemCompleteDesc AS Item_Desc " &
-            "FROM dbo.m_item AS i " &
-            "LEFT JOIN dbo.m_item_detail AS d ON d.Item_ID = i.Item_ID " &
-            "LEFT JOIN dbo.tbl_SubClassification AS sc ON sc.SubClassificationID = i.SubClassificationID " &
-            "WHERE i.ClassificationID = " & classId & " " &
-            "  AND (i.SubClassificationID IS NULL OR i.SubClassificationID = 0) " &
-            "ORDER BY i.ItemCompleteDesc"
-        Else
-            'If a subclass is selected, filter by that SubClassificationID under the selected ClassificationID
-            sql =
-            "SELECT DISTINCT " &
-            "   i.Item_ID, i.ItemCompleteDesc AS Item_Desc " &
-            "FROM dbo.m_item AS i " &
-            "LEFT JOIN dbo.m_item_detail AS d ON d.Item_ID = i.Item_ID " &
-            "LEFT JOIN dbo.tbl_SubClassification AS sc ON sc.SubClassificationID = i.SubClassificationID " &
-            "WHERE i.ClassificationID = " & classId & " " &
-            "  AND i.SubClassificationID = " & subClassId & " " &
-            "ORDER BY i.ItemCompleteDesc"
+            ClearItemDesc()
+            Exit Sub
         End If
 
-        Dim dtitem As DataTable = objDerived.GetDataTable(sql, CommandType.Text)
+        Dim sqlQuery As String = "SELECT DISTINCT " &
+        "dbo.m_item.Item_ID, " &
+        "dbo.m_item.ItemCompleteDesc as Item_Desc " &
+        "FROM " &
+        "dbo.m_item " &
+        "INNER JOIN dbo.tbl_Classification ON dbo.m_item.ClassificationID = dbo.tbl_Classification.ClassificationId " &
+        "INNER JOIN dbo.m_item_detail ON dbo.m_item.Item_ID = dbo.m_item_detail.Item_ID " &
+        "INNER JOIN dbo.tblclassmatrix AS cm ON cm.item_id = dbo.m_item.Item_ID " &
+        "LEFT JOIN dbo.tbl_SubCategory ON dbo.m_item.SubCategoryID = dbo.tbl_SubCategory.SubCategoryID " &
+        "LEFT JOIN dbo.tbl_SubClassification ON dbo.tbl_SubClassification.SubClassificationID = dbo.m_item.SubClassificationID " &
+        "WHERE " &
+        "dbo.m_item.SubClassificationID = " & DrpSubClass.SelectedValue & " " &
+        "AND cm.ga_id = " & ddGlAccount.SelectedValue & " " &
+        "ORDER BY dbo.m_item.ItemCompleteDesc"
 
-        If dtitem IsNot Nothing Then
-            Dim dr As DataRow = dtitem.NewRow()
-            dr("Item_ID") = 0
-            dr("Item_Desc") = "Select"
-            dtitem.Rows.InsertAt(dr, 0)
+        ' Add trace for the SQL query
+        AddTrace("Executing SQL Query: " & sqlQuery)
+
+        Dim dtitem As DataTable = objDerived.GetDataTable(sqlQuery, CommandType.Text)
+
+
+        If dtitem Is Nothing Then
+            ClearItemDesc()
+            Exit Sub
         End If
+
+        Dim dr As DataRow = dtitem.NewRow()
+        dr("Item_ID") = 0
+        dr("Item_Desc") = "Select"
+        dtitem.Rows.InsertAt(dr, 0)
 
         ddlItemDesc2.DataSource = dtitem
         ddlItemDesc2.DataTextField = "Item_Desc"
@@ -180,22 +252,34 @@ Partial Class Records_t_StockCard_Rev_Food
 
 
 
+    Protected Sub DrpSubClass_SelectedIndexChanged(
+    ByVal sender As Object,
+    ByVal e As System.EventArgs
+)
 
-    Protected Sub DrpSubClass_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs)
-        LoadGLAccounts()
-        LoadWarehouse()
         ClearTextBoxesFood()
-        BindEmptyLedger()
-    End Sub
 
-    Protected Sub ddGlAccount_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs)
         hdnGAId.Value = ddGlAccount.SelectedValue
 
         LoadItemDesc()
-        LoadWarehouse()
+        BindEmptyLedger()
+
+    End Sub
+
+    Protected Sub ddGlAccount_SelectedIndexChanged(
+    ByVal sender As Object,
+    ByVal e As System.EventArgs
+)
 
         ClearTextBoxesFood()
-        BindEmptyLedger()    ' <-- better than LoadLedger() at this stage
+
+        hdnGAId.Value = ddGlAccount.SelectedValue
+
+        LoadSubClassifications()
+        ClearItemDesc()
+        LoadItemDesc()
+        BindEmptyLedger()
+
     End Sub
 
 
@@ -210,7 +294,12 @@ Partial Class Records_t_StockCard_Rev_Food
     Protected Sub btnFoodSave_Click(ByVal sender As Object, ByVal e As EventArgs)
         If btnFoodSave.Text = "SAVE" Then
             save()
-        Else
+
+        ElseIf btnFoodSave.Text = "EDIT" Then
+            loadApprovalOfficer()
+            ModalPopupExtenderApproval.Show()
+
+        ElseIf btnFoodSave.Text = "UPDATE" Then
             update()
         End If
     End Sub
@@ -427,7 +516,7 @@ Partial Class Records_t_StockCard_Rev_Food
             Dim StockID As Long = objStock.save()
             If StockID <= 0 Then Throw New Exception("Failed to save AMS.Stock.")
 
-            objDerived.Execute("UPDATE AMS.Stock SET Received_ID = " & rcvID & " WHERE StockID = " & StockID, CommandType.Text)
+            objDerived.Execute("UPDATE AMS.Stock SET AIR_HDR_ID = 0, Received_ID = " & rcvID & " WHERE StockID = " & StockID, CommandType.Text)
 
             '========================
             ' STOCK LEDGER (Starting Balance)
@@ -816,21 +905,36 @@ Partial Class Records_t_StockCard_Rev_Food
         txtRack.Text = GetStr("Rack")
         txtBin.Text = GetStr("Bin")
 
-        btnFoodSave.Text = "UPDATE"
+        btnFoodSave.Text = "EDIT"
     End Sub
 
     Protected Sub grdLedger_RowDataBound(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewRowEventArgs)
+
+        If e.Row.RowType = DataControlRowType.DataRow Then
+
+            Dim cbInspection As CheckBox = TryCast(e.Row.FindControl("cbInspection"), CheckBox)
+            Dim TransType As String = ""
+
+            If e.Row.DataItem IsNot Nothing Then
+                TransType = DataBinder.Eval(e.Row.DataItem, "Trans_Type").ToString().Trim()
+            End If
+
+            If cbInspection IsNot Nothing Then
+                If TransType = "Starting Balance" Or TransType = "Starting Inventory" Then
+                    cbInspection.Enabled = True
+                Else
+                    cbInspection.Checked = False
+                    cbInspection.Enabled = False
+                End If
+            End If
+
+        End If
+
     End Sub
 
-    Private Sub AddTrace(ByVal message As String)
-        ' Prevent single quotes in the message from breaking JavaScript
-        Dim safeMessage As String = message.Replace("'", "\'")
-        ScriptManager.RegisterClientScriptBlock(Me, Me.GetType(),
-        "TraceKey" & Guid.NewGuid().ToString("N"),
-        "console.log('" & safeMessage & "');",
-        True)
+    Private Sub AddTrace(ByVal msg As String)
+        System.Diagnostics.Debug.WriteLine(msg)
     End Sub
-
 
     Private Sub BindEmptyLedger()
         Dim dt As New DataTable()
@@ -908,5 +1012,57 @@ Partial Class Records_t_StockCard_Rev_Food
         btnFoodSave.Text = "SAVE"
         btnFoodSave.Enabled = True
     End Sub
+
+
+
+
+
+
+    Private Sub loadApprovalOfficer()
+        Dim dt As New DataTable
+        dt = objDerived.GetDataTable("SELECT approvalid,full_name FROM ams.tbl_approval", CommandType.Text)
+
+        drpApprovedOfficer.DataSource = dt
+        drpApprovedOfficer.DataTextField = ("full_name")
+        drpApprovedOfficer.DataValueField = ("approvalid")
+        drpApprovedOfficer.DataBind()
+    End Sub
+
+    Protected Sub btnApprovalProceed_Click(sender As Object, e As EventArgs)
+        Dim approved As String
+        approved = objDerived.GetValue("select approvalid from ams.tbl_approval where approvalid='" & drpApprovedOfficer.SelectedValue() & "' and npassword = '" & DecryptEncrypt(txtApprovedPass.Text) & "'", CommandType.Text)
+
+        If approved = "" Then
+            MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Invalid Approving Officer / Password")
+            ModalPopupExtenderApproval.Show()
+        Else
+            btnFoodSave.Text = "UPDATE"
+            btnFoodSave.Enabled = True
+            txtApprovedPass.Text = ""
+            ModalPopupExtenderApproval.Hide()
+        End If
+    End Sub
+
+    Protected Sub btnApprovalCancel_Click(sender As Object, e As EventArgs)
+        txtApprovedPass.Text = ""
+        ModalPopupExtenderApproval.Hide()
+    End Sub
+
+    Private Function DecryptEncrypt(ByVal TheText As String) As String
+        Dim tempChar As String = Nothing
+        Dim i As Integer = 0
+
+        For i = 1 To TheText.Length
+            If Convert.ToInt32(TheText.Chars(i - 1)) < 128 Then
+                tempChar = System.Convert.ToString(Convert.ToInt32(TheText.Chars(i - 1)) + 100)
+            ElseIf Convert.ToInt32(TheText.Chars(i - 1)) > 128 Then
+                tempChar = System.Convert.ToString(Convert.ToInt32(TheText.Chars(i - 1)) - 100)
+            End If
+
+            TheText = TheText.Remove(i - 1, 1).Insert(i - 1, (CChar(ChrW(tempChar))).ToString())
+        Next i
+
+        Return TheText
+    End Function
 
 End Class
