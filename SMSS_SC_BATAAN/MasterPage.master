@@ -444,34 +444,42 @@ document.getElementById('theButton').addEventListener('click', function(event) {
                 <tr runat="server" id="UserRow">
                 
                     <td colspan="7" style="font-weight: bold; font-size: 10pt; width: 1020px; font-family: Tahoma; text-align: Right; vertical-align: middle; border-bottom: black 1px solid; height: 25px; background-color: #9DCCFA;">
-                      <table width="100%">
-                          <tr>
-                               <td style="width:60%">
-                                 <marquee>
-                                    <asp:Label ID="Label3" runat="server" Text=""></asp:Label>
-                                 </marquee>
-                               </td>
+                        <table width="100%" style="table-layout: auto; border-collapse: collapse;">
+                            <tr>
+                                <td style="width:100%; vertical-align: middle;">
+                                    <marquee>
+                                        <asp:Label ID="Label3" runat="server" Text=""></asp:Label>
+                                    </marquee>
+                                </td>
 
-                               <td style="width:5%">Welcome,</td>
-                               <td style="width:10%"><asp:Label ID="lblUser" runat="server" ForeColor="Black" Font-Bold="True" Font-Names="Tahoma" Font-Size="10pt"></asp:Label> |</td>
-                               <td style="width:5%"> <asp:LinkButton ID="LinkButton3" runat="server" Font-Bold="True" ForeColor="Black"
-                        Style="font-weight: bold; font-size: 9pt; font-family: Tahoma; text-decoration: underline">Home</asp:LinkButton>
-                            |</td>
-                               <td style="width:10%"><asp:Button ID="btnNotifications" runat="server" Text="Notifications" OnClick="btnNotifications_Click" />
-                            <asp:Panel ID="pnlNotifications" runat="server" CssClass="notification-dropdown-panel" Visible="False">
-                                <asp:Repeater ID="rptNotifications" runat="server">
-                                    <ItemTemplate>
-                                        <asp:LinkButton ID="lnkNotification" runat="server" Text='<%# Eval("Description") %>' PostBackUrl='<%# Eval("HomeUrl") %>' />
-                                        <br />
-                                    </ItemTemplate>
-                                </asp:Repeater>
-                            </asp:Panel>
-                            |</td>
-                               <td style="width:5%"> <asp:LinkButton ID="LinkButton1" runat="server" Font-Bold="True" ForeColor="Black"
-                        Style="font-weight: bold; font-size: 9pt; font-family: Tahoma; text-decoration: underline">Logout</asp:LinkButton></td>
-                          </tr>
-                      </table>
-                        
+                                <td style="width:1%; vertical-align: middle; white-space: nowrap;">Welcome,</td>
+                                <td style="width:1%; vertical-align: middle; white-space: nowrap;">
+                                    <asp:Label ID="lblUser" runat="server" ForeColor="Black" Font-Bold="True" Font-Names="Tahoma" Font-Size="10pt"></asp:Label>
+                                </td>
+                                <td style="width:1%; vertical-align: middle; white-space: nowrap;">|</td>
+                                <td style="width:1%; vertical-align: middle; white-space: nowrap;">
+                                    <asp:LinkButton ID="LinkButton3" runat="server" Font-Bold="True" ForeColor="Black"
+                                        Style="font-weight: bold; font-size: 9pt; font-family: Tahoma; text-decoration: underline">Home</asp:LinkButton>
+                                </td>
+                                <td style="width:1%; vertical-align: middle; white-space: nowrap;">|</td>
+                                <td style="width:1%; vertical-align: middle; white-space: nowrap;">
+                                    <asp:Button ID="btnNotifications" runat="server" Text="Notifications" OnClick="btnNotifications_Click" />
+                                    <asp:Panel ID="pnlNotifications" runat="server" CssClass="notification-dropdown-panel" Visible="False">
+                                        <asp:Repeater ID="rptNotifications" runat="server">
+                                            <ItemTemplate>
+                                                <asp:LinkButton ID="lnkNotification" runat="server" Text='<%# Eval("Description") %>' PostBackUrl='<%# Eval("HomeUrl") %>' />
+                                                <br />
+                                            </ItemTemplate>
+                                        </asp:Repeater>
+                                    </asp:Panel>
+                                </td>
+                                <td style="width:1%; vertical-align: middle; white-space: nowrap;">|</td>
+                                <td style="width:1%; vertical-align: middle; white-space: nowrap;">
+                                    <asp:LinkButton ID="LinkButton1" runat="server" Font-Bold="True" ForeColor="Black"
+                                        Style="font-weight: bold; font-size: 9pt; font-family: Tahoma; text-decoration: underline">Logout</asp:LinkButton>
+                                </td>
+                            </tr>
+                        </table>
                           
 
                             

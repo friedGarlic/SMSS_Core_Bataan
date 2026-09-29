@@ -151,11 +151,43 @@ Partial Class Records_t_StockCard_Rev_Main_MRO_Equipment
         BindMROEquipmentStockList()
     End Sub
 
-    Protected Sub grdMROEquipmentStockList_RowDataBound(ByVal sender As Object, ByVal e As GridViewRowEventArgs)
+    Protected Sub grdMROEquipmentStockList_RowDataBound(
+ByVal sender As Object,
+ByVal e As GridViewRowEventArgs)
+
         If e.Row.RowType = DataControlRowType.DataRow Then
-            e.Row.Attributes("style") = "cursor:pointer;"
-            e.Row.Attributes("onclick") = Page.ClientScript.GetPostBackClientHyperlink(grdMROEquipmentStockList, "Select$" & e.Row.RowIndex, True)
+
+            Dim itemIdObject As Object =
+        DataBinder.Eval(
+            e.Row.DataItem,
+            "Item_ID"
+        )
+
+            Dim itemId As String = ""
+
+            If itemIdObject IsNot Nothing AndAlso
+        Not Convert.IsDBNull(itemIdObject) Then
+
+                itemId = itemIdObject.ToString()
+
+            End If
+
+            ' Only actual MRO Equipment records are clickable.
+            If Not String.IsNullOrEmpty(itemId) Then
+
+                e.Row.Attributes("onclick") =
+            Page.ClientScript.GetPostBackClientHyperlink(
+                grdMROEquipmentStockList,
+                "Select$" & e.Row.RowIndex,
+                True
+            )
+
+                e.Row.Style("cursor") = "pointer"
+
+            End If
+
         End If
+
     End Sub
 
     ' Now accepts Item_ID instead of POHdr_ID
@@ -219,54 +251,285 @@ Partial Class Records_t_StockCard_Rev_Main_MRO_Equipment
         End If
     End Sub
 
-    Protected Sub grdMROEquipmentStockList_SelectedIndexChanged(ByVal sender As Object, ByVal e As EventArgs)
+    Protected Sub grdMROEquipmentStockList_SelectedIndexChanged(
+ByVal sender As Object,
+ByVal e As EventArgs)
+
         Dim stockId As Long = 0
         Dim itemId As Long = 0
 
-        ' Add trace for debugging
-        If grdMROEquipmentStockList.SelectedDataKey IsNot Nothing Then
-            If grdMROEquipmentStockList.SelectedDataKey.Values("Item_ID") IsNot Nothing Then
-                AddTrace("Item_ID: " & grdMROEquipmentStockList.SelectedDataKey.Values("Item_ID").ToString())
-            End If
-            If grdMROEquipmentStockList.SelectedDataKey.Values("Stock_ID") IsNot Nothing Then
-                AddTrace("Stock_ID: " & grdMROEquipmentStockList.SelectedDataKey.Values("Stock_ID").ToString())
-            End If
+        If grdMROEquipmentStockList.SelectedDataKey Is Nothing Then
+            Exit Sub
         End If
 
-        If grdMROEquipmentStockList.SelectedDataKey IsNot Nothing Then
-            If grdMROEquipmentStockList.SelectedDataKey.Values("Stock_ID") IsNot Nothing Then
-                Long.TryParse(grdMROEquipmentStockList.SelectedDataKey.Values("Stock_ID").ToString(), stockId)
-            End If
-            If grdMROEquipmentStockList.SelectedDataKey.Values("Item_ID") IsNot Nothing Then
-                Long.TryParse(grdMROEquipmentStockList.SelectedDataKey.Values("Item_ID").ToString(), itemId)
-            End If
+        If grdMROEquipmentStockList.SelectedDataKey.Values(
+        "Stock_ID"
+    ) IsNot Nothing Then
+
+            Long.TryParse(
+            grdMROEquipmentStockList.SelectedDataKey.Values(
+                "Stock_ID"
+            ).ToString(),
+            stockId
+        )
+
         End If
+
+        If grdMROEquipmentStockList.SelectedDataKey.Values(
+        "Item_ID"
+    ) IsNot Nothing Then
+
+            Long.TryParse(
+            grdMROEquipmentStockList.SelectedDataKey.Values(
+                "Item_ID"
+            ).ToString(),
+            itemId
+        )
+
+        End If
+
+        AddTrace(
+        "Item_ID: " &
+        itemId
+    )
+
+        AddTrace(
+        "Stock_ID: " &
+        stockId
+    )
+
+        ProcessSelectedMROEquipmentStockItem(
+        stockId,
+        itemId
+    )
+
+    End Sub
+    Private Sub ProcessSelectedMROEquipmentStockItem(
+ByVal stockId As Long,
+ByVal itemId As Long)
 
         ViewState("SelectedMROEquipmentStockID") = stockId
         ViewState("SelectedMROEquipmentItemID") = itemId
 
-        AddTrace("Selected StockID: " & stockId)
-        AddTrace("Selected Item_ID: " & itemId)
+        Session("Item_ID") = itemId
 
-        ' Incoming Deliveries - NOW USING Item_ID (matches updated stored proc)
+        AddTrace(
+        "Selected StockID: " &
+        stockId
+    )
+
+        AddTrace(
+        "Selected Item_ID: " &
+        itemId
+    )
+
+        ' Incoming Deliveries uses Item_ID.
         If itemId > 0 Then
             BindMROEquipmentIncomingDeliveries(itemId)
         Else
             BindEmptyMROEquipmentIncomingDeliveries()
         End If
 
+        ' Inventory Card uses Stock_ID.
         If stockId > 0 Then
             PopulateMROEquipmentInventoryCard(stockId)
         Else
             ClearMROEquipmentInventoryCard()
         End If
 
+        ' Ledger uses Item_ID.
         If itemId > 0 Then
             BindMROEquipmentLedger(itemId)
         Else
             BindEmptyMROEquipmentLedger()
         End If
+
     End Sub
+
+
+    Public Sub LoadSelectedItem(
+ByVal itemId As Long)
+
+        If itemId <= 0 Then
+
+            Session("Item_ID") = 0
+
+            ViewState("SelectedMROEquipmentStockID") = Nothing
+            ViewState("SelectedMROEquipmentItemID") = Nothing
+
+            grdMROEquipmentStockList.PageIndex = 0
+            grdMROEquipmentStockList.SelectedIndex = -1
+
+            BindEmptyMROEquipmentIncomingDeliveries()
+            ClearMROEquipmentInventoryCard()
+            BindEmptyMROEquipmentLedger()
+
+            Exit Sub
+
+        End If
+
+        Session("Item_ID") = itemId
+
+        AddTrace(
+        "MRO Equipment User Control Item_ID: " &
+        itemId
+    )
+
+        Dim classId As String =
+    Convert.ToString(
+        Session("ClassificationID")
+    )
+
+        Dim subClassId As String =
+    Convert.ToString(
+        Session("SubClassificationID")
+    )
+
+        Dim gaId As String =
+    Convert.ToString(
+        Session("GA_ID")
+    )
+
+        If String.IsNullOrWhiteSpace(classId) Then
+            classId = "0"
+        End If
+
+        If String.IsNullOrWhiteSpace(subClassId) Then
+            subClassId = "0"
+        End If
+
+        If String.IsNullOrWhiteSpace(gaId) Then
+            gaId = "0"
+        End If
+
+        Dim dt As DataTable = Nothing
+
+        Try
+
+            ' Use the same dataset as
+            ' BindMROEquipmentStockList.
+            Dim sql As String =
+        "EXEC [AMS].[sp_StockCard_Rev_ListOfSupplies] " &
+        "@ClassificationID=" & classId & ", " &
+        "@SubClassificationID=" & subClassId & ", " &
+        "@GA_ID=" & gaId
+
+            AddTrace(
+            "Loading selected MRO Equipment item: " &
+            sql
+        )
+
+            dt = objDerived.GetDataTable(
+            sql,
+            CommandType.Text
+        )
+
+        Catch ex As Exception
+
+            System.Diagnostics.Debug.WriteLine(
+            "Error loading selected MRO Equipment item: " &
+            ex.Message
+        )
+
+            dt = Nothing
+
+        End Try
+
+        Dim selectedStockId As Long = 0
+        Dim selectedRecordIndex As Integer = -1
+
+        If dt IsNot Nothing AndAlso
+    dt.Rows.Count > 0 Then
+
+            For i As Integer = 0 To dt.Rows.Count - 1
+
+                Dim currentItemId As Long = 0
+
+                Long.TryParse(
+                Convert.ToString(
+                    dt.Rows(i).Item("Item_ID")
+                ),
+                currentItemId
+            )
+
+                If currentItemId = itemId Then
+
+                    selectedRecordIndex = i
+
+                    Long.TryParse(
+                    Convert.ToString(
+                        dt.Rows(i).Item("Stock_ID")
+                    ),
+                    selectedStockId
+                )
+
+                    Exit For
+
+                End If
+
+            Next
+
+            If selectedRecordIndex >= 0 Then
+
+                grdMROEquipmentStockList.PageIndex =
+            selectedRecordIndex \
+            grdMROEquipmentStockList.PageSize
+
+            Else
+
+                grdMROEquipmentStockList.PageIndex = 0
+
+            End If
+
+            grdMROEquipmentStockList.DataSource = dt
+            grdMROEquipmentStockList.DataBind()
+
+            If selectedRecordIndex >= 0 Then
+
+                ' Maintain selected row for Preview.
+                grdMROEquipmentStockList.SelectedIndex =
+            selectedRecordIndex Mod
+            grdMROEquipmentStockList.PageSize
+
+                ProcessSelectedMROEquipmentStockItem(
+                selectedStockId,
+                itemId
+            )
+
+            Else
+
+                grdMROEquipmentStockList.SelectedIndex = -1
+
+                ViewState("SelectedMROEquipmentStockID") =
+            Nothing
+
+                ViewState("SelectedMROEquipmentItemID") =
+            Nothing
+
+                BindEmptyMROEquipmentIncomingDeliveries()
+                ClearMROEquipmentInventoryCard()
+                BindEmptyMROEquipmentLedger()
+
+            End If
+
+        Else
+
+            BindEmptyMROEquipmentStockList()
+
+            ViewState("SelectedMROEquipmentStockID") =
+        Nothing
+
+            ViewState("SelectedMROEquipmentItemID") =
+        Nothing
+
+            BindEmptyMROEquipmentIncomingDeliveries()
+            ClearMROEquipmentInventoryCard()
+            BindEmptyMROEquipmentLedger()
+
+        End If
+
+    End Sub
+
 
     Private Sub PopulateMROEquipmentInventoryCard(ByVal stockId As Long)
         If stockId <= 0 Then

@@ -2320,12 +2320,14 @@ Partial Class Inventory_RIS
     Protected Sub btnpreview_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btnpreview.Click
         Session("Page") = "INV"
         Session("Report") = "RIS"
-        'Me.Page.Response.Redirect("~/MainReports/Inventory_Reports.aspx")
 
-        Dim url As String = "Inventory_Reports.aspx"
-        Dim fullURL As String = "window.open('" & url + "', '_blank', 'status=0,screenX=0,resizable=1,scrollbars=1,width=850,height=700,left=250,top=100');"
-        ScriptManager.RegisterStartupScript(Me, GetType(String), "OPEN_WINDOW", fullURL, True)
+        Dim url As String = ResolveUrl("~/MainReports/Inventory_Reports.aspx")
+        Dim script As String = "window.open('" & url & "', '_blank', 'status=0,screenX=0,resizable=1,scrollbars=1,width=850,height=700,left=250,top=100');"
+        ScriptManager.RegisterStartupScript(Me, Me.GetType(), "OPEN_WINDOW", script, True)
     End Sub
+
+
+
     Protected Sub txtsearchitems_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs)
         Try
 

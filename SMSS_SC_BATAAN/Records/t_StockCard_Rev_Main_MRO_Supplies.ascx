@@ -1,8 +1,8 @@
 ﻿<%@ Control Language="VB" AutoEventWireup="false" CodeFile="t_StockCard_Rev_Main_MRO_Supplies.ascx.vb" Inherits="Records_t_StockCard_Rev_Main_MRO_Supplies" %>
 
-<div class="DivTitle">LIST OF MRO SUPPLIES</div>
+<div  style="display: none;"  class="DivTitle">LIST OF MRO SUPPLIES</div>
 
-<asp:GridView ID="grdMROStockList" runat="server" Width="98%" SkinID="GridViewAA"
+<asp:GridView ID="grdMROStockList" runat="server" Width="98%" SkinID="GridViewAA"  style="display: none;"
     AllowPaging="True"
     DataKeyNames="Item_ID, Stock_ID"
     OnPageIndexChanging="grdMROStockList_PageIndexChanging"

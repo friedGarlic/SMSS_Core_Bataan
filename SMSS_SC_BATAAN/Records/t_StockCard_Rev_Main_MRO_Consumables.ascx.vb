@@ -151,12 +151,43 @@ Partial Class Records_t_StockCard_Rev_Main_MRO_Consumables
         BindMROConsumablesStockList()
     End Sub
 
-    Protected Sub grdMROConsumablesStockList_RowDataBound(ByVal sender As Object, ByVal e As GridViewRowEventArgs)
+    Protected Sub grdMROConsumablesStockList_RowDataBound(
+ByVal sender As Object,
+ByVal e As GridViewRowEventArgs)
+
         If e.Row.RowType = DataControlRowType.DataRow Then
-            e.Row.Attributes("style") = "cursor:pointer;"
-            e.Row.Attributes("onclick") =
-                Page.ClientScript.GetPostBackClientHyperlink(grdMROConsumablesStockList, "Select$" & e.Row.RowIndex, True)
+
+            Dim itemIdObject As Object =
+        DataBinder.Eval(
+            e.Row.DataItem,
+            "Item_ID"
+        )
+
+            Dim itemId As String = ""
+
+            If itemIdObject IsNot Nothing AndAlso
+        Not Convert.IsDBNull(itemIdObject) Then
+
+                itemId = itemIdObject.ToString()
+
+            End If
+
+            ' Only actual MRO Consumables records are clickable.
+            If Not String.IsNullOrEmpty(itemId) Then
+
+                e.Row.Attributes("onclick") =
+            Page.ClientScript.GetPostBackClientHyperlink(
+                grdMROConsumablesStockList,
+                "Select$" & e.Row.RowIndex,
+                True
+            )
+
+                e.Row.Style("cursor") = "pointer"
+
+            End If
+
         End If
+
     End Sub
 
     ' Now accepts Item_ID instead of POHdr_ID
@@ -221,54 +252,295 @@ Partial Class Records_t_StockCard_Rev_Main_MRO_Consumables
         End If
     End Sub
 
-    Protected Sub grdMROConsumablesStockList_SelectedIndexChanged(ByVal sender As Object, ByVal e As EventArgs)
+    Protected Sub grdMROConsumablesStockList_SelectedIndexChanged(
+ByVal sender As Object,
+ByVal e As EventArgs)
+
         Dim stockId As Long = 0
         Dim itemId As Long = 0
 
-        ' Add trace for debugging
-        If grdMROConsumablesStockList.SelectedDataKey IsNot Nothing Then
-            If grdMROConsumablesStockList.SelectedDataKey.Values("Item_ID") IsNot Nothing Then
-                AddTrace("Item_ID: " & grdMROConsumablesStockList.SelectedDataKey.Values("Item_ID").ToString())
-            End If
-            If grdMROConsumablesStockList.SelectedDataKey.Values("Stock_ID") IsNot Nothing Then
-                AddTrace("Stock_ID: " & grdMROConsumablesStockList.SelectedDataKey.Values("Stock_ID").ToString())
-            End If
+        If grdMROConsumablesStockList.SelectedDataKey Is Nothing Then
+            Exit Sub
         End If
 
-        If grdMROConsumablesStockList.SelectedDataKey IsNot Nothing Then
-            If grdMROConsumablesStockList.SelectedDataKey.Values("Stock_ID") IsNot Nothing Then
-                Long.TryParse(grdMROConsumablesStockList.SelectedDataKey.Values("Stock_ID").ToString(), stockId)
-            End If
-            If grdMROConsumablesStockList.SelectedDataKey.Values("Item_ID") IsNot Nothing Then
-                Long.TryParse(grdMROConsumablesStockList.SelectedDataKey.Values("Item_ID").ToString(), itemId)
-            End If
+        If grdMROConsumablesStockList.SelectedDataKey.Values(
+        "Stock_ID"
+    ) IsNot Nothing Then
+
+            Long.TryParse(
+            grdMROConsumablesStockList.SelectedDataKey.Values(
+                "Stock_ID"
+            ).ToString(),
+            stockId
+        )
+
         End If
+
+        If grdMROConsumablesStockList.SelectedDataKey.Values(
+        "Item_ID"
+    ) IsNot Nothing Then
+
+            Long.TryParse(
+            grdMROConsumablesStockList.SelectedDataKey.Values(
+                "Item_ID"
+            ).ToString(),
+            itemId
+        )
+
+        End If
+
+        AddTrace(
+        "Item_ID: " &
+        itemId
+    )
+
+        AddTrace(
+        "Stock_ID: " &
+        stockId
+    )
+
+        ProcessSelectedMROConsumablesStockItem(
+        stockId,
+        itemId
+    )
+
+    End Sub
+
+
+    Private Sub ProcessSelectedMROConsumablesStockItem(
+ByVal stockId As Long,
+ByVal itemId As Long)
 
         ViewState("SelectedMROConsumablesStockID") = stockId
         ViewState("SelectedMROConsumablesItemID") = itemId
 
-        AddTrace("Selected StockID: " & stockId)
-        AddTrace("Selected Item_ID: " & itemId)
+        Session("Item_ID") = itemId
 
-        ' Incoming Deliveries - NOW USING Item_ID (matches updated stored proc)
+        AddTrace(
+        "Selected StockID: " &
+        stockId
+    )
+
+        AddTrace(
+        "Selected Item_ID: " &
+        itemId
+    )
+
+        ' Incoming Deliveries uses Item_ID.
         If itemId > 0 Then
             BindMROConsumablesIncomingDeliveries(itemId)
         Else
             BindEmptyMROConsumablesIncomingDeliveries()
         End If
 
+        ' Inventory Card uses Stock_ID.
         If stockId > 0 Then
             PopulateMROConsumablesInventoryCard(stockId)
         Else
             ClearMROConsumablesInventoryCard()
         End If
 
+        ' Ledger uses Item_ID.
         If itemId > 0 Then
             BindMROConsumablesLedger(itemId)
         Else
             BindEmptyMROConsumablesLedger()
         End If
+
+
+
     End Sub
+
+
+    Public Sub LoadSelectedItem(
+ByVal itemId As Long)
+
+        If itemId <= 0 Then
+
+            Session("Item_ID") = 0
+
+            ViewState("SelectedMROConsumablesStockID") = Nothing
+            ViewState("SelectedMROConsumablesItemID") = Nothing
+
+            grdMROConsumablesStockList.PageIndex = 0
+            grdMROConsumablesStockList.SelectedIndex = -1
+
+            BindEmptyMROConsumablesIncomingDeliveries()
+            ClearMROConsumablesInventoryCard()
+            BindEmptyMROConsumablesLedger()
+
+            Exit Sub
+
+        End If
+
+        Session("Item_ID") = itemId
+
+        AddTrace(
+        "MRO Consumables User Control Item_ID: " &
+        itemId
+    )
+
+        Dim classId As String =
+    Convert.ToString(
+        Session("ClassificationID")
+    )
+
+        Dim subClassId As String =
+    Convert.ToString(
+        Session("SubClassificationID")
+    )
+
+        Dim gaId As String =
+    Convert.ToString(
+        Session("GA_ID")
+    )
+
+        If String.IsNullOrWhiteSpace(classId) Then
+            classId = "0"
+        End If
+
+        If String.IsNullOrWhiteSpace(subClassId) Then
+            subClassId = "0"
+        End If
+
+        If String.IsNullOrWhiteSpace(gaId) Then
+            gaId = "0"
+        End If
+
+        Dim dt As DataTable = Nothing
+
+        Try
+
+            ' Use the same dataset as
+            ' BindMROConsumablesStockList.
+            Dim sql As String =
+        "EXEC [AMS].[sp_StockCard_Rev_ListOfSupplies] " &
+        "@ClassificationID=" & classId & ", " &
+        "@SubClassificationID=" & subClassId & ", " &
+        "@GA_ID=" & gaId
+
+            AddTrace(
+            "Loading selected MRO Consumables item: " &
+            sql
+        )
+
+            dt = objDerived.GetDataTable(
+            sql,
+            CommandType.Text
+        )
+
+        Catch ex As Exception
+
+            System.Diagnostics.Debug.WriteLine(
+            "Error loading selected MRO Consumables item: " &
+            ex.Message
+        )
+
+            dt = Nothing
+
+        End Try
+
+        Dim selectedStockId As Long = 0
+        Dim selectedRecordIndex As Integer = -1
+
+        If dt IsNot Nothing AndAlso
+    dt.Rows.Count > 0 Then
+
+            For i As Integer = 0 To dt.Rows.Count - 1
+
+                Dim currentItemId As Long = 0
+
+                Long.TryParse(
+                Convert.ToString(
+                    dt.Rows(i).Item("Item_ID")
+                ),
+                currentItemId
+            )
+
+                If currentItemId = itemId Then
+
+                    selectedRecordIndex = i
+
+                    Long.TryParse(
+                    Convert.ToString(
+                        dt.Rows(i).Item("Stock_ID")
+                    ),
+                    selectedStockId
+                )
+
+                    Exit For
+
+                End If
+
+            Next
+
+            If selectedRecordIndex >= 0 Then
+
+                ' Display the page containing
+                ' the selected item.
+                grdMROConsumablesStockList.PageIndex =
+            selectedRecordIndex \
+            grdMROConsumablesStockList.PageSize
+
+            Else
+
+                grdMROConsumablesStockList.PageIndex = 0
+
+            End If
+
+            grdMROConsumablesStockList.DataSource = dt
+            grdMROConsumablesStockList.DataBind()
+
+            If selectedRecordIndex >= 0 Then
+
+                ' Maintain the selected row so the
+                ' existing Preview process still works.
+                grdMROConsumablesStockList.SelectedIndex =
+            selectedRecordIndex Mod
+            grdMROConsumablesStockList.PageSize
+
+                ProcessSelectedMROConsumablesStockItem(
+                selectedStockId,
+                itemId
+            )
+
+            Else
+
+                grdMROConsumablesStockList.SelectedIndex = -1
+
+                ViewState("SelectedMROConsumablesStockID") =
+            Nothing
+
+                ViewState("SelectedMROConsumablesItemID") =
+            Nothing
+
+                BindEmptyMROConsumablesIncomingDeliveries()
+                ClearMROConsumablesInventoryCard()
+                BindEmptyMROConsumablesLedger()
+
+            End If
+
+        Else
+
+            BindEmptyMROConsumablesStockList()
+
+            ViewState("SelectedMROConsumablesStockID") =
+        Nothing
+
+            ViewState("SelectedMROConsumablesItemID") =
+        Nothing
+
+            BindEmptyMROConsumablesIncomingDeliveries()
+            ClearMROConsumablesInventoryCard()
+            BindEmptyMROConsumablesLedger()
+
+        End If
+
+    End Sub
+
+
+
+
 
     Protected Sub grdMROConsumablesLedger_PageIndexChanging(ByVal sender As Object, ByVal e As GridViewPageEventArgs)
         grdMROConsumablesLedger.PageIndex = e.NewPageIndex

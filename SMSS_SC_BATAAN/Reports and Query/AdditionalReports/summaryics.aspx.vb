@@ -1,10 +1,58 @@
 ﻿Imports System.Data
+Imports System.IO
+Imports CrystalDecisions.CrystalReports.Engine
+Imports CrystalDecisions.Shared
+
 Partial Class Reports_and_Query_AdditionalReports_summaryics
     Inherits System.Web.UI.Page
     Private objDerived As New DerivedDal
     Private obj As New connectionreport
+    Dim rpt As New ReportDocument
+
+    Protected Sub Page_Init(sender As Object, e As EventArgs) Handles Me.Init
+
+        ' On postback, if the user already pressed Preview, re-bind the
+        ' cached report so the viewer keeps displaying it.  On a first-time
+        ' visit the viewer stays empty until Preview is clicked.
+        If IsPostBack Then
+
+            rpt = CType(Session("SummaryICS_Report"), ReportDocument)
+
+            If Not rpt Is Nothing Then
+
+                rpt.SetDatabaseLogon(obj.username, obj.Password)
+
+                Me.SummaryReports.ReportSource = rpt
+
+            End If
+
+        End If
+
+    End Sub
 
     Private Sub Reports_and_Query_AdditionalReports_summaryics_Load(sender As Object, e As EventArgs) Handles Me.Load
+
+        ' When the page is opened with ?print=1, export the report that is
+        ' already in Session to PDF and stream it straight to the browser.
+        ' This replaces the normal HTML output so the report opens in the
+        ' browser's PDF viewer, ready to print, with all pages included.
+        If Request.QueryString("print") = "1" Then
+
+            Dim rptPrint As ReportDocument = CType(Session("SummaryICS_Report"), ReportDocument)
+
+            If rptPrint Is Nothing Then
+                Me.Page.Response.Redirect("~/Records/PropertyCard_Rev.aspx")
+                Return
+            End If
+
+            rptPrint.SetDatabaseLogon(obj.username, obj.Password)
+
+            rptPrint.ExportToHttpResponse(ExportFormatType.PortableDocFormat, Me.Page.Response, False, "SummaryICS")
+
+            Me.Page.Response.End()
+
+        End If
+
         If Not Page.IsPostBack Then
             drpYear.DataSource = objDerived.GetDataTable("SELECT * FROM AMS.APP WHERE status <> 3 ORDER BY YEAR DESC", CommandType.Text)
             drpYear.DataTextField = "year"
@@ -21,11 +69,6 @@ Partial Class Reports_and_Query_AdditionalReports_summaryics
             drpNotedby.DataValueField = "EmpID"
             drpNotedby.DataBind()
 
-            'Me.SummaryReports.ToolPanelView = CrystalDecisions.Web.ToolPanelViewType.None
-            'Me.SummaryReports.ReportSource = Me.CrystalReportSource1
-            'Me.SummaryReports.ToolPanelView = CrystalDecisions.Web.ToolPanelViewType.None
-            'Me.SummaryReports.Zoom(90)
-
         Else
             'LoadReportPreview()
 
@@ -38,15 +81,17 @@ Partial Class Reports_and_Query_AdditionalReports_summaryics
     End Sub
 
     Protected Sub LoadReportPreview()
-        'Me.SummaryReports.ToolPanelView = CrystalDecisions.Web.ToolPanelViewType.None
-        Me.SummaryReports.ReportSource = Me.CrystalReportSource1
-        Me.SummaryReports.ToolPanelView = CrystalDecisions.Web.ToolPanelViewType.None
-        Me.CrystalReportSource1.ReportDocument.SetDatabaseLogon(obj.username, obj.Password)
-        Me.CrystalReportSource1.ReportDocument.SetParameterValue("@Year", drpYear.SelectedItem.Value)
-        Me.CrystalReportSource1.ReportDocument.SetParameterValue("@Month", drpMonths.SelectedItem.Value)
-        Me.CrystalReportSource1.ReportDocument.SetParameterValue("@PreparedBy", drpPreparedby.SelectedItem.Value)
-        Me.CrystalReportSource1.ReportDocument.SetParameterValue("@NotedBy", drpNotedby.SelectedItem.Value)
-        'Me.SummaryReports.Zoom(90)
+
+        rpt = New ReportDocument()
+        rpt.Load(Server.MapPath("rpt_summaryics.rpt"))
+        rpt.SetParameterValue("@Year", drpYear.SelectedItem.Value)
+        rpt.SetParameterValue("@Month", drpMonths.SelectedItem.Value)
+        rpt.SetParameterValue("@PreparedBy", drpPreparedby.SelectedItem.Value)
+        rpt.SetParameterValue("@NotedBy", drpNotedby.SelectedItem.Value)
+        rpt.SetDatabaseLogon(obj.username, obj.Password)
+        Session("SummaryICS_Report") = rpt
+
+        Me.SummaryReports.ReportSource = rpt
 
     End Sub
 End Class

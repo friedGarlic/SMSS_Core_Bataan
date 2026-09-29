@@ -10,7 +10,37 @@
     <asp:ScriptManager ID="ScriptManager1" runat="server">
     </asp:ScriptManager>
 
-    <script type="text/javascript"> 
+    <script type="text/javascript">
+        function PrintReport() {
+            var frame = document.getElementById("pdfPrintFrame");
+            if (!frame) {
+                alert("Print frame not found.");
+                return;
+            }
+
+            // Reset any previous handler so we do not trigger print twice.
+            frame.onload = null;
+
+            frame.onload = function () {
+                // Small delay so the PDF viewer finishes initializing
+                // before we ask it to print.
+                setTimeout(function () {
+                    try {
+                        frame.contentWindow.focus();
+                        frame.contentWindow.print();
+                    } catch (e) {
+                        alert("Could not open the print dialog automatically. The report will be shown so you can print it manually.");
+                        frame.style.display = "block";
+                        frame.style.width = "100%";
+                        frame.style.height = "900px";
+                    }
+                }, 800);
+            };
+
+            // Cache-buster so the browser always reloads the PDF fresh.
+            frame.src = "rpt_BidderAttendance.aspx?print=1&t=" + new Date().getTime();
+        }
+
         function stopRKey(evt) {
             var evt = (evt) ? evt : ((event) ? event : null);
             var node = (evt.target) ? evt.target : ((evt.srcElement) ? evt.srcElement : null);
@@ -32,8 +62,10 @@
 
     </script>
 
+    <iframe id="pdfPrintFrame" style="display:none; width:0; height:0; border:0;"></iframe>
+
     <div>
-        <table width="1020px">
+        <table width="1020px" cellpadding="0" cellspacing="0">
             <tr>
                 <td style="width: 1%"></td>
                 <td style="width: 98%" class="PageTitle">LIST OF INTERESTED BIDDERS
@@ -43,7 +75,18 @@
             <tr>
                 <td style="width: 1%"></td>
                 <td style="width: 98%" align="left">
-                    <asp:LinkButton ID="LinkButton1" runat="server" CssClass="LinkBtnSelect">Back to Previous Page ...</asp:LinkButton>
+                    <table width="1000px" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td align="left">
+                                <asp:LinkButton ID="LinkButton1" runat="server" CssClass="LinkBtnSelect">Back to Previous Page ...</asp:LinkButton>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="right">
+                                <asp:LinkButton ID="btnPrintReport" runat="server" CssClass="LinkBtnSelect" OnClientClick="PrintReport(); return false;">Print Report</asp:LinkButton>
+                            </td>
+                        </tr>
+                    </table>
                 </td>
                 <td style="width: 1%"></td>
             </tr>
@@ -77,7 +120,7 @@
             <tr>
                 <td style="width: 1%"></td>
                 <td style="width: 98%" align="center">
-                    <div style="width: 880px; text-align: center; vertical-align: middle">
+                    <div style="width: 1000px; background-color: #808080; text-align: center; vertical-align: middle">
                         <table width="100%">
                             <tr>
                                 <td style="width: 100%; height: 10px"></td>
@@ -85,8 +128,22 @@
                             <tr>
                                 <td style="width: 100%" align="center">
 
-                                    <CR:CrystalReportViewer ID="BidderReport" runat="server" AutoDataBind="true" HasToggleGroupTreeButton="False" HasCrystalLogo="False" HasSearchButton="False" HasDrilldownTabs="False"
-                                        BestFitPage="true" BackColor="#ffffff" BorderStyle="Solid" BorderColor="#2977dc" BorderWidth="1px" />
+                                    <CR:CrystalReportViewer ID="BidderReport" runat="server"
+                                        AutoDataBind="true"
+                                        HasToggleGroupTreeButton="False"
+                                        HasCrystalLogo="False"
+                                        HasSearchButton="False"
+                                        HasDrilldownTabs="False"
+                                        BestFitPage="False"
+                                        BackColor="#ffffff"
+                                        Height="930px"
+                                        Width="980px"
+                                        BorderStyle="Solid"
+                                        BorderColor="#2977dc"
+                                        BorderWidth="1px"
+                                        ToolPanelView="None"
+                                        HasGroupTree="False"
+                                        HasPrintButton="False" />
 
                                     <CR:CrystalReportSource ID="CrystalReportSource1" runat="server">
                                         <Report FileName="rpt_BiddersAttendance.rpt">
@@ -106,6 +163,11 @@
                 <td style="width: 1%"></td>
             </tr>
 
+            <tr>
+                <td style="width: 1%"></td>
+                <td style="width: 98%"></td>
+                <td style="width: 1%"></td>
+            </tr>
             <tr>
                 <td style="width: 1%"></td>
                 <td style="width: 98%"></td>

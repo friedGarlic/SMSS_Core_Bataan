@@ -1,8 +1,8 @@
 ﻿<%@ Control Language="VB" AutoEventWireup="false" CodeFile="t_StockCard_Rev_Main_Food.ascx.vb" Inherits="Records_t_StockCard_Rev_Main_Food" %>
 
-<div class="DivTitle">LIST OF FOOD</div>
+<div  style="display: none;"   class="DivTitle">LIST OF FOOD</div>
 
-<asp:GridView ID="grdFoodStockList" runat="server" Width="98%" SkinID="GridViewAA"
+<asp:GridView ID="grdFoodStockList" runat="server" Width="98%" SkinID="GridViewAA"  style="display: none;" 
     AllowPaging="True"
     DataKeyNames="Item_ID, Stock_ID"
     OnPageIndexChanging="grdFoodStockList_PageIndexChanging"

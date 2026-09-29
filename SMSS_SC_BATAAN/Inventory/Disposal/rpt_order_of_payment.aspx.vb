@@ -1,58 +1,144 @@
 Imports System.Data
+Imports System.IO
+Imports CrystalDecisions.CrystalReports.Engine
+Imports CrystalDecisions.Shared
 
 Partial Class rpt_order_of_payment
     Inherits System.Web.UI.Page
     Private objDerived As New connectionreport
+    Dim rpt As New ReportDocument
 
     Private Sub rpt_order_of_payment_Init(sender As Object, e As EventArgs) Handles Me.Init
-        loadReport()
+
+        If Session("Page") = "ISSP_List" Then
+
+            If Not IsPostBack Then
+
+                rpt = New ReportDocument()
+                rpt.Load(Server.MapPath("rpt_order_of_payment.rpt"))
+                rpt.SetParameterValue("@IsspHdr_ID", Me.Session("IsspHdr_ID"))
+                rpt.SetParameterValue("@SuppName", Me.Session("SuppName"))
+                rpt.SetParameterValue("@Amount", CType(Me.Session("op1_Amt"), Decimal))
+                Session("OrderOfPayment_Report") = rpt
+
+            Else
+
+                rpt = CType(Session("OrderOfPayment_Report"), ReportDocument)
+
+                If rpt Is Nothing Then
+
+                    rpt = New ReportDocument()
+                    rpt.Load(Server.MapPath("rpt_order_of_payment.rpt"))
+                    rpt.SetParameterValue("@IsspHdr_ID", Me.Session("IsspHdr_ID"))
+                    rpt.SetParameterValue("@SuppName", Me.Session("SuppName"))
+                    rpt.SetParameterValue("@Amount", CType(Me.Session("op1_Amt"), Decimal))
+                    Session("OrderOfPayment_Report") = rpt
+
+                End If
+
+            End If
+
+            rpt.SetDatabaseLogon(objDerived.username, objDerived.Password)
+
+            Me.OrderPaymentReports.ReportSource = rpt
+
+        ElseIf Session("Page") = "Auction" Then
+
+            If Not IsPostBack Then
+
+                rpt = New ReportDocument()
+                rpt.Load(Server.MapPath("rpt_order_of_payment.rpt"))
+                rpt.SetParameterValue("@IsspHdr_ID", Me.Session("IsspHdr_ID"))
+                rpt.SetParameterValue("@SuppName", Me.Session("SuppName"))
+                rpt.SetParameterValue("@Amount", CType(Me.Session("Amount"), Decimal))
+                Session("OrderOfPayment_Report") = rpt
+
+            Else
+
+                rpt = CType(Session("OrderOfPayment_Report"), ReportDocument)
+
+                If rpt Is Nothing Then
+
+                    rpt = New ReportDocument()
+                    rpt.Load(Server.MapPath("rpt_order_of_payment.rpt"))
+                    rpt.SetParameterValue("@IsspHdr_ID", Me.Session("IsspHdr_ID"))
+                    rpt.SetParameterValue("@SuppName", Me.Session("SuppName"))
+                    rpt.SetParameterValue("@Amount", CType(Me.Session("Amount"), Decimal))
+                    Session("OrderOfPayment_Report") = rpt
+
+                End If
+
+            End If
+
+            rpt.SetDatabaseLogon(objDerived.username, objDerived.Password)
+
+            Me.OrderPaymentReports.ReportSource = rpt
+
+        ElseIf Session("Page") = "NOA" Then
+
+            If Not IsPostBack Then
+
+                rpt = New ReportDocument()
+                rpt.Load(Server.MapPath("rpt_order_of_payment.rpt"))
+                rpt.SetParameterValue("@IsspHdr_ID", Me.Session("IsspHdr_ID"))
+                rpt.SetParameterValue("@SuppName", Me.Session("SuppName"))
+                rpt.SetParameterValue("@Amount", CType(Me.Session("Amount"), Decimal))
+                Session("OrderOfPayment_Report") = rpt
+
+            Else
+
+                rpt = CType(Session("OrderOfPayment_Report"), ReportDocument)
+
+                If rpt Is Nothing Then
+
+                    rpt = New ReportDocument()
+                    rpt.Load(Server.MapPath("rpt_order_of_payment.rpt"))
+                    rpt.SetParameterValue("@IsspHdr_ID", Me.Session("IsspHdr_ID"))
+                    rpt.SetParameterValue("@SuppName", Me.Session("SuppName"))
+                    rpt.SetParameterValue("@Amount", CType(Me.Session("Amount"), Decimal))
+                    Session("OrderOfPayment_Report") = rpt
+
+                End If
+
+            End If
+
+            rpt.SetDatabaseLogon(objDerived.username, objDerived.Password)
+
+            Me.OrderPaymentReports.ReportSource = rpt
+
+        End If
 
     End Sub
+
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
 
+        ' When the page is opened with ?print=1, export the report that is
+        ' already in Session to PDF and stream it straight to the browser.
+        ' This replaces the normal HTML output so the report opens in the
+        ' browser's PDF viewer, ready to print, with all pages included.
+        If Request.QueryString("print") = "1" Then
+
+            Dim rptPrint As ReportDocument = CType(Session("OrderOfPayment_Report"), ReportDocument)
+
+            If rptPrint Is Nothing Then
+                Me.Page.Response.Redirect("~/Inventory/disposal/Disposal_ISSP_List.aspx")
+                Return
+            End If
+
+            rptPrint.SetDatabaseLogon(objDerived.username, objDerived.Password)
+
+            rptPrint.ExportToHttpResponse(ExportFormatType.PortableDocFormat, Me.Page.Response, False, "OrderOfPayment")
+
+            Me.Page.Response.End()
+
+        End If
 
     End Sub
+
     Private Sub rpt_order_of_payment_LoadComplete(sender As Object, e As EventArgs) Handles Me.LoadComplete
         Master.FindControl("MasterRowModules").Visible = False
         Master.FindControl("UserRow").Visible = False
         Master.FindControl("Menu1").Visible = False
-    End Sub
-
-    Protected Sub loadReport()
-        If Session("Page") = "ISSP_List" Then
-            Me.OrderPaymentReports.ToolPanelView = CrystalDecisions.Web.ToolPanelViewType.None
-
-            CrystalReportSource1.Report.FileName = "rpt_order_of_payment.rpt"
-            Me.OrderPaymentReports.ReportSource = Me.CrystalReportSource1
-            Me.CrystalReportSource1.ReportDocument.SetDatabaseLogon(objDerived.username, objDerived.Password)
-            Me.CrystalReportSource1.ReportDocument.SetParameterValue("@IsspHdr_ID", Session("IsspHdr_ID"))
-            Me.CrystalReportSource1.ReportDocument.SetParameterValue("@SuppName", Session("SuppName"))
-            Me.CrystalReportSource1.ReportDocument.SetParameterValue("@Amount", CType(Session("op1_Amt"), Decimal))
-
-        ElseIf Session("Page") = "Auction" Then
-            Me.OrderPaymentReports.ToolPanelView = CrystalDecisions.Web.ToolPanelViewType.None
-
-            CrystalReportSource1.Report.FileName = "rpt_order_of_payment.rpt"
-            Me.OrderPaymentReports.ReportSource = Me.CrystalReportSource1
-            Me.CrystalReportSource1.ReportDocument.SetDatabaseLogon(objDerived.username, objDerived.Password)
-            Me.CrystalReportSource1.ReportDocument.SetParameterValue("@IsspHdr_ID", Session("IsspHdr_ID"))
-            Me.CrystalReportSource1.ReportDocument.SetParameterValue("@SuppName", Session("SuppName"))
-            Me.CrystalReportSource1.ReportDocument.SetParameterValue("@Amount", CType(Session("Amount"), Decimal))
-
-        ElseIf Session("Page") = "NOA" Then
-            Me.OrderPaymentReports.ToolPanelView = CrystalDecisions.Web.ToolPanelViewType.None
-
-            CrystalReportSource1.Report.FileName = "rpt_order_of_payment.rpt"
-            Me.OrderPaymentReports.ReportSource = Me.CrystalReportSource1
-            Me.CrystalReportSource1.ReportDocument.SetDatabaseLogon(objDerived.username, objDerived.Password)
-            Me.CrystalReportSource1.ReportDocument.SetParameterValue("@IsspHdr_ID", Session("IsspHdr_ID"))
-            Me.CrystalReportSource1.ReportDocument.SetParameterValue("@SuppName", Session("SuppName"))
-            Me.CrystalReportSource1.ReportDocument.SetParameterValue("@Amount", CType(Session("Amount"), Decimal))
-
-        End If
-
-
-
     End Sub
 
     Private Sub lnkBack_Click(sender As Object, e As EventArgs) Handles lnkBack.Click
