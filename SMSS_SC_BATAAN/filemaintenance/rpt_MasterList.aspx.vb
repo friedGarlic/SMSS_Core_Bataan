@@ -1,44 +1,69 @@
+Imports System.IO
+Imports CrystalDecisions.CrystalReports.Engine
+Imports CrystalDecisions.Shared
 
 Partial Class filemaintenance_rpt_MasterList
     Inherits System.Web.UI.Page
     Private objDerived As New connectionreport
-    Private Sub AddTrace(ByVal message As String)
-        Dim safeMessage As String = message.Replace("'", "\'")
-        ScriptManager.RegisterClientScriptBlock(Me, Me.GetType(),
-        "TraceKey" & Guid.NewGuid().ToString("N"),
-        "console.log('" & safeMessage & "');",
-        True)
-    End Sub
-
+    Dim rpt As New ReportDocument
 
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
 
-        LoadReportReset()
-        LoadReport()
+        ' When the page is opened with ?print=1, export the report that is
+        ' already in Session to PDF and stream it straight to the browser.
+        ' This replaces the normal HTML output so the report opens in the
+        ' browser's PDF viewer, ready to print, with all pages included.
+        If Request.QueryString("print") = "1" Then
+
+            Dim rptPrint As ReportDocument = CType(Session("MasterList_Report"), ReportDocument)
+
+            If rptPrint Is Nothing Then
+                Me.Page.Response.Redirect("~/filemaintenance/t_goods_master_list.aspx")
+                Return
+            End If
+
+            rptPrint.SetDatabaseLogon(objDerived.username, objDerived.Password)
+
+            rptPrint.ExportToHttpResponse(ExportFormatType.PortableDocFormat, Me.Page.Response, False, "MasterList")
+
+            Me.Page.Response.End()
+
+        End If
+
     End Sub
 
-    Public Sub LoadReportReset()
-        Session("Reset") = 0
+    Protected Sub Page_Init(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Init
 
-        Me.CrystalReportViewer1.ReportSource = Me.CrystalReportSource1
-        Me.CrystalReportSource1.ReportDocument.SetDatabaseLogon(objDerived.username, objDerived.Password)
-        Me.CrystalReportSource1.ReportDocument.SetParameterValue(0, Session("Reset"))
-        Me.CrystalReportSource1.ReportDocument.SetParameterValue(1, Session("Reset"))
-        Me.CrystalReportSource1.ReportDocument.SetParameterValue(2, Session("Reset"))
+        If Not IsPostBack Then
+
+            rpt = New ReportDocument()
+            rpt.Load(Server.MapPath("rpt_FM_MasterList.rpt"))
+            rpt.SetParameterValue(0, Me.Session("xYear"))
+            rpt.SetParameterValue(1, Me.Session("Allotment_Type"))
+            Session("MasterList_Report") = rpt
+
+        Else
+
+            rpt = CType(Session("MasterList_Report"), ReportDocument)
+
+            If rpt Is Nothing Then
+
+                rpt = New ReportDocument()
+                rpt.Load(Server.MapPath("rpt_FM_MasterList.rpt"))
+                rpt.SetParameterValue(0, Me.Session("xYear"))
+                rpt.SetParameterValue(1, Me.Session("Allotment_Type"))
+                Session("MasterList_Report") = rpt
+
+            End If
+
+        End If
+
+        rpt.SetDatabaseLogon(objDerived.username, objDerived.Password)
+
+        Me.CrystalReportViewer1.ReportSource = rpt
+
     End Sub
 
-
-    Public Sub LoadReport()
-        AddTrace("Year: " & Session("Year"))
-        AddTrace("Allotment_Type: " & Session("Allotment_Type"))
-        AddTrace("GA_ID: " & Session("GA_ID"))
-
-        Me.CrystalReportViewer1.ReportSource = Me.CrystalReportSource1
-        Me.CrystalReportSource1.ReportDocument.SetDatabaseLogon(objDerived.username, objDerived.Password)
-        Me.CrystalReportSource1.ReportDocument.SetParameterValue(0, Session("xYear"))
-        Me.CrystalReportSource1.ReportDocument.SetParameterValue(1, Session("Allotment_Type"))
-        Me.CrystalReportSource1.ReportDocument.SetParameterValue(2, Session("GA_ID"))
-    End Sub
     Protected Sub LinkButton1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles LinkButton1.Click
         Me.Page.Response.Redirect("~/filemaintenance/t_goods_master_list.aspx")
     End Sub

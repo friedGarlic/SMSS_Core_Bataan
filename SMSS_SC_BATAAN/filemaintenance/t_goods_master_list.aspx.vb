@@ -16,13 +16,16 @@ Partial Class filemaintenance_t_goods_master_list
 
     Dim obj As New AccessRule
 
-    Private Sub AddTrace(ByVal message As String)
-        Dim safeMessage As String = message.Replace("'", "\'")
-        ScriptManager.RegisterClientScriptBlock(Me, Me.GetType(),
-        "TraceKey" & Guid.NewGuid().ToString("N"),
-        "console.log('" & safeMessage & "');",
-        True)
-    End Sub
+    Private Property rolename() As String
+        Get
+            Return CType(Session("rolename"), String)
+        End Get
+        Set(ByVal value As String)
+            Session("rolename") = value
+        End Set
+    End Property
+
+
 
 
     Private Property categ() As DataTable
@@ -44,62 +47,81 @@ Partial Class filemaintenance_t_goods_master_list
     End Property
 
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+
+        obj.GetAccessRight(Me.Session("@username"), Page)
+        If obj.HasAccess = False Then
+            Me.Page.Response.Redirect("~/UnauthorizedAccess.aspx")
+        End If
+
+        Dim usr As MembershipUser = Membership.GetUser(Me.Session("@UserName").ToString)
+        Dim role() As String = Roles.GetRolesForUser(usr.UserName)
+        rolename = role(0)
+        Session("RoleName") = rolename
+
         Try
+
             If Not Page.IsPostBack Then
                 Session("Search") = 0
                 Session("Year") = "CY" & Year(Date.Today.ToString("MM/dd/yyyy"))
                 Session("xYear") = Year(Date.Today.ToString("MM/dd/yyyy"))
 
-
-
-                loadYear()
+                LoadYears()
                 loadcategory()
 
                 txtSearch.Attributes.Add("onkeypress", "return fun1(event,'" & btnsearch.ClientID & "')")
 
             End If
 
+            '=-= keep Session("Year") in sync with the dropdown on every load
+            If ddYear.SelectedItem IsNot Nothing Then
+                Session("Year") = ddYear.SelectedItem.Text
+                Session("xYear") = ddYear.SelectedItem.Value
+            End If
+
         Catch ex As Exception
-            AddTrace("Page_Load Error: " & ex.Message)
         End Try
 
     End Sub
 
-    Public Sub loadYear()
-        Dim CYear As New DataTable
-        CYear = objDerived.GetDataTable("Select * from AMS.APP order by year desc", CommandType.Text)
+    Protected Sub LoadYears()
+        ddYear.Items.Clear()
 
-        ddYear.DataSource = CYear
-        ddYear.DataTextField = "year"
-        ddYear.DataValueField = "year"
-        ddYear.DataBind()
-        ddYear.Items.Insert(0, "Select")
+        Dim baseYear As Integer = Year(Date.Today.ToString("MM/dd/yyyy"))
+
+        For i As Integer = baseYear - 3 To baseYear + 3
+            ddYear.Items.Add(New ListItem("CY" & i, i))
+        Next
+
+        '=-= default selection = current year
+        ddYear.SelectedValue = baseYear
 
     End Sub
 
+    Protected Sub ddYear_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs)
+        Session("Year") = ddYear.SelectedItem.Text
+        Session("xYear") = ddYear.SelectedItem.Value
+
+        LoadCategories()
+    End Sub
     Protected Sub loadcategory()
 
-        If RadioButtonList1.SelectedItem.Value = 2 Then
+        If RadioButtonList1.SelectedItem.Value = 1 Then
             categ = objDerived.GetDataTable("Exec dbo.sp_Accounts_Category '" & 2 & "'", CommandType.Text)
             ddCategories.DataSource = CType(categ, DataTable)
             ddCategories.DataTextField = ("GA_Title")
             ddCategories.DataValueField = ("GA_ID")
             ddCategories.DataBind()
-            ddCategories.Items.Insert(0, "Select")
             ddCategories.SelectedIndex = 0
             'ddCategories.Items.Insert(0, "Select")
 
             Session("Allotment_Type") = 2
 
-        ElseIf RadioButtonList1.SelectedItem.Value = 3 Then
+        ElseIf RadioButtonList1.SelectedItem.Value = 2 Then
             categ = objDerived.GetDataTable("Exec dbo.sp_Accounts_Category '" & 3 & "'", CommandType.Text)
             ddCategories.DataSource = CType(categ, DataTable)
             ddCategories.DataTextField = ("GA_Title")
             ddCategories.DataValueField = ("GA_ID")
             ddCategories.DataBind()
-
-            ddCategories.Items.Insert(0, "Select")
-
             ddCategories.SelectedIndex = 0
             'ddCategories.Items.Insert(0, "Select")
 
@@ -110,55 +132,29 @@ Partial Class filemaintenance_t_goods_master_list
         LoadCategories()
     End Sub
 
-    Protected Sub ddYear_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs)
-        If ddYear.SelectedIndex > 0 Then
-            Session("Year") = "CY" & ddYear.SelectedValue
-
-            Session("xYear") = ddYear.SelectedValue
-            AddTrace("Year changed to: " & Session("Year"))
-
-
-
-        End If
-    End Sub
-
     Protected Sub ddCategories_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs)
         LoadCategories()
-        Session("GA_ID") = ddCategories.SelectedValue
-
     End Sub
+
     Protected Sub LoadCategories()
         txtSearch.Text = ""
-
-        ' ADD THIS CHECK - Exit if categ is Nothing
-        If categ Is Nothing Then
-            AddTrace("LoadCategories: categ is Nothing, exiting")
-            Exit Sub
-        End If
-
         If ddCategories.SelectedItem.Text = "Select" Then
             gvstock.DataSource = createdatatable1(50)
             gvstock.DataBind()
-            Exit Sub  ' ADD THIS - Exit early for "Select"
         End If
 
         Session("GA_ID") = ddCategories.SelectedItem.Value
+        lblAccntCode.Text = "Account Code : " + CType(categ.Rows(ddCategories.SelectedIndex)("GA_Code"), String)
 
-        lblAccntCode.Text = "Account Code : " + CType(categ.Rows(ddCategories.SelectedIndex - 1)("GA_Code"), String)
 
-        AddTrace("GA_ID: " & Session("GA_ID"))
-        AddTrace("Year: " & Session("Year"))
-        AddTrace("RadioButtonList1: " & RadioButtonList1.SelectedValue)
+        dtItemList = objDerived.GetDataTable(
+            "Exec [AMS].[sp_masterlist_categories] '" &
+            Session("GA_ID") & "','" &
+            Session("Year") & "','" &
+            Session("Allotment_Type") & "'",
+            CommandType.Text
+        )
 
-        dtItemList = objDerived.GetDataTable("Exec [AMS].[sp_masterlist_categories] '" & Session("GA_ID") & "' , '" & Session("Year") & "' , '" & RadioButtonList1.SelectedValue & "'  ", CommandType.Text)
-
-        ' ADD THIS NULL CHECK
-        If dtItemList Is Nothing Then
-            AddTrace("LoadCategories: dtItemList is Nothing, creating empty table")
-            gvstock.DataSource = createdatatable1(50)
-            gvstock.DataBind()
-            Exit Sub
-        End If
 
         If dtItemList.Rows.Count = 0 Then
             gvstock.DataSource = createdatatable1(50)
@@ -170,9 +166,11 @@ Partial Class filemaintenance_t_goods_master_list
             End If
             gvstock.DataSource = dtItemList
             gvstock.DataBind()
+
         End If
 
     End Sub
+
     Public Function replaceapostrophe(ByVal str As String) As String
         Return Replace(str, "'", "''")
     End Function
@@ -187,16 +185,14 @@ Partial Class filemaintenance_t_goods_master_list
         If ddSearch.SelectedItem.Value = 1 Then
             Dim myview As DataView
             myview = dtItemList.DefaultView
-            Dim searchTerm As String = txtSearch.Text.Replace("[", "[[]").Replace("%", "[%]").Replace("_", "[_]")
-            myview.RowFilter = "Item_desc like '%" & searchTerm & "%'"
+            myview.RowFilter = "Item_desc like '%" & replaceapostrophe(txtSearch.Text) & "%'"
             gvstock.DataSource = myview
             gvstock.DataBind()
 
         ElseIf ddSearch.SelectedItem.Value = 2 Then
             Dim myview As DataView
             myview = dtItemList.DefaultView
-            Dim searchTerm As String = txtSearch.Text.Replace("[", "[[]").Replace("%", "[%]").Replace("_", "[_]")
-            myview.RowFilter = "ItemCode like '%" & searchTerm & "%'"
+            myview.RowFilter = "ItemCode like '%" & replaceapostrophe(txtSearch.Text) & "%'"
             gvstock.DataSource = myview
             gvstock.DataBind()
         End If
@@ -213,7 +209,7 @@ Partial Class filemaintenance_t_goods_master_list
             gvstock.DataSource = objDerived.GetRecords("exec ams.sp_search_master_list '" & txtSearch.Text & "'," & rb.SelectedIndex & "", CommandType.Text)
             gvstock.DataBind()
         Catch ex As Exception
-            AddTrace("Page_Load Error: " & ex.Message)
+
         End Try
     End Sub
 
@@ -222,28 +218,6 @@ Partial Class filemaintenance_t_goods_master_list
         gvstock.DataSource = dtItemList
         gvstock.DataBind()
 
-        'If Session("Search") = 0 Then
-        '    Dim dtInspect As New DataTable
-        '    dtInspect = objDerived.GetDataTable("Exec [AMS].[sp_masterlist_categories] '" & Session("GA_ID") & "','" & Session("Year") & "'", CommandType.Text)
-        '    If dtInspect.Rows.Count < 50 Then
-        '        dtInspect.Merge(createdatatable1(50 - dtInspect.Rows.Count))
-        '    End If
-        '    gvstock.PageIndex = e.NewPageIndex
-        '    gvstock.DataSource = dtInspect
-        '    gvstock.DataBind()
-
-        'ElseIf Session("Search") = 1 Then
-
-        '    Dim dtsearch As New DataTable
-        '   dtsearch = objDerived.GetDataTable("Exec [AMS].[sp_masterlist_categories_Search] '" & Session("GA_ID") & "','" & Session("Year") & "','" & txtSearch.Text & "'", CommandType.Text)
-        '    If dtsearch.Rows.Count < 50 Then
-        '        dtsearch.Merge(createdatatable1(50 - dtsearch.Rows.Count))
-        '    End If
-        '    gvstock.PageIndex = e.NewPageIndex
-        '    gvstock.DataSource = dtsearch
-        '    gvstock.DataBind()
-
-        'End If
 
     End Sub
     Public Function createdatatable1(ByVal row As Integer) As DataTable
@@ -274,23 +248,10 @@ Partial Class filemaintenance_t_goods_master_list
 
     Protected Sub RadioButtonList1_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs)
         loadcategory()
-        Session("Allotment_Type") = RadioButtonList1.SelectedValue
-        AddTrace("Allotment_Type" & Session("Allotment_Type"))
     End Sub
 
 
-
     Protected Sub btnPreview_Click(ByVal sender As Object, ByVal e As System.EventArgs)
-
-        Dim url As String = ResolveUrl("~/filemaintenance/rpt_MasterList.aspx")
-
-        ScriptManager.RegisterStartupScript(
-        Me,
-        Me.GetType(),
-        "OpenMasterListReport",
-        "window.open('" & url & "', '_blank');",
-        True
-    )
-
+        Me.Page.Response.Redirect("~/filemaintenance/rpt_MasterList.aspx")
     End Sub
 End Class

@@ -46,31 +46,15 @@
 
                     <colgroup>
                         <col style="width:20%;" />
-                        <col style="width:18%;" />
+                        <col style="width:38%;" />
                         <col style="width:3%;" />
-                        <col style="width:18%;" />
-                        <col style="width:18%;" />
+                        <col style="width:8%;" />
+                        <col style="width:8%;" />
                         <col style="width:13%;" />
                     </colgroup>
 
-                    <!-- ROW 1 -->
+                    <%-- Visible General Account Row --%>
                     <tr>
-                        <td style="padding:5px; text-align:right; vertical-align:middle;">
-                            <span style="font-size:10pt; font-family:Arial;">
-                                <strong>Classification :</strong>
-                            </span>
-                        </td>
-
-                        <td style="padding:5px; text-align:center; vertical-align:middle;">
-                            <asp:DropDownList ID="drpClassification" runat="server"
-                                Width="100%" CssClass="txtboxinspection"
-                                AutoPostBack="True"
-                                OnSelectedIndexChanged="drpClassification_SelectedIndexChanged">
-                            </asp:DropDownList>
-                        </td>
-
-                        <td style="padding:5px;"></td>
-
                         <td style="padding:5px; text-align:right; vertical-align:middle;">
                             <span style="font-size:10pt; font-family:Arial;">
                                 <strong>General Account :</strong>
@@ -86,36 +70,28 @@
                         </td>
 
                         <td style="padding:5px;"></td>
+                        <td style="padding:5px;"></td>
+                        <td style="padding:5px;"></td>
+                        <td style="padding:5px;"></td>
                     </tr>
 
-                    <!-- ROW 2 -->
-                    <tr>
-                        <td style="padding:5px; text-align:right; vertical-align:middle;">
-                            <span style="font-size:10pt; font-family:Arial;">
-                                <strong>Sub Classification :</strong>
-                            </span>
+                    <%-- Keep these controls for the existing UpdateActiveView process --%>
+                    <tr style="display:none;">
+                        <td>
+                            <asp:DropDownList ID="drpClassification" runat="server"
+                                AutoPostBack="True"
+                                OnSelectedIndexChanged="drpClassification_SelectedIndexChanged">
+                            </asp:DropDownList>
                         </td>
 
-                        <td style="padding:5px; text-align:center; vertical-align:middle;">
+                        <td>
                             <asp:DropDownList ID="drpSubClassification" runat="server"
-                                Width="100%" CssClass="txtboxinspection"
                                 AutoPostBack="True"
                                 OnSelectedIndexChanged="drpSubClassification_SelectedIndexChanged">
                             </asp:DropDownList>
                         </td>
 
-                        <td style="padding:5px;"></td>
-
-                        <td style="padding:5px; text-align:right; vertical-align:middle;">
-                            <span style="font-size:10pt; font-family:Arial;">
-                            </span>
-                        </td>
-
-                        <td style="padding:5px; text-align:center; vertical-align:middle;">
-                        </td>
-
-                        <td style="padding:5px; text-align:center; vertical-align:middle;">
-                        </td>
+                        <td colspan="4"></td>
                     </tr>
 
                 </table>
@@ -126,7 +102,48 @@
             <td style="height:10px;"></td>
         </tr>
 
-        <!-- MAIN MULTIVIEW AREA (EMPTY FOR NOW) -->
+        <%-- List of Items Section --%>
+        <tr>
+            <td class="DivTitle" style="width:1010px">
+                LIST OF ITEMS
+            </td>
+        </tr>
+
+        <tr>
+            <td style="width:1010px">
+                <asp:GridView ID="gvItems" runat="server"
+                    Width="1000px"
+                    SkinID="GridViewAA"
+                    HorizontalAlign="Center"
+                    DataKeyNames="Item_ID,ClassificationID"
+                    AllowPaging="True"
+                    AutoGenerateColumns="False"
+                    Font-Size="9pt"
+                    OnPageIndexChanging="gvItems_PageIndexChanging"
+                    OnSelectedIndexChanged="gvItems_SelectedIndexChanged"
+                    OnRowDataBound="gvItems_RowDataBound">
+
+                    <Columns>
+                        <asp:BoundField DataField="Item_Code" HeaderText="Item Code">
+                            <HeaderStyle HorizontalAlign="Center" Width="35%"></HeaderStyle>
+                            <ItemStyle HorizontalAlign="Center" Width="35%"></ItemStyle>
+                        </asp:BoundField>
+
+                        <asp:BoundField DataField="ItemDescription" HeaderText="Item Description">
+                            <HeaderStyle HorizontalAlign="Center" Width="65%"></HeaderStyle>
+                            <ItemStyle HorizontalAlign="Left" Width="65%"></ItemStyle>
+                        </asp:BoundField>
+                    </Columns>
+                </asp:GridView>
+            </td>
+        </tr>
+
+        <tr>
+            <td style="height:10px;"></td>
+        </tr>
+
+        <!-- MAIN MULTIVIEW AREA -->
+
         <tr>
             <td style="width: 1010px">
               <asp:MultiView ID="mwStockCard" runat="server">

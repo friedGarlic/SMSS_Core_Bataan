@@ -3,9 +3,9 @@
 
 
 
-<div class="DivTitle">LIST OF SUPPLIES</div>
+<div   style="display: none;" class="DivTitle">LIST OF SUPPLIES</div>
 
-<asp:GridView ID="grdStockList" runat="server" Width="98%" SkinID="GridViewAA"
+<asp:GridView ID="grdStockList" runat="server" Width="98%" SkinID="GridViewAA"  style="display: none;" 
     AllowPaging="True"
     DataKeyNames="Item_ID,Stock_ID"
     OnPageIndexChanging="grdStockList_PageIndexChanging"
@@ -243,6 +243,9 @@
 
 
 <br />
+
+
+<div class="DivTitle">TRANSACTIONS</div>
 
 <asp:Panel ID="pnlLedger" runat="server" Width="100%" CssClass="PanelSize" ScrollBars="Vertical">
     <asp:GridView ID="grdLedger" runat="server" Width="100%" SkinID="GridViewAA" AutoGenerateColumns="False">

@@ -38,16 +38,15 @@ Partial Class Reports_and_Query_WasteMaterials_Reports
     Private Sub Reports_and_Query_WasteMaterials_Reports_Load(sender As Object, e As EventArgs) Handles Me.Load
         If Not Page.IsPostBack Then
 
-            dtWaste = objDerived.GetDataTable("SELECT A.WMHdr_ID, A.WM_Date, A.rc_id, CASE WHEN A.Function_ID = 86 THEN B.RC_Name ELSE B.Function_Desc END AS RC_Name, CONVERT(BIT,1) AS isVisible    " &
-                                                  "  FROM AMS.WMR_Hdr AS A INNER JOIN DBO.View_RespCenter_withFunctions AS B ON A.RC_ID = B.RC_ID AND A.Function_ID = B.Function_ID                     " &
-                                                  "  ORDER BY A.WM_Date DESC, A.rc_id DESC", CommandType.Text)
+            dtWaste = objDerived.GetDataTable("SELECT A.WMHdr_ID, A.WM_Date, A.ctrl_no, A.rc_id, CASE WHEN A.Function_ID = 86 THEN B.RC_Name ELSE B.Function_Desc END AS RC_Name, CONVERT(BIT,1) AS isVisible    " &
+                                          "  FROM AMS.WMR_Hdr AS A INNER JOIN DBO.View_RespCenter_withFunctions AS B ON A.RC_ID = B.RC_ID AND A.Function_ID = B.Function_ID                     " &
+                                          "  ORDER BY A.WM_Date DESC, A.rc_id DESC", CommandType.Text)
 
             If dtWaste.Rows.Count < 5 Then
                 dtWaste.Merge(tempTable_WMR(4 - dtWaste.Rows.Count))
             End If
             grdWMR.DataSource = dtWaste
             grdWMR.DataBind()
-
 
         End If
 

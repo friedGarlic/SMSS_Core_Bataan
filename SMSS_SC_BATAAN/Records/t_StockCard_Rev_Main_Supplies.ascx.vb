@@ -303,6 +303,200 @@ Partial Class Records_t_StockCard_Rev_Main_Supplies
         ' Intentionally left empty - grid is display-only with no click functionality
     End Sub
 
+
+    Private Sub ProcessSelectedStockItem(
+ByVal stockId As Long,
+ByVal itemId As Long)
+
+        ViewState("SelectedStockID") = stockId
+        ViewState("SelectedItemID") = itemId
+
+        Session("Item_ID") = itemId
+
+        ' Incoming Deliveries uses Item_ID.
+        If itemId > 0 Then
+            BindIncomingDeliveries(itemId)
+        Else
+            BindEmptyIncomingDeliveries()
+        End If
+
+        ' Inventory Card uses Stock_ID.
+        If stockId > 0 Then
+            PopulateSuppliesInventoryCard(stockId)
+        Else
+            ClearSuppliesInventoryCard()
+        End If
+
+        ' Ledger uses Item_ID.
+        If itemId > 0 Then
+            BindLedger(itemId)
+        Else
+            BindEmptyLedger()
+        End If
+
+    End Sub
+
+
+    Public Sub LoadSelectedItem(
+ByVal itemId As Long)
+
+        If itemId <= 0 Then
+
+            Session("Item_ID") = 0
+
+            ViewState("SelectedStockID") = Nothing
+            ViewState("SelectedItemID") = Nothing
+
+            grdStockList.SelectedIndex = -1
+
+            BindEmptyIncomingDeliveries()
+            ClearSuppliesInventoryCard()
+            BindEmptyLedger()
+
+            Exit Sub
+
+        End If
+
+        Session("Item_ID") = itemId
+
+        AddTrace(
+        "Supplies User Control Item_ID: " &
+        itemId
+    )
+
+        Dim classId As String =
+    Convert.ToString(
+        Session("ClassificationID")
+    )
+
+        Dim subClassId As String =
+    Convert.ToString(
+        Session("SubClassificationID")
+    )
+
+        Dim gaId As String =
+    Convert.ToString(
+        Session("GA_ID")
+    )
+
+        If String.IsNullOrWhiteSpace(classId) Then
+            classId = "0"
+        End If
+
+        If String.IsNullOrWhiteSpace(subClassId) Then
+            subClassId = "0"
+        End If
+
+        If String.IsNullOrWhiteSpace(gaId) Then
+            gaId = "0"
+        End If
+
+        Dim dt As DataTable = Nothing
+
+        Try
+
+            Dim sql As String =
+        "EXEC [AMS].[sp_StockCard_Rev_ListOfSupplies] " &
+        "@ClassificationID=" & classId & ", " &
+        "@SubClassificationID=" & subClassId & ", " &
+        "@GA_ID=" & gaId
+
+            AddTrace(
+            "Loading Supplies Item: " &
+            sql
+        )
+
+            dt = objDerived.GetDataTable(
+            sql,
+            CommandType.Text
+        )
+
+        Catch ex As Exception
+
+            System.Diagnostics.Debug.WriteLine(
+            "Error loading selected supplies item: " &
+            ex.Message
+        )
+
+            dt = Nothing
+
+        End Try
+
+        Dim selectedStockId As Long = 0
+        Dim selectedRecordIndex As Integer = -1
+
+        If dt IsNot Nothing AndAlso
+    dt.Rows.Count > 0 Then
+
+            For i As Integer = 0 To dt.Rows.Count - 1
+
+                Dim currentItemId As Long = 0
+
+                Long.TryParse(
+                Convert.ToString(
+                    dt.Rows(i).Item("Item_ID")
+                ),
+                currentItemId
+            )
+
+                If currentItemId = itemId Then
+
+                    selectedRecordIndex = i
+
+                    Long.TryParse(
+                    Convert.ToString(
+                        dt.Rows(i).Item("Stock_ID")
+                    ),
+                    selectedStockId
+                )
+
+                    Exit For
+
+                End If
+
+            Next
+
+            ' Display the page containing the selected item.
+            If selectedRecordIndex >= 0 Then
+
+                grdStockList.PageIndex =
+            selectedRecordIndex \ grdStockList.PageSize
+
+            Else
+
+                grdStockList.PageIndex = 0
+
+            End If
+
+            grdStockList.DataSource = dt
+            grdStockList.DataBind()
+
+            ' Select the matching row so the existing
+            ' Preview button can still find SelectedDataKey.
+            If selectedRecordIndex >= 0 Then
+
+                grdStockList.SelectedIndex =
+            selectedRecordIndex Mod grdStockList.PageSize
+
+            Else
+
+                grdStockList.SelectedIndex = -1
+
+            End If
+
+        Else
+
+            BindEmptyStockList()
+
+        End If
+
+        ProcessSelectedStockItem(
+        selectedStockId,
+        itemId
+    )
+
+    End Sub
+
     '------------------------- GRID LEDGER ------------------------------------------------------------------------
     Private Sub BindLedger(ByVal itemId As Long)
         Dim dt As DataTable = Nothing
@@ -322,44 +516,60 @@ Partial Class Records_t_StockCard_Rev_Main_Supplies
         End If
     End Sub
 
-    Protected Sub grdStockList_SelectedIndexChanged(ByVal sender As Object, ByVal e As EventArgs)
+    Protected Sub grdStockList_SelectedIndexChanged(
+ByVal sender As Object,
+ByVal e As EventArgs)
+
         Dim stockId As Long = 0
         Dim itemId As Long = 0
 
-        AddTrace("Item_ID: " & grdStockList.SelectedDataKey.Values("Item_ID"))
-        AddTrace("Stock_ID: " & grdStockList.SelectedDataKey.Values("Stock_ID"))
-
-        If grdStockList.SelectedDataKey IsNot Nothing Then
-            If grdStockList.SelectedDataKey.Values("Stock_ID") IsNot Nothing Then
-                Long.TryParse(grdStockList.SelectedDataKey.Values("Stock_ID").ToString(), stockId)
-            End If
-            If grdStockList.SelectedDataKey.Values("Item_ID") IsNot Nothing Then
-                Long.TryParse(grdStockList.SelectedDataKey.Values("Item_ID").ToString(), itemId)
-            End If
+        If grdStockList.SelectedDataKey Is Nothing Then
+            Exit Sub
         End If
 
-        ViewState("SelectedStockID") = stockId
-        ViewState("SelectedItemID") = itemId
+        If grdStockList.SelectedDataKey.Values(
+        "Stock_ID"
+    ) IsNot Nothing Then
 
-        ' Incoming Deliveries - NOW USING Item_ID (matches updated stored proc)
-        If itemId > 0 Then
-            BindIncomingDeliveries(itemId)
-        Else
-            BindEmptyIncomingDeliveries()
+            Long.TryParse(
+            grdStockList.SelectedDataKey.Values(
+                "Stock_ID"
+            ).ToString(),
+            stockId
+        )
+
         End If
 
-        If stockId > 0 Then
-            PopulateSuppliesInventoryCard(stockId)
-        Else
-            ClearSuppliesInventoryCard()
+        If grdStockList.SelectedDataKey.Values(
+        "Item_ID"
+    ) IsNot Nothing Then
+
+            Long.TryParse(
+            grdStockList.SelectedDataKey.Values(
+                "Item_ID"
+            ).ToString(),
+            itemId
+        )
+
         End If
 
-        If itemId > 0 Then
-            BindLedger(itemId)
-        Else
-            BindEmptyLedger()
-        End If
+        AddTrace(
+        "Item_ID: " &
+        itemId
+    )
+
+        AddTrace(
+        "Stock_ID: " &
+        stockId
+    )
+
+        ProcessSelectedStockItem(
+        stockId,
+        itemId
+    )
+
     End Sub
+
 
     Protected Sub grdLedger_PageIndexChanging(ByVal sender As Object, ByVal e As GridViewPageEventArgs)
         grdLedger.PageIndex = e.NewPageIndex

@@ -39,7 +39,7 @@
 
 
             <div>
-                <table width="1020px">
+                <table width="1020px" cellpadding="0" cellspacing="0">
                     <tr>
                         <td style="width: 1%"></td>
                         <td style="width: 98%" class="PageTitle">DISPOSAL REPORTS

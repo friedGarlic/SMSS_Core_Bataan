@@ -9,16 +9,68 @@ Imports System.Web.UI.WebControls
 Imports System.Web.UI.WebControls.WebParts
 Imports System.Web.UI.HtmlControls
 Imports System.IO
+Imports CrystalDecisions.CrystalReports.Engine
+Imports CrystalDecisions.Shared
 
 Partial Class Inventory_Disposal_rpt_Auction_BidForm
     Inherits System.Web.UI.Page
     Private objDerived As New connectionreport
     Private objDerived2 As New DerivedDal
+    Dim rpt As New ReportDocument
 
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
-        Me.CrystalReportViewer1.ReportSource = Me.CrystalReportSource1
-        Me.CrystalReportSource1.ReportDocument.SetDatabaseLogon(objDerived.username, objDerived.Password)
-        Me.CrystalReportSource1.ReportDocument.SetParameterValue("@IIRUPHdr_ID", Session("IIRUPHdr_ID"))
+
+        ' When the page is opened with ?print=1, export the report that is
+        ' already in Session to PDF and stream it straight to the browser.
+        ' This replaces the normal HTML output so the report opens in the
+        ' browser's PDF viewer, ready to print, with all pages included.
+        If Request.QueryString("print") = "1" Then
+
+            Dim rptPrint As ReportDocument = CType(Session("AuctionBid_Report"), ReportDocument)
+
+            If rptPrint Is Nothing Then
+                Me.Page.Response.Redirect("~/Records/PropertyCard_Rev.aspx")
+                Return
+            End If
+
+            rptPrint.SetDatabaseLogon(objDerived.username, objDerived.Password)
+
+            rptPrint.ExportToHttpResponse(ExportFormatType.PortableDocFormat, Me.Page.Response, False, "AuctionBidForm")
+
+            Me.Page.Response.End()
+
+        End If
+
+    End Sub
+
+    Protected Sub Page_Init(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Init
+
+        If Not IsPostBack Then
+
+            rpt = New ReportDocument()
+            rpt.Load(Server.MapPath("rpt_Auction_BidForm.rpt"))
+            rpt.SetParameterValue("@IIRUPHdr_ID", Me.Session("IIRUPHdr_ID"))
+            Session("AuctionBid_Report") = rpt
+
+        Else
+
+            rpt = CType(Session("AuctionBid_Report"), ReportDocument)
+
+            If rpt Is Nothing Then
+
+                rpt = New ReportDocument()
+                rpt.Load(Server.MapPath("rpt_Auction_BidForm.rpt"))
+                rpt.SetParameterValue("@IIRUPHdr_ID", Me.Session("IIRUPHdr_ID"))
+                Session("AuctionBid_Report") = rpt
+
+            End If
+
+        End If
+
+        rpt.SetDatabaseLogon(objDerived.username, objDerived.Password)
+
+        Me.CrystalReportViewer1.ReportSource = rpt
+
     End Sub
 
 End Class
