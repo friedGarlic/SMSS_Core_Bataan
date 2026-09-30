@@ -49,7 +49,11 @@ Partial Class Inventory_Encoding_Land
             End If
 
             selectClassification()
+
             BindGAAccounts()
+
+            'LoadGLAccounts()
+
             ClassAndSubText()
 
             ddBrgy1.DataSource = objDerived.GetDataTable("Select * from dbo.tbl_Brgy_Invent", CommandType.Text)
@@ -123,11 +127,28 @@ Partial Class Inventory_Encoding_Land
 
         Dim sql As String =
         "SELECT DISTINCT " &
-        "    GA_ID, " &
-        "    GA_Title " &
-        "FROM dbo.vw_AccountWithClass " &
-        "WHERE ClassificationID = " & classificationID & " " &
-        "ORDER BY GA_Title"
+        "    m_GenAccnt.GA_ID, " &
+        "    m_GenAccnt.GA_Code, " &
+        "    CONVERT(varchar(30), m_GenAccnt.GA_Code) + ' - ' + m_GenAccnt.GA_Title AS GA_Title, " &
+        "    m_GenAccnt.Rev_ID, " &
+        "    m_AllotmentClassAccount.AllotmentClass_ID, " &
+        "    m_GenAccnt.GA_Title AS Title, " &
+        "    m_GenAccnt.ClassificationId " &
+        "FROM LnkdSrvrBOSS.GEOBOS.BOS.m_GenAccnt AS m_GenAccnt " &
+        "INNER JOIN LnkdSrvrBOSS.GEOBOS.BOS.m_AllotmentClassAccount AS m_AllotmentClassAccount " &
+        "    ON m_GenAccnt.GA_ID = m_AllotmentClassAccount.GA_ID " &
+        "WHERE m_GenAccnt.Rev_ID = 8 " &
+        "    AND m_AllotmentClassAccount.AllotmentClass_ID = 3 " &
+        "    AND m_GenAccnt.GA_Title LIKE '%land%' " &
+        "ORDER BY Title"
+
+        'Dim sql As String =
+        '"SELECT DISTINCT " &
+        '"    GA_ID, " &
+        '"    GA_Title " &
+        '"FROM dbo.vw_AccountWithClass " &
+        '"WHERE ClassificationID = " & classificationID & " " &
+        '"ORDER BY GA_Title"
 
         AddTrace(sql)
 
@@ -381,6 +402,10 @@ Partial Class Inventory_Encoding_Land
         ByVal sender As Object,
         ByVal e As EventArgs
         ) Handles ddGA.SelectedIndexChanged
+
+
+        Dim gaId As Integer = 0
+        Integer.TryParse(Convert.ToString(ddGA.SelectedValue), gaId)
 
         hdnGAId.Value = If(
             ddGA.SelectedValue Is Nothing,
