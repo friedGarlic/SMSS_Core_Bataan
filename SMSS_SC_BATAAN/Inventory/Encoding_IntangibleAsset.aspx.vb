@@ -1068,7 +1068,7 @@ Partial Class Inventory_Encoding_IntangibleAsset
             Save()
 
             loadEquipmentLedger()
-
+            btnSave.Enabled = False
         ElseIf btnSave.Text = "EDIT" Then
 
             LoadApprovingOfficers()
@@ -1129,9 +1129,9 @@ Partial Class Inventory_Encoding_IntangibleAsset
             btnSave.Text = "SAVE"
 
             loadEquipmentLedger()
-
+            btnSave.Enabled = False
         End If
-        btnSave.Enabled = False
+
 
     End Sub
 

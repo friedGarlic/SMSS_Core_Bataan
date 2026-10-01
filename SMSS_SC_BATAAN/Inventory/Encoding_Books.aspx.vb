@@ -1041,7 +1041,7 @@ Partial Class Inventory_Encoding_Books
             loadBookLedger()
 
         End If
-        btnSave.Enabled = False
+
     End Sub
 
 
@@ -1330,7 +1330,7 @@ Partial Class Inventory_Encoding_Books
 
 
             MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Transaction has been successfully saved.")
-
+            btnSave.Enabled = False
         End If
 
         Session.Remove("TempPropertyList")
@@ -1379,9 +1379,7 @@ Partial Class Inventory_Encoding_Books
         If String.IsNullOrWhiteSpace(txtbookdesciption.Text) Then
             missingFields.Add("Description")
         End If
-        If drpbookUnit.SelectedIndex = 0 Then
-            missingFields.Add("Unit")
-        End If
+
         If String.IsNullOrWhiteSpace(txtbookQuantity.Text) Then
             missingFields.Add("Quantity")
         End If

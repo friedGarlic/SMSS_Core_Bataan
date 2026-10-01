@@ -2635,40 +2635,7 @@ Partial Class t_supplies
         DrpSubClass.Items.Clear()
 
         Dim count = objDerived.GetValue("Select count(*) from dbo.tbl_SubClassification where ClassificationID = '" & DrpClass.SelectedItem.Value & "'", CommandType.Text)
-        If count = 0 Then
 
-            If DrpSubClass.Text = "" Or DrpSubClass.Text = "Select" Then
-
-                DrpGenAcc = objDerived.GetDataTable("Exec [AMS].[FMgetGenAccntNoSubclass]'" & DrpClass.SelectedItem.Value & "','" & 0 & "'", CommandType.Text)
-                GenAccnt.DataSource = DrpGenAcc
-                GenAccnt.DataTextField = "GA_title"
-                GenAccnt.DataValueField = "GA_ID"
-                GenAccnt.Items.Clear()
-                GenAccnt.DataBind()
-                GenAccnt.Items.Insert(0, "Select")
-
-            Else
-
-                DrpGenAcc = objDerived.GetDataTable("Exec [AMS].[FMgetGenAccnt]'" & DrpClass.SelectedItem.Value & "','" & DrpSubClass.SelectedItem.Value & "','" & 0 & "'", CommandType.Text)
-                GenAccnt.DataSource = DrpGenAcc
-                GenAccnt.DataTextField = "GA_title"
-                GenAccnt.DataValueField = "GA_ID"
-                GenAccnt.Items.Clear()
-                GenAccnt.DataBind()
-                GenAccnt.Items.Insert(0, "Select")
-
-            End If
-
-
-        Else
-            DrpSubClassF = objDerived.GetDataTable("Select SubClassificationID, SubclassificationName from dbo.tbl_SubClassification where GA_ID = '" & GenAccnt.SelectedValue & "' AND ClassificationID = '" & DrpClass.SelectedItem.Value & "'", CommandType.Text)
-            DrpSubClass.DataSource = DrpSubClassF
-            DrpSubClass.DataTextField = "SubClassificationName"
-            DrpSubClass.DataValueField = "SubClassificationID"
-            DrpSubClass.Items.Clear()
-            DrpSubClass.DataBind()
-            DrpSubClass.Items.Insert(0, New ListItem("No Subclass", "0"))
-        End If
 
         If DrpClass.SelectedItem.Value = 5 Or DrpClass.Text = "Medicines" Then
             TextBoxGen.Enabled = "False"
@@ -2677,18 +2644,18 @@ Partial Class t_supplies
             TextBoxGen.Enabled = "False"
             GenName.Visible = False
         End If
-        'DrpSubClassF = objDerived.GetDataTable("Select SubClassificationID, SubclassificationName from dbo.tbl_SubClassification where ClassificationID = '" & DrpClass.SelectedItem.Value & "'", CommandType.Text)
-        'DrpSubClass.DataSource = DrpSubClassF
-        'DrpSubClass.DataTextField = "SubClassificationName"
-        'DrpSubClass.DataValueField = "SubClassificationID"
-        'DrpSubClass.items.clear()
-        'DrpSubClass.DataBind()
 
-        If DrpSubClass.Text = "" Then
-            DrpSubClass.Enabled = False
-        Else
-            DrpSubClass.Enabled = True
-        End If
+
+        DrpSubClassF = objDerived.GetDataTable("Select SubClassificationID, SubclassificationName from dbo.tbl_SubClassification where GA_ID = '" & GenAccnt.SelectedValue & "' AND ClassificationID = '" & DrpClass.SelectedItem.Value & "'", CommandType.Text)
+        DrpSubClass.DataSource = DrpSubClassF
+        DrpSubClass.DataTextField = "SubClassificationName"
+        DrpSubClass.DataValueField = "SubClassificationID"
+        DrpSubClass.Items.Clear()
+        DrpSubClass.DataBind()
+        DrpSubClass.Items.Insert(0, New ListItem("No Subclass", "0"))
+
+
+
 
 
         Dim b As Integer

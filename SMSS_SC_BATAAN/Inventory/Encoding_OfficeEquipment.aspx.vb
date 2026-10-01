@@ -822,7 +822,7 @@ Partial Class Inventory_Encoding_OfficeEquipment
 
         End If
 
-        btnSave.Enabled = False
+
     End Sub
 
     Public Sub Edit()
@@ -967,6 +967,7 @@ Partial Class Inventory_Encoding_OfficeEquipment
 
         MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Transaction has been successfully saved.")
         loadEquipmentLedger()
+        btnSave.Enabled = False
     End Sub
 
     Protected Sub loadEquipmentInformation_from_drpName()

@@ -1201,7 +1201,7 @@ Partial Class Inventory_Encoding_Equipment
 
             SAVE()
             loadEquipmentLedger()
-
+            btnSave.Enabled = False
         ElseIf btnSave.Text = "EDIT" Then
 
             Dim dt As DataTable = objDerived.GetDataTable(
@@ -1230,10 +1230,10 @@ Partial Class Inventory_Encoding_Equipment
 
             Edit()
             loadEquipmentLedger()
-
+            btnSave.Enabled = False
         End If
 
-        btnSave.Enabled = False
+
     End Sub
     Public Sub SAVE()
 

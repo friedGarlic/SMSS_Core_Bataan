@@ -2199,7 +2199,7 @@ Partial Class Inventory_Encoding_Vehicle
 
             Add()
             loadEquipmentLedger()
-
+            btnSave.Enabled = False
         ElseIf btnSave.Text = "EDIT" Then
 
             Dim dt As DataTable = objDerived.GetDataTable(
@@ -2253,13 +2253,12 @@ Partial Class Inventory_Encoding_Vehicle
 
             btnSave.Text = "SAVE"
             btnWatercraftsave.Text = "SAVE"
-            btnSave.Enabled = True
 
             loadEquipmentLedger()
-
+            btnSave.Enabled = False
         End If
 
-        btnSave.Enabled = False
+
     End Sub
 
     Private Function DecryptEncrypt(ByVal TheText As String) As String

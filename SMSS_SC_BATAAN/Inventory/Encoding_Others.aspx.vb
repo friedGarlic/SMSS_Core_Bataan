@@ -1697,6 +1697,7 @@ txtEMarketValue, txtNoYears, txtUsefulLife, txtSalvageValue, txtSpecification
             SAVE()
 
             loadEquipmentLedger()
+            btnSave.Enabled = False
         ElseIf btnSave.Text = "EDIT" Then
             Dim dt As New DataTable
             dt = objDerived.GetDataTable("SELECT approvalid,full_name  FROM ams.tbl_approval", CommandType.Text)
@@ -1710,8 +1711,9 @@ txtEMarketValue, txtNoYears, txtUsefulLife, txtSalvageValue, txtSpecification
             Edit()
 
             loadEquipmentLedger()
+            btnSave.Enabled = False
         End If
-        btnSave.Enabled = False
+
     End Sub
 
     Public Sub SAVE()
