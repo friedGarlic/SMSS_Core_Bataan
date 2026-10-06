@@ -182,8 +182,8 @@ Partial Class Inventory_Encoding_RoadsBridges
             vwBridge
         )
 
-            LoadGLAccounts()
-            'LoadGeneralAccounts()
+            'LoadGLAccounts()
+            LoadGeneralAccounts()
 
             drpSubClass.Items.Clear()
             drpSubClass.Items.Insert(
