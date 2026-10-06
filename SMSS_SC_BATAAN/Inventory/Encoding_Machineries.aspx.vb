@@ -1024,7 +1024,7 @@ Partial Class Inventory_Encoding_Machineries
 
         End If
 
-        btnSave.Enabled = True
+
     End Sub
 
     Public Sub Update()
@@ -1200,7 +1200,7 @@ Partial Class Inventory_Encoding_Machineries
                       "WHERE Ledger_ID = '" & ledgerId & "'", CommandType.Text)
 
         'objDerived.Execute("EXEC [AMS].[ReBalanceLedger] " & ItemID, CommandType.Text)
-
+        btnSave.Enabled = False
     End Sub
 
 
@@ -1249,9 +1249,7 @@ Partial Class Inventory_Encoding_Machineries
         If String.IsNullOrWhiteSpace(txtMachineryDescription.Text) Then
             missingFields.Add("Description")
         End If
-        If drpMachineryUnit.SelectedIndex = 0 Then
-            missingFields.Add("Unit")
-        End If
+
         If String.IsNullOrWhiteSpace(txtMachineryQuantity.Text) Then
             missingFields.Add("Quantity")
         End If

@@ -487,74 +487,23 @@ e As GridViewRowEventArgs)
 
 
     Protected Sub btnPreview_Click(sender As Object, e As EventArgs)
-        ' First, find the active user control to access its selected item
-        Dim activeView As View = CType(mwStockCard.GetActiveView(), View)
 
-        If activeView Is Nothing Then
-            ScriptManager.RegisterStartupScript(Me, Me.GetType(), "alert", "alert('No active view found.');", True)
+        '=-= Validate that a General Account is selected
+        If ddGlAccount.SelectedItem Is Nothing OrElse
+           String.IsNullOrEmpty(ddGlAccount.SelectedValue) OrElse
+           ddGlAccount.SelectedValue = "0" Then
+
+            ScriptManager.RegisterStartupScript(Me, Me.GetType(), "alert", "alert('Please select a General Account first.');", True)
             Exit Sub
         End If
 
-        Dim itemId As Object = Nothing
-        Dim grdStockList As GridView = Nothing
+        '=-= Store the GA_ID so the report page can read it via Session("GA_ID")
+        Session("GA_ID") = ddGlAccount.SelectedValue
+        AddTrace("Setting Session('GA_ID') = " & ddGlAccount.SelectedValue.ToString())
 
-        ' Determine which user control is active and get its GridView
-        If activeView.ID = "vwMROSupplies" Then
-            Dim ctrl As Records_t_StockCard_Rev_Main_MRO_Supplies = CType(vwMROSupplies.FindControl("MROStockCard1"), Records_t_StockCard_Rev_Main_MRO_Supplies)
-            If ctrl IsNot Nothing Then
-                grdStockList = CType(ctrl.FindControl("grdMROStockList"), GridView)
-            End If
+        '=-= Open the report in a new tab
+        Dim script As String = "window.open('../MainReports/rpt_StockCard_Rev.aspx', '_blank');"
+        ScriptManager.RegisterStartupScript(Me, Me.GetType(), "OpenReport", script, True)
 
-        ElseIf activeView.ID = "vwMROConsumables" Then
-            Dim ctrl As Records_t_StockCard_Rev_Main_MRO_Consumables = CType(vwMROConsumables.FindControl("MROConsumablesStockCard1"), Records_t_StockCard_Rev_Main_MRO_Consumables)
-            If ctrl IsNot Nothing Then
-                grdStockList = CType(ctrl.FindControl("grdMROConsumablesStockList"), GridView)
-            End If
-
-        ElseIf activeView.ID = "vwMROEquipment" Then
-            Dim ctrl As Records_t_StockCard_Rev_Main_MRO_Equipment = CType(vwMROEquipment.FindControl("MROEquipmentStockCard1"), Records_t_StockCard_Rev_Main_MRO_Equipment)
-            If ctrl IsNot Nothing Then
-                grdStockList = CType(ctrl.FindControl("grdMROEquipmentStockList"), GridView)
-            End If
-
-        ElseIf activeView.ID = "vwMedicine" Then
-            Dim ctrl As Records_t_StockCard_Rev_Main_Medicine = CType(vwMedicine.FindControl("MedicineStockCard1"), Records_t_StockCard_Rev_Main_Medicine)
-            If ctrl IsNot Nothing Then
-                grdStockList = CType(ctrl.FindControl("grdMedicineStockList"), GridView)
-            End If
-
-        ElseIf activeView.ID = "vwFood" Then
-            Dim ctrl As Records_t_StockCard_Rev_Main_Food = CType(vwFood.FindControl("FoodStockCard1"), Records_t_StockCard_Rev_Main_Food)
-            If ctrl IsNot Nothing Then
-                grdStockList = CType(ctrl.FindControl("grdFoodStockList"), GridView)
-            End If
-
-        ElseIf activeView.ID = "vwSupplies" Then
-            Dim ctrl As Records_t_StockCard_Rev_Main_Supplies = CType(vwSupplies.FindControl("SuppliesStockCard1"), Records_t_StockCard_Rev_Main_Supplies)
-            If ctrl IsNot Nothing Then
-                grdStockList = CType(ctrl.FindControl("grdStockList"), GridView)
-            End If
-        End If
-
-        ' Check if we have a selected item in the grid
-        If grdStockList IsNot Nothing AndAlso grdStockList.SelectedDataKey IsNot Nothing Then
-            ' Get the Item_ID from the selected data key
-            If grdStockList.SelectedDataKey.Values("Item_ID") IsNot Nothing Then
-                itemId = grdStockList.SelectedDataKey.Values("Item_ID")
-
-                ' Store in session
-                Session("Item_ID") = itemId
-
-                AddTrace("Setting Session('Item_ID') = " & itemId.ToString())
-
-                ' Open the report in a new tab
-                Dim script As String = "window.open('../MainReports/rpt_StockCard_Rev.aspx', '_blank');"
-                ScriptManager.RegisterStartupScript(Me, Me.GetType(), "OpenReport", script, True)
-            Else
-                ScriptManager.RegisterStartupScript(Me, Me.GetType(), "alert", "alert('Item_ID not found in selected row.');", True)
-            End If
-        Else
-            ScriptManager.RegisterStartupScript(Me, Me.GetType(), "alert", "alert('Please select an item from the list first.');", True)
-        End If
     End Sub
 End Class

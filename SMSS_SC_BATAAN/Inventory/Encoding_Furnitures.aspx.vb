@@ -1306,7 +1306,7 @@ Partial Class Inventory_Encoding_Furnitures
             SAVE()
 
             loadEquipmentLedger()
-
+            btnSave.Enabled = False
         ElseIf btnSave.Text = "EDIT" Then
 
             Dim dt As DataTable =
@@ -1364,9 +1364,9 @@ Partial Class Inventory_Encoding_Furnitures
             Next
 
             loadEquipmentLedger()
-
+            btnSave.Enabled = False
         End If
-        btnSave.Enabled = False
+
     End Sub
 
     Public Sub UPDATE()

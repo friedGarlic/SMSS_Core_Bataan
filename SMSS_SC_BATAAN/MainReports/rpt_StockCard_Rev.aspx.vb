@@ -14,6 +14,24 @@ Partial Class MainReports_rpt_StockCard_Rev
 
     Private Sub MainReports_rpt_StockCard_Rev_Load(sender As Object, e As EventArgs) Handles Me.Load
         LOAD_RP()
+
+        ' PDF export path for the hidden print iframe.  rpt_StockCard was just
+        ' built IN THIS SAME REQUEST by LOAD_RP() above, so we export it right
+        ' away and stop the pipeline -- no ReportDocument crosses a request
+        ' boundary.
+        If Request.QueryString("print") = "1" Then
+
+            If rpt_StockCard Is Nothing Then
+                Me.Page.Response.Redirect("~/Records/t_StockCard_Rev_Main.aspx")
+                Return
+            End If
+
+            rpt_StockCard.ExportToHttpResponse(ExportFormatType.PortableDocFormat, Me.Page.Response, False, "StockCard")
+
+            Me.Page.Response.End()
+
+        End If
+
     End Sub
 
     Protected Sub Page_Unload(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Unload
@@ -25,6 +43,10 @@ Partial Class MainReports_rpt_StockCard_Rev
     End Sub
 
     Private Sub AddTrace(ByVal message As String)
+        ' On a print request the response is already being aborted by
+        ' Response.End(); registering scripts would be a no-op anyway.
+        If Request.QueryString("print") = "1" Then Exit Sub
+
         ' Prevent single quotes in the message from breaking JavaScript
         Dim safeMessage As String = message.Replace("'", "\'")
         ScriptManager.RegisterClientScriptBlock(Me, Me.GetType(),
@@ -70,27 +92,27 @@ Partial Class MainReports_rpt_StockCard_Rev
         ApplyDatabaseLogon(rpt_StockCard, dsn, userIDFromConfig, passwordFromConfig)
 
         ' Set default parameter values first
-        rpt_StockCard.SetParameterValue("@Item_ID", 0)
+        rpt_StockCard.SetParameterValue("@GA_ID", 0)
 
         ' Set the report source
         Me.StockCardReport.ReportSource = rpt_StockCard
 
-        ' Check if Session("Item_ID") exists and set the parameter
-        If Session("Item_ID") IsNot Nothing AndAlso Not IsDBNull(Session("Item_ID")) Then
-            Dim itemID As Integer = 0
-            Dim sessItemID As Object = Session("Item_ID")
+        ' Check if Session("GA_ID") exists and set the parameter
+        If Session("GA_ID") IsNot Nothing AndAlso Not IsDBNull(Session("GA_ID")) Then
+            Dim gaID As Long = 0
+            Dim sessGAID As Object = Session("GA_ID")
 
-            If sessItemID IsNot Nothing Then
-                Dim s As String = Convert.ToString(sessItemID).Trim()
+            If sessGAID IsNot Nothing Then
+                Dim s As String = Convert.ToString(sessGAID).Trim()
                 If s <> "" Then
-                    Integer.TryParse(s, itemID)
+                    Long.TryParse(s, gaID)
                 End If
             End If
 
-            rpt_StockCard.SetParameterValue("@Item_ID", itemID)
-            AddTrace("Set @Item_ID = " & Convert.ToString(itemID))
+            rpt_StockCard.SetParameterValue("@GA_ID", gaID)
+            AddTrace("Set @GA_ID = " & Convert.ToString(gaID))
         Else
-            AddTrace("Warning: Session('Item_ID') is not set or is empty")
+            AddTrace("Warning: Session('GA_ID') is not set or is empty")
         End If
 
         ' Refresh the report source
