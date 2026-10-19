@@ -117,7 +117,7 @@
                                     <asp:BoundField DataField="Purpose" HeaderText="Purpose" HtmlEncode="false">
                                         <ItemStyle HorizontalAlign="Left" Width="12%"></ItemStyle>
                                     </asp:BoundField>
-                                    <asp:BoundField DataField="Remarks" HeaderText="Remarks" HtmlEncode="false">
+                                    <asp:BoundField DataField="TransferRemarks" HeaderText="Remarks" HtmlEncode="false">
                                         <ItemStyle HorizontalAlign="Left" Width="13%"></ItemStyle>
                                     </asp:BoundField>
                                 </Columns>

@@ -122,6 +122,17 @@ Public Class MREHdr
             pApprovedBy_ID = value
         End Set
     End Property
+
+
+    Private pProperty_ID As Integer
+    Public Property Property_ID() As Integer
+        Get
+            Return pProperty_ID
+        End Get
+        Set(ByVal value As Integer)
+            pProperty_ID = value
+        End Set
+    End Property
 #End Region
 
     Public Overrides Sub GetRecordsByID(ByVal strCmd As String, ByVal cmdType As System.Data.CommandType, Optional ByVal param() As System.Data.SqlClient.SqlParameter = Nothing)
@@ -141,6 +152,7 @@ Public Class MREHdr
             Me.Cancelled = IIf(IsDBNull(rd("Cancelled")), 0, rd("Cancelled"))
             Me.MRENumber = IIf(IsDBNull(rd("MRENumber")), 0, rd("MRENumber"))
             Me.ApprovedBy_ID = IIf(IsDBNull(rd("ApprovedBy_ID")), 0, rd("ApprovedBy_ID"))
+            Me.ApprovedBy_ID = IIf(IsDBNull(rd("Property_ID")), 0, rd("Property_ID"))
         End While
 
         If cn.State = Data.ConnectionState.Open Then
@@ -162,6 +174,7 @@ Public Class MREHdr
         objDerived.cmd.Parameters.AddWithValue("@Cancelled", Cancelled)
         objDerived.cmd.Parameters.AddWithValue("@MRENumber", MRENumber)
         objDerived.cmd.Parameters.AddWithValue("@ApprovedBy_ID", ApprovedBy_ID)
+        objDerived.cmd.Parameters.AddWithValue("@Property_ID", Property_ID)
 
         objDerived.cmd.Parameters.Add("@CurrID", SqlDbType.BigInt).Direction = ParameterDirection.Output
         i = objDerived.Execute("@CurrID", "AMS.spSave_MRE_HDR", CommandType.StoredProcedure, Nothing)

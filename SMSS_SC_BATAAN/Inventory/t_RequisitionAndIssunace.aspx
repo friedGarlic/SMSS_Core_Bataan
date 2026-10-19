@@ -657,7 +657,7 @@
                                         </tr>
                                         <tr>
                                             <td style="width: 100%" align="center">
-                                                <asp:GridView ID="gvsearchProperty" runat="server" Width="95%" SkinID="GridViewAA" DataKeyNames="Item_id,Item_Desc,GA_ID,ItemParticular,isDonated"
+                                                <asp:GridView ID="gvsearchProperty" runat="server" Width="95%" SkinID="GridViewAA" DataKeyNames="Item_id,Item_Desc,GA_ID,ItemParticular,isDonated,Property_ID"
                                                     AllowPaging="True" HorizontalAlign="Center">
                                                     <Columns>
                                                         <asp:BoundField DataField="Item_Desc" HeaderText="Item Description" HtmlEncode="false">

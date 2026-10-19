@@ -38,7 +38,7 @@ Partial Class Inventory_TransferApproval
         dtPending.Columns.Add("DepartmentTo", GetType(String))
         dtPending.Columns.Add("ReturnedBy", GetType(String))
         dtPending.Columns.Add("Purpose", GetType(String))
-        dtPending.Columns.Add("Remarks", GetType(String))
+        dtPending.Columns.Add("TransferRemarks", GetType(String))
         ' Add DataKeyNames columns
         dtPending.Columns.Add("MRE_Transfer_ID", GetType(String))
         dtPending.Columns.Add("MREHdr_ID", GetType(String))
@@ -53,7 +53,7 @@ Partial Class Inventory_TransferApproval
             row("DepartmentTo") = String.Empty
             row("ReturnedBy") = String.Empty
             row("Purpose") = String.Empty
-            row("Remarks") = String.Empty
+            row("TransferRemarks") = String.Empty
             row("MRE_Transfer_ID") = String.Empty
             row("MREHdr_ID") = String.Empty
             row("Returned_ID") = String.Empty

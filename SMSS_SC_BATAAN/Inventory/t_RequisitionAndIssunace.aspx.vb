@@ -166,6 +166,7 @@ Partial Class Inventory_RIS
         dt.Columns.Add("ItemParticular", GetType(String))
         dt.Columns.Add("isDonated", GetType(Boolean))
         dt.Columns.Add("Qty", GetType(Integer))
+        dt.Columns.Add("Property_ID", GetType(Long))
         For i As Integer = 0 To row
             dr = dt.NewRow
             dr("Item_Desc") = DBNull.Value
@@ -176,6 +177,8 @@ Partial Class Inventory_RIS
             dr("ItemParticular") = DBNull.Value
             dr("isDonated") = DBNull.Value
             dr("Qty") = DBNull.Value
+            dr("Property_ID") = DBNull.Value
+
             dt.Rows.Add(dr)
 
         Next
@@ -1013,6 +1016,9 @@ Partial Class Inventory_RIS
                     .RC_ID = 0
                     .Func_ID = 0
                 End If
+
+                .Property_ID = gvsearchProperty.SelectedDataKey("PropertyID").ToString()
+
             End With
 
 
