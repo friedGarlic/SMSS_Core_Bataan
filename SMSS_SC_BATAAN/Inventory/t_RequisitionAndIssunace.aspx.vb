@@ -1017,7 +1017,7 @@ Partial Class Inventory_RIS
                     .Func_ID = 0
                 End If
 
-                .Property_ID = gvsearchProperty.SelectedDataKey("PropertyID").ToString()
+                .Property_ID = gvsearchProperty.SelectedDataKey("Property_ID").ToString()
 
             End With
 

@@ -797,7 +797,7 @@ Partial Class Inventory_Encoding_Land
                CDec(txtAcqCost.Text.Replace(",", "")))
             .Item_ID = itemid
             .Property_code = objDerived.GetValue("select GA_Code From dbo.tbl_Classification as a inner join dbo.tblclassmatrix as c on a.ClassificationId = c.classificationid inner join geobos.[dbo].[view_allotmentclassaccounts] as b on c.ga_id  = b.GA_ID   where a.ClassificationName  like '%Land%' ", CommandType.Text)
-            .RC_ID = 0
+            .RC_ID = 7
             .Function_ID = 0
             .TD_ID = 1
             .Project_ID = 0
