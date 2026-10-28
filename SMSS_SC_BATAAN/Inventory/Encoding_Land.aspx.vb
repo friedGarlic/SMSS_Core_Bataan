@@ -12,6 +12,7 @@ Partial Class Inventory_Encoding_Land
     Private Prop_Dtl As New t_property_dtl
     Dim objLandDtl As New ConsolidatedPropertySaving.TBLand_Details
     Private Prop_Ledger As New t_PropertyLedger
+    Dim item_particular As New item_particular
 
 
 
@@ -709,23 +710,8 @@ Partial Class Inventory_Encoding_Land
         Return dt
     End Function
     Public Sub SaveRecord()
-        With item
-            .Item_Code = ""
-            .Item_Desc = txtLocation.Text
-            .Unit_ID = objDerived.GetValue("select * From ams.m_Unit where Description like '%Square Meter%'", CommandType.Text)
-            .ClassificationID = 7
-        End With
-        'item.save()
-        Dim itemid As Integer
 
-        If btnLandSave.Text = "SAVE" Then
-            itemid = item.save()
-        Else
-            itemid = item.saveEditItem()
 
-        End If
-
-        objDerived.Execute("exec [dbo].[spSave_m_item_detail] '0','" & itemid & "','" & Val(txtAcqCost.Text) & "',null", CommandType.Text)
 
         'Dim classification As String = objDerived.GetValue("select  a.ClassificationId From dbo.tbl_Classification as a inner join dbo.tblclassmatrix as c on a.ClassificationId = c.classificationid inner join geobos.[dbo].[view_allotmentclassaccounts] as b on c.ga_id  = b.GA_ID   where a.ClassificationName  like '%Land%'", CommandType.Text)
         'Dim gaid As Integer = objDerived.GetValue("select b.GA_ID  From dbo.tbl_Classification as a inner join dbo.tblclassmatrix as c on a.ClassificationId = c.classificationid inner join geobos.[dbo].[view_allotmentclassaccounts] as b on c.ga_id  = b.GA_ID   where a.ClassificationName  like '%Land%' ", CommandType.Text)
@@ -742,16 +728,50 @@ Partial Class Inventory_Encoding_Land
         Integer.TryParse(Convert.ToString(ddGA.SelectedValue), gaId)
 
 
-        ' item_particular_id is BIGINT -> use Long
-        Dim category As Long = Convert.ToInt64(
-            objDerived.GetValue(
-                "SELECT a.item_particular_id " &
-                "FROM dbo.m_item AS a " &
-                "INNER JOIN AMS.item_particular AS b ON a.item_particular_id = b.item_particular_id " &
-                "WHERE a.Item_ID = " & itemid,
-                CommandType.Text
-            )
-        )
+        ''CREATE ITEM PARTICULAR
+
+        With item_particular
+            .description = txtLocation.Text
+            .GA_ID = gaId
+            '.useful_life = ""
+            '.BGA_ID = ""
+            .ParticularCode = ""
+            .ClassificationID = classificationId
+            .SubClassificationID = subclassificationId
+        End With
+
+        Dim category As Long = item_particular.save()
+
+        '' item_particular_id is BIGINT -> use Long
+        'Dim category As Long = Convert.ToInt64(
+        '    objDerived.GetValue(
+        '        "SELECT a.item_particular_id " &
+        '        "FROM dbo.m_item AS a " &
+        '        "INNER JOIN AMS.item_particular AS b ON a.item_particular_id = b.item_particular_id " &
+        '        "WHERE a.Item_ID = " & itemid,
+        '        CommandType.Text
+        '    )
+        ')
+
+        With item
+            .Item_Code = ""
+            .Item_Desc = txtLocation.Text
+            .Unit_ID = objDerived.GetValue("select * From ams.m_Unit where Description like '%Square Meter%'", CommandType.Text)
+            .ClassificationID = classificationId
+            .SubClassificationId = subclassificationId
+            .item_particular_id = category
+        End With
+        'item.save()
+        Dim itemid As Integer
+
+        If btnLandSave.Text = "SAVE" Then
+            itemid = item.save()
+        Else
+            itemid = item.saveEditItem()
+
+        End If
+
+        objDerived.Execute("exec [dbo].[spSave_m_item_detail] '0','" & itemid & "','" & Val(txtAcqCost.Text) & "',null", CommandType.Text)
 
         ' FIXED: spacing + no quotes around INTs, schema prefix, and all spaces around ANDs
         Dim matrix As String = Convert.ToString(
