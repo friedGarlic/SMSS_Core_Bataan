@@ -345,7 +345,21 @@ Partial Class Inventory_RIS
             ddProperty.Items.Insert(0, "")
 
 
-            ddApprovedByPAR.DataSource = objDerived.GetDataTable("Exec ams.sp_SignatoryList '', 1", CommandType.Text)
+            'ddApprovedByPAR.DataSource = objDerived.GetDataTable("Exec ams.sp_SignatoryList '', 1", CommandType.Text)
+            ddApprovedByPAR.DataSource = objDerived.GetDataTable(
+                                            "SELECT DISTINCT " &
+                                            "    VS.EmpID, " &
+                                            "    VS.Full_Name AS FullName " &
+                                            "FROM " &
+                                            "    dbo.View_RespCenter_withFunctions VRC " &
+                                            "INNER JOIN " &
+                                            "    HRMS.view_signatory VS ON VRC.RC_id = VS.deptid " &
+                                            "    AND VRC.Function_ID = VS.division_Key " &
+                                            "WHERE " &
+                                            "    (VS.deptid = 1 OR VS.deptid = 7) AND VS.isDeptHead = 'Yes' " &
+                                            "ORDER BY " &
+                                            "    FullName", CommandType.Text)
+
             ddApprovedByPAR.DataTextField = "FullName"
             ddApprovedByPAR.DataValueField = "EmpID"
             ddApprovedByPAR.DataBind()

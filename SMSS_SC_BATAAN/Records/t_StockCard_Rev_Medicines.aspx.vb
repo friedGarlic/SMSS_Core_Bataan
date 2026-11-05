@@ -160,9 +160,9 @@ Partial Class Records_t_StockCard_Rev_Medicines
         AddTrace(sql)
 
         Dim dt As DataTable = objDerived.GetDataTable(
-        sql,
-        CommandType.Text
-    )
+            sql,
+            CommandType.Text
+        )
 
         If dt IsNot Nothing Then
 
