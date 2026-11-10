@@ -7,6 +7,16 @@ Partial Class filemaintenance_rpt_MasterList
     Private objDerived As New connectionreport
     Dim rpt As New ReportDocument
 
+
+    Private Sub AddTrace(ByVal message As String)
+        ' Prevent single quotes in the message from breaking JavaScript
+        Dim safeMessage As String = message.Replace("'", "\'")
+        ScriptManager.RegisterClientScriptBlock(Me, Me.GetType(),
+        "TraceKey" & Guid.NewGuid().ToString("N"),
+        "console.log('" & safeMessage & "');",
+        True)
+    End Sub
+
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
 
         ' When the page is opened with ?print=1, export the report that is
@@ -40,6 +50,7 @@ Partial Class filemaintenance_rpt_MasterList
             rpt.Load(Server.MapPath("rpt_FM_MasterList.rpt"))
             rpt.SetParameterValue(0, Me.Session("xYear"))
             rpt.SetParameterValue(1, Me.Session("Allotment_Type"))
+            rpt.SetParameterValue(2, Me.Session("GA_ID"))
             Session("MasterList_Report") = rpt
 
         Else
@@ -52,11 +63,16 @@ Partial Class filemaintenance_rpt_MasterList
                 rpt.Load(Server.MapPath("rpt_FM_MasterList.rpt"))
                 rpt.SetParameterValue(0, Me.Session("xYear"))
                 rpt.SetParameterValue(1, Me.Session("Allotment_Type"))
+                rpt.SetParameterValue(2, Me.Session("GA_ID")) ' <--- ADDED
                 Session("MasterList_Report") = rpt
 
             End If
 
         End If
+        AddTrace("xYear: " & Session("xYear"))
+        AddTrace("Allotment_Type: " & Session("Allotment_Type"))
+        AddTrace("GA_ID: " & Session("GA_ID"))
+
 
         rpt.SetDatabaseLogon(objDerived.username, objDerived.Password)
 

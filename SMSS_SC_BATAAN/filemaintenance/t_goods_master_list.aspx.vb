@@ -46,6 +46,15 @@ Partial Class filemaintenance_t_goods_master_list
         End Set
     End Property
 
+    Private Sub AddTrace(ByVal message As String)
+        ' Prevent single quotes in the message from breaking JavaScript
+        Dim safeMessage As String = message.Replace("'", "\'")
+        ScriptManager.RegisterClientScriptBlock(Me, Me.GetType(),
+        "TraceKey" & Guid.NewGuid().ToString("N"),
+        "console.log('" & safeMessage & "');",
+        True)
+    End Sub
+
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
 
         obj.GetAccessRight(Me.Session("@username"), Page)
@@ -146,6 +155,9 @@ Partial Class filemaintenance_t_goods_master_list
         Session("GA_ID") = ddCategories.SelectedItem.Value
         lblAccntCode.Text = "Account Code : " + CType(categ.Rows(ddCategories.SelectedIndex)("GA_Code"), String)
 
+        Addtrace("GA_ID: " & Session("GA_ID"))
+        Addtrace("Year: " & Session("Year"))
+        Addtrace("Allotment_Type: " & Session("Allotment_Type"))
 
         dtItemList = objDerived.GetDataTable(
             "Exec [AMS].[sp_masterlist_categories] '" &
