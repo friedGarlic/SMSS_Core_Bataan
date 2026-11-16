@@ -426,7 +426,7 @@ function formatCurrency(amount) {
                                      <td  class="column_RightBold"><span class="required-label">Acquisition Date :</span></td>
                                     <td class="column_Left" style="width:100px;">
                                         <asp:Label ID="Label1" runat="server"></asp:Label>
-                                        <asp:TextBox ID="txtEAcqDate" runat="server" AutoPostBack="true"  CssClass="txtbox_Var" onchange="return NoOfYears(this.value);" Width="140px"  ></asp:TextBox>
+                                        <asp:TextBox ID="txtEAcqDate" runat="server" AutoPostBack="true"  CssClass="txtbox_Var" OnTextChanged="txtEAcqDate_TextChanged" onchange="NoOfYears(this.value); __doPostBack(this.name, '');" Width="140px"  ></asp:TextBox>
                                         <cc1:CalendarExtender ID="CalendarExtender1" runat="server" TargetControlID="txtEAcqDate" PopupButtonID="txtEAcqDate"></cc1:CalendarExtender>
 
 

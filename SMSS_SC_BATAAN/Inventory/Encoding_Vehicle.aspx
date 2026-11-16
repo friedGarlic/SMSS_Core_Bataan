@@ -467,7 +467,7 @@
                             <td class="column_RightBold" style="width: 121px"><span class="required-label">Acquisition Date :</span></td>
                             <td class="column_Left" style="width: 100px;">
                                 <asp:Label ID="Label13" runat="server"></asp:Label>
-                                <asp:TextBox ID="txtEAcqDate" runat="server" AutoPostBack="True" CssClass="txtbox_Var" Width="140px" onchange="return NoOfYears(this.value);"  ></asp:TextBox>
+                                <asp:TextBox ID="txtEAcqDate" runat="server" AutoPostBack="True" CssClass="txtbox_Var" Width="140px" OnTextChanged="txtEAcqDate_TextChanged" onchange="NoOfYears(this.value); __doPostBack(this.name, '');"  ></asp:TextBox>
                                 <cc1:CalendarExtender ID="CalendarExtender2" runat="server" TargetControlID="txtEAcqDate" PopupButtonID="txtEAcqDate"></cc1:CalendarExtender>
                                 &nbsp;(MM/DD/YYYY)
                             </td>
@@ -824,7 +824,7 @@
                                                             </td>
                                                             <td class="column_Left" style="width: 100px;">
                                                                 <asp:Label ID="lblWatercraftAcqDate" runat="server"></asp:Label>
-                                                                <asp:TextBox ID="txtWatercraftAcqDate" runat="server" AutoPostBack="True" CssClass="txtbox_Var" onchange="return NoOfYearsWater(this.value);"></asp:TextBox>
+                                                                <asp:TextBox ID="txtWatercraftAcqDate" runat="server" AutoPostBack="True" CssClass="txtbox_Var" OnTextChanged="txtWatercraftAcqDate_TextChanged" onchange="NoOfYearsWater(this.value); __doPostBack(this.name, '');"></asp:TextBox>
                                                                 <cc1:CalendarExtender ID="CalendarExtender1" runat="server" TargetControlID="txtWatercraftAcqDate" PopupButtonID="txtWatercraftAcqDate"></cc1:CalendarExtender>
 
 

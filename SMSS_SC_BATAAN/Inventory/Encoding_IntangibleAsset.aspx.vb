@@ -2213,4 +2213,94 @@ Partial Class Inventory_Encoding_IntangibleAsset
     End Sub
 
 
+    Protected Sub txtAcquisitionDate_TextChanged(sender As Object, e As EventArgs)
+
+        ' Keep both fields editable — IsEnabledTextBox(False) during edit mode
+        ' disables them, but a user-initiated date change must still be allowed
+        ' to refresh the acquisition cost from m_item_detail.
+        txtAcquisitionDate.Enabled = True
+        txtAcquisitionDate.ReadOnly = False
+        txtAcquisitionCost.Enabled = True
+        txtAcquisitionCost.ReadOnly = False
+
+        ' Parse the acquisition date — try exact MM/dd/yyyy first, then fall back.
+        Dim acqDate As DateTime
+        Dim parsed As Boolean = DateTime.TryParseExact(
+            Convert.ToString(txtAcquisitionDate.Text).Trim(),
+            New String() {"MM/dd/yyyy", "M/d/yyyy", "MM-dd-yyyy", "M-d-yyyy"},
+            System.Globalization.CultureInfo.InvariantCulture,
+            System.Globalization.DateTimeStyles.None,
+            acqDate
+        )
+
+        If Not parsed Then
+            parsed = DateTime.TryParse(Convert.ToString(txtAcquisitionDate.Text), acqDate)
+        End If
+
+        If Not parsed Then
+            Exit Sub
+        End If
+
+        Dim acqYear As Integer = acqDate.Year
+
+        ' Resolve the selected Item_ID from the Name dropdown (ddName).
+        Dim itemID As Integer = 0
+        If Not Integer.TryParse(Convert.ToString(ddName.SelectedValue), itemID) Then
+            Exit Sub
+        End If
+
+        If itemID = 0 Then
+            Exit Sub
+        End If
+
+        ' Default to 0.00 — this is what the field shows when the year-specific
+        ' value cannot be found (no row, no column, DBNull, or non-numeric).
+        Dim costVal As Decimal = 0D
+
+        ' Load the m_item_detail row for this item — SELECT * because the CY<year>
+        ' column is not guaranteed to exist for every possible year.
+        Dim dtDetail As DataTable = objDerived.GetDataTable(
+            "SELECT * FROM dbo.m_item_detail WHERE Item_ID = " & itemID,
+            CommandType.Text
+        )
+
+        If dtDetail IsNot Nothing AndAlso dtDetail.Rows.Count > 0 Then
+
+            ' Build the per-year column name — same convention used elsewhere
+            ' in this codebase (CYear = "CY" & Year(...)).
+            Dim CYear As String = "CY" & acqYear.ToString()
+
+            If dtDetail.Columns.Contains(CYear) Then
+
+                Dim rawVal As Object = dtDetail.Rows(0).Item(CYear)
+
+                If rawVal IsNot Nothing AndAlso Not IsDBNull(rawVal) Then
+                    ' TryParse only replaces costVal when it succeeds — on failure
+                    ' it stays at the 0.00 default.
+                    Decimal.TryParse(Convert.ToString(rawVal), costVal)
+                End If
+
+            End If
+
+        End If
+
+        ' Push the resolved value into the Acquisition Cost field — always,
+        ' defaulting to 0.00 when nothing was retrieved.
+        txtAcquisitionCost.Text = costVal.ToString("n2")
+
+        ' Refresh the client-side depreciation chain. Salvage FIRST (it drives
+        ' the depreciation math), then Depreciation — matching the order used
+        ' by the Onchange handler on the cost field itself.
+        System.Web.UI.ScriptManager.RegisterStartupScript(
+            Me,
+            Me.GetType(),
+            "RecalcDepreciationAfterDateChange_Intangible",
+            "if (typeof getSalVal === 'function') { getSalVal(); } " &
+            "if (typeof getDepValRate === 'function') { getDepValRate(); }",
+            True
+        )
+
+    End Sub
+
+
 End Class

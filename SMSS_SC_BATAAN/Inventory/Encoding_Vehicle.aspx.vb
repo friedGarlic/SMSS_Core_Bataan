@@ -2668,4 +2668,168 @@ Partial Class Inventory_Encoding_Vehicle
 
     End Sub
 
+    Protected Sub txtEAcqDate_TextChanged(sender As Object, e As EventArgs)
+
+        ' Keep both fields editable — a future disable-on-edit pass must not
+        ' lock these fields, or this handler becomes unreachable.
+        txtEAcqDate.Enabled = True
+        txtEAcqDate.ReadOnly = False
+        txtVehicleAcqCost.Enabled = True
+        txtVehicleAcqCost.ReadOnly = False
+
+        ' Parse the acquisition date — try exact MM/dd/yyyy first, then fall back.
+        Dim acqDate As DateTime
+        Dim parsed As Boolean = DateTime.TryParseExact(
+            Convert.ToString(txtEAcqDate.Text).Trim(),
+            New String() {"MM/dd/yyyy", "M/d/yyyy", "MM-dd-yyyy", "M-d-yyyy"},
+            System.Globalization.CultureInfo.InvariantCulture,
+            System.Globalization.DateTimeStyles.None,
+            acqDate
+        )
+
+        If Not parsed Then
+            parsed = DateTime.TryParse(Convert.ToString(txtEAcqDate.Text), acqDate)
+        End If
+
+        If Not parsed Then
+            Exit Sub
+        End If
+
+        Dim acqYear As Integer = acqDate.Year
+
+        ' Resolve the selected Item_ID from the Vehicle Name dropdown.
+        Dim itemID As Integer = 0
+        If Not Integer.TryParse(Convert.ToString(DrpVehicleName.SelectedValue), itemID) Then
+            Exit Sub
+        End If
+
+        If itemID = 0 Then
+            Exit Sub
+        End If
+
+        ' Default to 0.00 — this is what the field shows when the year-specific
+        ' value cannot be found (no row, no column, DBNull, or non-numeric).
+        Dim costVal As Decimal = 0D
+
+        ' Load the m_item_detail row for this item — SELECT * because the CY<year>
+        ' column is not guaranteed to exist for every possible year.
+        Dim dtDetail As DataTable = objDerived.GetDataTable(
+            "SELECT * FROM dbo.m_item_detail WHERE Item_ID = " & itemID,
+            CommandType.Text
+        )
+
+        If dtDetail IsNot Nothing AndAlso dtDetail.Rows.Count > 0 Then
+
+            Dim CYear As String = "CY" & acqYear.ToString()
+
+            If dtDetail.Columns.Contains(CYear) Then
+
+                Dim rawVal As Object = dtDetail.Rows(0).Item(CYear)
+
+                If rawVal IsNot Nothing AndAlso Not IsDBNull(rawVal) Then
+                    ' TryParse only replaces costVal when it succeeds — on failure
+                    ' it stays at the 0.00 default.
+                    Decimal.TryParse(Convert.ToString(rawVal), costVal)
+                End If
+
+            End If
+
+        End If
+
+        ' Push the resolved value into the Acquisition Cost field — always,
+        ' defaulting to 0.00 when nothing was retrieved.
+        txtVehicleAcqCost.Text = costVal.ToString("n2")
+
+        ' Refresh the client-side depreciation chain. Salvage FIRST (it drives
+        ' the depreciation math), then Depreciation — matching the order used
+        ' by the Onchange handler on the cost field itself.
+        System.Web.UI.ScriptManager.RegisterStartupScript(
+            Me,
+            Me.GetType(),
+            "RecalcDepreciationAfterDateChange_Vehicle",
+            "if (typeof getSalVal === 'function') { getSalVal(); } " &
+            "if (typeof getDepValRate === 'function') { getDepValRate(); }",
+            True
+        )
+
+    End Sub
+    Protected Sub txtWatercraftAcqDate_TextChanged(sender As Object, e As EventArgs)
+
+        ' Keep both fields editable — same defensive re-enable as the vehicle side.
+        txtWatercraftAcqDate.Enabled = True
+        txtWatercraftAcqDate.ReadOnly = False
+        txtWatercraftAcqCost.Enabled = True
+        txtWatercraftAcqCost.ReadOnly = False
+
+        ' Parse the acquisition date — try exact MM/dd/yyyy first, then fall back.
+        Dim acqDate As DateTime
+        Dim parsed As Boolean = DateTime.TryParseExact(
+            Convert.ToString(txtWatercraftAcqDate.Text).Trim(),
+            New String() {"MM/dd/yyyy", "M/d/yyyy", "MM-dd-yyyy", "M-d-yyyy"},
+            System.Globalization.CultureInfo.InvariantCulture,
+            System.Globalization.DateTimeStyles.None,
+            acqDate
+        )
+
+        If Not parsed Then
+            parsed = DateTime.TryParse(Convert.ToString(txtWatercraftAcqDate.Text), acqDate)
+        End If
+
+        If Not parsed Then
+            Exit Sub
+        End If
+
+        Dim acqYear As Integer = acqDate.Year
+
+        ' Resolve the selected Item_ID from the Watercraft Name dropdown.
+        Dim itemID As Integer = 0
+        If Not Integer.TryParse(Convert.ToString(drpWatercraftName.SelectedValue), itemID) Then
+            Exit Sub
+        End If
+
+        If itemID = 0 Then
+            Exit Sub
+        End If
+
+        ' Default to 0.00 — same as the vehicle side.
+        Dim costVal As Decimal = 0D
+
+        ' Load the m_item_detail row for this item.
+        Dim dtDetail As DataTable = objDerived.GetDataTable(
+            "SELECT * FROM dbo.m_item_detail WHERE Item_ID = " & itemID,
+            CommandType.Text
+        )
+
+        If dtDetail IsNot Nothing AndAlso dtDetail.Rows.Count > 0 Then
+
+            Dim CYear As String = "CY" & acqYear.ToString()
+
+            If dtDetail.Columns.Contains(CYear) Then
+
+                Dim rawVal As Object = dtDetail.Rows(0).Item(CYear)
+
+                If rawVal IsNot Nothing AndAlso Not IsDBNull(rawVal) Then
+                    Decimal.TryParse(Convert.ToString(rawVal), costVal)
+                End If
+
+            End If
+
+        End If
+
+        ' Push the resolved value into the Watercraft Acquisition Cost field — always.
+        txtWatercraftAcqCost.Text = costVal.ToString("n2")
+
+        ' Refresh the watercraft-side depreciation chain. Salvage FIRST, then
+        ' Depreciation — matching the order used by the Onchange handler on
+        ' the watercraft cost field itself.
+        System.Web.UI.ScriptManager.RegisterStartupScript(
+            Me,
+            Me.GetType(),
+            "RecalcDepreciationAfterDateChange_Watercraft",
+            "if (typeof getWaterSalVal === 'function') { getWaterSalVal(); } " &
+            "if (typeof getWaterDepValRate === 'function') { getWaterDepValRate(); }",
+            True
+        )
+
+    End Sub
 End Class

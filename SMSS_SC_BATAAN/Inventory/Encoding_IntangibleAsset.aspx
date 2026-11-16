@@ -363,7 +363,7 @@
                                                 <tr>
                                                     <td class="column_RightBold" style="width: 115px"><span class="required-label">Acquisition Date :</span></td>
                                                     <td class="column_Left" style="width: 250px">
-                                                        <asp:TextBox ID="txtAcquisitionDate" runat="server" CssClass="txtbox_Var" onchange="return NoOfYears(this.value);"  ></asp:TextBox>
+                                                        <asp:TextBox ID="txtAcquisitionDate" runat="server" AutoPostBack="True" CssClass="txtbox_Var" OnTextChanged="txtAcquisitionDate_TextChanged" onchange="NoOfYears(this.value); __doPostBack(this.name, '');"  ></asp:TextBox>
                                                         <cc1:CalendarExtender ID="CalendarExtender1" runat="server" TargetControlID="txtAcquisitionDate" PopupButtonID="txtAcquisitionDate"></cc1:CalendarExtender>
                                                         &nbsp;MM/DD/YYYY</td>
                                                     <td class="column_RightBold" style="width: 150px">Market Value :</td>
