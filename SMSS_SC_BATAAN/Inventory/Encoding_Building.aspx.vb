@@ -821,7 +821,7 @@ Partial Class Inventory_Encoding_Building
                 "INNER JOIN geobos.dbo.view_allotmentclassaccounts AS b ON c.ga_id = b.GA_ID " &
                 "WHERE a.ClassificationId = " & classId, CommandType.Text)
                 .RC_ID = 7
-                .Function_ID = 0
+                .Function_ID = 86
                 .TD_ID = 1
                 .Project_ID = 0
                 .Program_id = 0

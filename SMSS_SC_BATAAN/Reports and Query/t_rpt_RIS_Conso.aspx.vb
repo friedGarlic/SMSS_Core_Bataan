@@ -83,6 +83,7 @@ Partial Class Reports_and_Query_t_rpt_RIS_Conso
 
     Private Sub LoadRISConso()
         AddTrace("RIS_RC_ID: " & Session("RIS_RC_ID"))
+        AddTrace("RIS_Function_ID: " & Session("RIS_Function_ID"))
         AddTrace("RIS_Year: " & Session("RIS_Year"))
         AddTrace("RIS_MonthFrom: " & Session("RIS_MonthFrom"))
         AddTrace("RIS_MonthTo: " & Session("RIS_MonthTo"))
@@ -102,6 +103,7 @@ Partial Class Reports_and_Query_t_rpt_RIS_Conso
 
         ' Set parameter values from Session
         rpt.SetParameterValue("@RC_ID", Session("RIS_RC_ID"))
+        rpt.SetParameterValue("@Function_ID", Session("RIS_Function_ID"))
         rpt.SetParameterValue("@Cyear", Session("RIS_Year"))
         rpt.SetParameterValue("@MonthFrom", Session("RIS_MonthFrom"))
         rpt.SetParameterValue("@MonthTo", Session("RIS_MonthTo"))
@@ -133,6 +135,7 @@ Partial Class Reports_and_Query_t_rpt_RIS_Conso
 
         ' Set parameter values from Session
         rpt.SetParameterValue("@RC_ID", Session("Reset"))
+        rpt.SetParameterValue("@Function_ID", Session("Reset"))
         rpt.SetParameterValue("@Cyear", Session("Reset"))
         rpt.SetParameterValue("@MonthFrom", Session("Reset"))
         rpt.SetParameterValue("@MonthTo", Session("Reset"))
@@ -154,6 +157,7 @@ Partial Class Reports_and_Query_t_rpt_RIS_Conso
 
             ' Set parameters (same as before)
             rptExport.SetParameterValue("@RC_ID", Session("RIS_RC_ID"))
+            rptExport.SetParameterValue("@Function_ID", Session("RIS_Function_ID"))
             rptExport.SetParameterValue("@Cyear", Session("RIS_Year"))
             rptExport.SetParameterValue("@MonthFrom", Session("RIS_MonthFrom"))
             rptExport.SetParameterValue("@MonthTo", Session("RIS_MonthTo"))

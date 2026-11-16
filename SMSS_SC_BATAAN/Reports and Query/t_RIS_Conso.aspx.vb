@@ -23,6 +23,7 @@ Partial Class Reports_and_Query_t_RIS_Conso
             LoadYear()
             LoadMonth()
             LoadDepartment()
+            LoadFunctions("0")          '=-= initialize ddFunction with 'Select'
 
             txtDate.Text = Date.Now.ToString("MM/dd/yyyy")
         End If
@@ -82,8 +83,21 @@ Partial Class Reports_and_Query_t_RIS_Conso
     Protected Sub ddRC_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ddRC.SelectedIndexChanged
         If ddRC.SelectedIndex > 0 Then
             Session("RIS_RC_ID") = ddRC.SelectedValue
+            LoadFunctions(ddRC.SelectedValue)
         Else
             Session("RIS_RC_ID") = Nothing
+            LoadFunctions("0")
+        End If
+    End Sub
+
+
+    Protected Sub ddFunction_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ddFunction.SelectedIndexChanged
+        If ddFunction.SelectedIndex >= 0 AndAlso
+       Not String.IsNullOrEmpty(ddFunction.SelectedValue) AndAlso
+       ddFunction.SelectedValue <> "0" Then
+            Session("RIS_Function_ID") = ddFunction.SelectedValue
+        Else
+            Session("RIS_Function_ID") = Nothing
         End If
     End Sub
 
@@ -121,6 +135,15 @@ Partial Class Reports_and_Query_t_RIS_Conso
             MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Please select a Department.")
             Exit Sub
         End If
+
+        ' Validate Function
+        If ddFunction.SelectedIndex < 0 OrElse
+   String.IsNullOrEmpty(ddFunction.SelectedValue) OrElse
+   ddFunction.SelectedValue = "0" Then
+            MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Please select a Function.")
+            Exit Sub
+        End If
+
         ' Validate Month From
         If drpYear.SelectedIndex = 0 Then
             MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "Please select a Year.")
@@ -168,6 +191,16 @@ Partial Class Reports_and_Query_t_RIS_Conso
         End If
 
 
+        ' Store Function value in Session
+        If ddFunction.SelectedIndex >= 0 AndAlso
+   Not String.IsNullOrEmpty(ddFunction.SelectedValue) AndAlso
+   ddFunction.SelectedValue <> "0" Then
+            Session("RIS_Function_ID") = ddFunction.SelectedValue
+        Else
+            Session("RIS_Function_ID") = Nothing
+        End If
+
+
         SaveRisConsoData()
 
 
@@ -188,6 +221,8 @@ Partial Class Reports_and_Query_t_RIS_Conso
             Dim printedName As String = txtPrintedName.Text.Trim()
             Dim designation As String = txtDesignation.Text.Trim()
             Dim dateValue As String = txtDate.Text.Trim()
+            Dim notedBy As String = txtPrintedNameNoted.Text.Trim()
+            Dim notedByDesignation As String = txtDesignationNoted.Text.Trim()
 
 
             Dim checkQuery As String =
@@ -220,14 +255,16 @@ Partial Class Reports_and_Query_t_RIS_Conso
 
                 Dim insertQuery As String =
                 "INSERT INTO AMS.RIS_Conso_Temp " &
-                "(FormNumber, Office, Purpose, PrintedName, Designation, Date) " &
+                "(FormNumber, Office, Purpose, PrintedName, Designation, Date, NotedBy, NotedByDesignation) " &
                 "VALUES " &
                 "('" & formNumber.Replace("'", "''") & "', " &
                 "'" & office.Replace("'", "''") & "', " &
                 "'" & purpose.Replace("'", "''") & "', " &
                 "'" & printedName.Replace("'", "''") & "', " &
                 "'" & designation.Replace("'", "''") & "', " &
-                "'" & dateValue.Replace("'", "''") & "')"
+                "'" & dateValue.Replace("'", "''") & "', " &
+                "'" & notedBy.Replace("'", "''") & "', " &
+                "'" & notedByDesignation.Replace("'", "''") & "')"
 
 
 
@@ -253,7 +290,9 @@ Partial Class Reports_and_Query_t_RIS_Conso
                 "Purpose = '" & purpose.Replace("'", "''") & "', " &
                 "PrintedName = '" & printedName.Replace("'", "''") & "', " &
                 "Designation = '" & designation.Replace("'", "''") & "', " &
-                "Date = '" & dateValue.Replace("'", "''") & "'"
+                "Date = '" & dateValue.Replace("'", "''") & "', " &
+                "NotedBy = '" & notedBy.Replace("'", "''") & "', " &
+                "NotedByDesignation = '" & notedByDesignation.Replace("'", "''") & "'"
 
 
 
@@ -284,4 +323,43 @@ Partial Class Reports_and_Query_t_RIS_Conso
         End Try
 
     End Sub
+
+
+    Private Sub LoadFunctions(ByVal rcId As String)
+        Try
+            ddFunction.Items.Clear()
+            Session("RIS_Function_ID") = Nothing
+
+            If String.IsNullOrEmpty(rcId) OrElse rcId = "0" OrElse rcId = "Select" Then
+                ddFunction.Items.Insert(0, New ListItem("Select", "0"))
+                Exit Sub
+            End If
+
+            Dim dtFunction As DataTable = objDerived.GetDataTable(
+                "SELECT DISTINCT Function_ID, Function_Desc " &
+                "FROM DBO.View_RespCenter_withFunctions " &
+                "WHERE RC_ID = " & rcId & " " &
+                "ORDER BY Function_Desc",
+                CommandType.Text)
+
+            If dtFunction IsNot Nothing AndAlso dtFunction.Rows.Count > 0 Then
+                ddFunction.DataSource = dtFunction
+                ddFunction.DataTextField = "Function_Desc"
+                ddFunction.DataValueField = "Function_ID"
+                ddFunction.DataBind()
+
+                '=-= auto-select the first retrieved function
+                ddFunction.SelectedIndex = 0
+                Session("RIS_Function_ID") = ddFunction.SelectedValue
+            Else
+                ddFunction.Items.Insert(0, New ListItem("Select", "0"))
+            End If
+
+        Catch ex As Exception
+            ddFunction.Items.Clear()
+            ddFunction.Items.Insert(0, New ListItem("-- Error Loading Functions --", "0"))
+            Session("RIS_Function_ID") = Nothing
+        End Try
+    End Sub
+
 End Class
