@@ -736,9 +736,8 @@ Partial Class Records_PropertyCard_Rev_Books
     Protected Sub btnViewPIR_Click(sender As Object, e As EventArgs) Handles btnViewPIR.Click
 
         Try
-            If gvBooksLocationList.SelectedRow.Controls.Count > 0 Then
-                Session("isNonSelectedItem") = False
 
+            If Session("isNonSelectedItem") = True Then
                 'OnClientClick="window.open(''
 
                 Dim url As String = "rpt_view_propertycard_v4.aspx?"
@@ -746,10 +745,6 @@ Partial Class Records_PropertyCard_Rev_Books
                 ScriptManager.RegisterStartupScript(Me, GetType(String), "OPEN_WINDOW", fullURL, True)
 
             Else
-                Session("isNonSelectedItem") = True
-
-                'MessageBox.Show("Select an item on table first!")
-
                 ScriptManager.RegisterStartupScript(Me, Me.GetType(), "noAccount", "alert('Select an Account on dropdown first!');", True)
             End If
         Catch ex As Exception

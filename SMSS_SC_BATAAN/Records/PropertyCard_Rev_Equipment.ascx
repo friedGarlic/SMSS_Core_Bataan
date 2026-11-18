@@ -67,7 +67,7 @@
     <tr>
         <td style="text-align: center; padding: 10px;">
             <asp:Button ID="btnViewEquipmentPIR" runat="server" Width="240px" CssClass="CSButton"
-                Text="View Perpetual Inventory Report" OnClientClick="window.open('rpt_view_propertycard_v4.aspx')"></asp:Button>
+                Text="View Perpetual Inventory Report" ></asp:Button>
         </td>
     </tr>
 

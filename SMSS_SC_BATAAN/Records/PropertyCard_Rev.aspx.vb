@@ -513,11 +513,10 @@ Partial Class Records_PropertyCard_Rev
             gvItemList.DataKeys(gvItemList.SelectedIndex).
             Values("Item_ID").ToString()
 
-            Dim selectedClassificationId As String =
-            gvItemList.DataKeys(gvItemList.SelectedIndex).
-            Values("ClassificationID").ToString()
+            'Dim selectedClassificationId As String = gvItemList.DataKeys(gvItemList.SelectedIndex).Values("ClassificationID").ToString()
+            Dim selectedClassificationId As String = gvItemList.SelectedDataKey.Values("ClassificationID").ToString()
 
-
+            Session("isNonSelectedItem") = True
 
             If String.IsNullOrEmpty(selectedItemId) Then
                 Exit Sub
@@ -551,6 +550,9 @@ Partial Class Records_PropertyCard_Rev
             ' Send the selected item to the active user control.
             LoadSelectedItemToActiveUserControl(selectedItemId)
 
+        Else
+
+            Session("isNonSelectedItem") = False
         End If
 
     End Sub

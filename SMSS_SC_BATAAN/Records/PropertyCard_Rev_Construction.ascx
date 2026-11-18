@@ -67,7 +67,7 @@
     <tr>
         <td style="text-align: center; padding: 10px;">
             <asp:Button ID="btnConstructionViewPIR" runat="server" Width="240px" CssClass="CSButton"
-                Text="View Perpetual Inventory Report" OnClientClick="window.open('rpt_view_propertycard_v4.aspx')"></asp:Button>
+                Text="View Perpetual Inventory Report" ></asp:Button>
         </td>
     </tr>
 
@@ -186,7 +186,7 @@
                             <asp:View ID="vwRoad" runat="server">
                                 <table>
                                     <tr>
-                                        <td colspan="7" style="width: 100%">
+                                        <td style="width: 100%">
                                             <fieldset>
                                                 <legend class="column_LeftBold">General Information</legend>
                                                 <table width="100%">
@@ -304,7 +304,7 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td colspan="7" style="width: 100%">
+                                        <td style="width: 100%">
                                             <fieldset>
                                                 <table width="100%">
                                                     <tr>
@@ -346,7 +346,7 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td colspan="7" style="width: 100%">
+                                        <td style="width: 100%">
                                             <table width="100%">
                                                 <tr>
                                                     <td style="width: 80%">
@@ -466,7 +466,7 @@
                             <asp:View ID="vwBridge" runat="server">
                                 <table>
                                     <tr>
-                                        <td colspan="7" style="width: 100%">
+                                        <td style="width: 100%">
                                             <fieldset>
                                                 <legend class="column_LeftBold">General Information</legend>
                                                 <table width="100%">
@@ -568,7 +568,7 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td colspan="7" style="width: 100%">
+                                        <td style="width: 100%">
                                             <fieldset>
                                                 <table width="100%">
                                                     <tr>
@@ -610,7 +610,7 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td colspan="7" style="width: 100%">
+                                        <td style="width: 100%">
                                             <table width="100%">
                                                 <tr>
                                                     <td style="width: 80%">
@@ -722,7 +722,7 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td colspan="7" align="right" style="width: 100%">
+                                        <td align="right" style="width: 100%">
                                             <table width="100%">
                                                 <tr>
                                                     <td align="right">

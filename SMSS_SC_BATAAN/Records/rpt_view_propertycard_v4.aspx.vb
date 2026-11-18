@@ -67,7 +67,8 @@ Partial Class Inventory_rpt_view_propertycard_v4
 
         rpt.Load(reportPath)
         rpt.SetDatabaseLogon(objDerived.username, objDerived.Password)
-        rpt.SetParameterValue("@ClassificationID", Session("ClassificationID"))
+        'rpt.SetParameterValue("@ClassificationID", Session("ClassificationID"))
+        rpt.SetParameterValue("@GA_ID", CInt(Session("GA_ID")))
 
         Return rpt
     End Function
@@ -161,20 +162,21 @@ Partial Class Inventory_rpt_view_propertycard_v4
         ' (Next Page, Previous Page, Drill Down, Export, Zoom).  If ReportSource
         ' is only set in Page_Load, the viewer cannot resolve page navigation
         ' after the first render -- which is why only the first pages show.
-        Try
+        'Try
 
-            If Session("ReportDocument") IsNot Nothing Then
-                Dim rpt As ReportDocument = CType(Session("ReportDocument"), ReportDocument)
-                rpt.SetDatabaseLogon(objDerived.username, objDerived.Password)
-                rpt.SetParameterValue("@ClassificationID", Session("ClassificationID"))
-                Me.CrystalReportViewer1.ReportSource = rpt
-            Else
-                LoadAndStoreReport()
-            End If
+        If Session("ReportDocument") IsNot Nothing Then
+            Dim rpt As ReportDocument = CType(Session("ReportDocument"), ReportDocument)
+            rpt.SetDatabaseLogon(objDerived.username, objDerived.Password)
+            'rpt.SetParameterValue("@ClassificationID", Session("ClassificationID"))
+            rpt.SetParameterValue(0, CInt(Session("GA_ID")))
+            Me.CrystalReportViewer1.ReportSource = rpt
+        Else
+            LoadAndStoreReport()
+        End If
 
-        Catch ex As Exception
-            MsgeBox.MessageBox(Nothing, "Something went wrong, please contact system admin.", Nothing)
-        End Try
+        'Catch ex As Exception
+        '    MsgeBox.MessageBox(Nothing, "Something went wrong, please contact system admin.", Nothing)
+        'End Try
 
     End Sub
 
