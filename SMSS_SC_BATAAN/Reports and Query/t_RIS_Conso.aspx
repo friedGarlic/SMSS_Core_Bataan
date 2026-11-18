@@ -28,6 +28,13 @@
                                     </td>
                                 </tr>
 
+                                 <tr>
+                                    <td style="width:25%" class="column_RightBold">Functon :</td>
+                                    <td style="width:75%" class="column_Left">
+                                        <asp:DropDownList ID="ddFunction" runat="server" Width="50%" CssClass="drpdownCSS" AutoPostBack="true" OnSelectedIndexChanged="ddFunction_SelectedIndexChanged"></asp:DropDownList>
+                                    </td>
+                                </tr>
+
                                 <tr>
                                     <td style="width:25%" class="column_RightBold">Year :</td>
                                     <td style="width:75%" class="column_Left">
@@ -81,7 +88,7 @@
                                 </tr>
 
                                 <tr>
-                                    <td class="column_RightBold">Printed Name :</td>
+                                    <td class="column_RightBold">Prepared By :</td>
                                     <td class="column_Left">
                                         <asp:TextBox ID="txtPrintedName" runat="server" Width="70%" CssClass="txtbox_Var">
                                         </asp:TextBox>
@@ -89,12 +96,29 @@
                                 </tr>
 
                                 <tr>
-                                    <td class="column_RightBold">Designation :</td>
+                                    <td class="column_RightBold">Prepared By Designation :</td>
                                     <td class="column_Left">
                                         <asp:TextBox ID="txtDesignation" runat="server" Width="70%" CssClass="txtbox_Var">
                                         </asp:TextBox>
                                     </td>
                                 </tr>
+
+                                <tr>
+                                    <td class="column_RightBold">Noted By :</td>
+                                    <td class="column_Left">
+                                        <asp:TextBox ID="txtPrintedNameNoted" runat="server" Width="70%" CssClass="txtbox_Var">
+                                        </asp:TextBox>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td class="column_RightBold">Noted By Designation :</td>
+                                    <td class="column_Left">
+                                        <asp:TextBox ID="txtDesignationNoted" runat="server" Width="70%" CssClass="txtbox_Var">
+                                        </asp:TextBox>
+                                    </td>
+                                </tr>
+
 
                                 <tr>
                                     <td class="column_RightBold">Date :</td>

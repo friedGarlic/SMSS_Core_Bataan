@@ -517,7 +517,7 @@ function NoOfYears(dateString) {
                                                      </td>
                                                     <td class="column_Left" style="width:100px;">
                                                         <asp:Label ID="Label1" runat="server"></asp:Label>
-                                                        <asp:TextBox ID="txtEAcqDate" runat="server" CssClass="txtbox_Var" Width="140" onchange="return NoOfYears(this.value);"  ></asp:TextBox>
+                                                        <asp:TextBox ID="txtEAcqDate" runat="server" AutoPostBack="True" CssClass="txtbox_Var" Width="140" OnTextChanged="txtEAcqDate_TextChanged" onchange="NoOfYears(this.value); __doPostBack(this.name, '');"  ></asp:TextBox>
                                                         <cc1:CalendarExtender ID="CalendarExtender1" runat="server" TargetControlID="txtEAcqDate" PopupButtonID="txtEAcqDate"></cc1:CalendarExtender>
                                                         &nbsp;(MM/DD/YYYY)
                                                      </td>
