@@ -65,7 +65,12 @@ Partial Class Reports_and_Query_t_RIS_Conso
             ddRC.Items.Clear()
             ddRC.Items.Insert(0, "Select")
 
-            Dim dtDepartment As DataTable = objDerived.GetDataTable("SELECT RC_ID, RC_Name FROM DBO.View_RespCenter_withFunctions ORDER BY RC_Name", CommandType.Text)
+            Dim dtDepartment As DataTable = objDerived.GetDataTable(
+                "SELECT DISTINCT V.RC_ID, V.RC_Name " &
+                "FROM DBO.View_RespCenter_withFunctions V " &
+                "WHERE EXISTS (SELECT 1 FROM AMS.RIS_Hdr R WHERE R.RC_ID = V.RC_ID) " &
+                "ORDER BY V.RC_Name",
+                CommandType.Text)
 
             ddRC.DataSource = dtDepartment
             ddRC.DataTextField = "RC_Name"
@@ -336,10 +341,12 @@ Partial Class Reports_and_Query_t_RIS_Conso
             End If
 
             Dim dtFunction As DataTable = objDerived.GetDataTable(
-                "SELECT DISTINCT Function_ID, Function_Desc " &
-                "FROM DBO.View_RespCenter_withFunctions " &
-                "WHERE RC_ID = " & rcId & " " &
-                "ORDER BY Function_Desc",
+                "SELECT DISTINCT V.Function_ID, V.Function_Desc " &
+                "FROM DBO.View_RespCenter_withFunctions V " &
+                "WHERE V.RC_ID = " & rcId & " " &
+                "AND EXISTS (SELECT 1 FROM AMS.RIS_Hdr R " &
+                "WHERE R.RC_ID = V.RC_ID AND R.Func_ID = V.Function_ID) " &
+                "ORDER BY V.Function_Desc",
                 CommandType.Text)
 
             If dtFunction IsNot Nothing AndAlso dtFunction.Rows.Count > 0 Then

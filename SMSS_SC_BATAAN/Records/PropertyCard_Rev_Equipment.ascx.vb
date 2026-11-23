@@ -968,22 +968,25 @@ Partial Class Records_PropertyCard_Rev_Equipment
     Protected Sub btnViewEquipmentPIR_Click(sender As Object, e As EventArgs) Handles btnViewEquipmentPIR.Click
 
         Try
-            If gvEquipmentLocationList.SelectedRow.Controls.Count > 0 Then
-                Session("isNonSelectedItem") = False
 
-                'OnClientClick="window.open(''
+            Dim url As String = "rpt_view_propertycard_v4.aspx?"
+            Dim fullURL As String = "window.open('" & url + "', '_blank', 'status=0,screenX=0,resizable=1,scrollbars=1,width=850,height=700,left=250,top=100');"
+            ScriptManager.RegisterStartupScript(Me, GetType(String), "OPEN_WINDOW", fullURL, True)
 
-                Dim url As String = "rpt_view_propertycard_v4.aspx?"
-                Dim fullURL As String = "window.open('" & url + "', '_blank', 'status=0,screenX=0,resizable=1,scrollbars=1,width=850,height=700,left=250,top=100');"
-                ScriptManager.RegisterStartupScript(Me, GetType(String), "OPEN_WINDOW", fullURL, True)
 
-            Else
-                Session("isNonSelectedItem") = True
 
-                'MessageBox.Show("Select an item on table first!")
+            'If gvEquipmentLocationList.SelectedRow.Controls.Count > 0 Then
+            '    Session("isNonSelectedItem") = False
 
-                ScriptManager.RegisterStartupScript(Me, Me.GetType(), "noAccount", "alert('Select an Account on dropdown first!');", True)
-            End If
+            '    'OnClientClick="window.open(''
+
+            'Else
+            '    Session("isNonSelectedItem") = True
+
+            '    'MessageBox.Show("Select an item on table first!")
+
+            '    ScriptManager.RegisterStartupScript(Me, Me.GetType(), "noAccount", "alert('Select an Account on dropdown first!');", True)
+            'End If
         Catch ex As Exception
             ScriptManager.RegisterStartupScript(Me, Me.GetType(), "noAccount", "alert('Select an Account on dropdown first!');", True)
 

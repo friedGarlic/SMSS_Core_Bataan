@@ -50,6 +50,7 @@ Partial Class rpt_stockcardinventory
             AddTrace("drpYear: " & drpYear.SelectedValue)
             AddTrace("ddMonth: " & ddMonth.SelectedValue)
             AddTrace("ddReport: " & ddReport.SelectedValue)
+            AddTrace("GA_ID: " & Session("GA_ID"))
 
 
             Me.CrystalReportViewer1.ToolPanelView = CrystalDecisions.Web.ToolPanelViewType.None
@@ -58,6 +59,7 @@ Partial Class rpt_stockcardinventory
             Me.CrystalReportSource1.ReportDocument.SetParameterValue("@CY", drpYear.SelectedItem.Value)
             Me.CrystalReportSource1.ReportDocument.SetParameterValue("@Month", ddMonth.SelectedItem.Value)
             Me.CrystalReportSource1.ReportDocument.SetParameterValue("@Report", ddReport.SelectedItem.Value)
+            Me.CrystalReportSource1.ReportDocument.SetParameterValue("@GA_ID", Session("GA_ID"))
 
             reportOK = True
 
@@ -104,12 +106,16 @@ Partial Class rpt_stockcardinventory
             Session("StockCardInventory_Month") = ddMonth.SelectedItem.Value
             Session("StockCardInventory_Year") = drpYear.SelectedItem.Value
 
+
+
             Me.CrystalReportViewer1.ToolPanelView = CrystalDecisions.Web.ToolPanelViewType.None
             Me.CrystalReportViewer1.ReportSource = Me.CrystalReportSource1
             Me.CrystalReportSource1.ReportDocument.SetDatabaseLogon(rptDerived.username, rptDerived.Password)
             Me.CrystalReportSource1.ReportDocument.SetParameterValue("@CY", drpYear.SelectedItem.Value)
             Me.CrystalReportSource1.ReportDocument.SetParameterValue("@Month", ddMonth.SelectedItem.Value)
             Me.CrystalReportSource1.ReportDocument.SetParameterValue("@Report", ddReport.SelectedItem.Value)
+            Me.CrystalReportSource1.ReportDocument.SetParameterValue("@GA_ID", Session("GA_ID"))
+
         Catch ex As Exception
             MsgeBox.MessageBox(Nothing, "Something went wrong, please contact system admin.", Nothing)
         End Try

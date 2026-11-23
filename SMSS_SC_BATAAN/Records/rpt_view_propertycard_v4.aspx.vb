@@ -8,6 +8,16 @@ Partial Class Inventory_rpt_view_propertycard_v4
 
     Private objDerived As New connectionreport
 
+    Private Sub AddTrace(ByVal message As String)
+        ' Prevent single quotes in the message from breaking JavaScript
+        Dim safeMessage As String = message.Replace("'", "\'")
+        ScriptManager.RegisterClientScriptBlock(Me, Me.GetType(),
+        "TraceKey" & Guid.NewGuid().ToString("N"),
+        "console.log('" & safeMessage & "');",
+        True)
+    End Sub
+
+
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
 
         ' Restore dropdown selections on a ?print=1 GET.  (These dropdowns
@@ -68,6 +78,8 @@ Partial Class Inventory_rpt_view_propertycard_v4
         rpt.Load(reportPath)
         rpt.SetDatabaseLogon(objDerived.username, objDerived.Password)
         'rpt.SetParameterValue("@ClassificationID", Session("ClassificationID"))
+
+        AddTrace("GA_ID: " & Session("GA_ID"))
         rpt.SetParameterValue("@GA_ID", CInt(Session("GA_ID")))
 
         Return rpt
@@ -168,6 +180,7 @@ Partial Class Inventory_rpt_view_propertycard_v4
             Dim rpt As ReportDocument = CType(Session("ReportDocument"), ReportDocument)
             rpt.SetDatabaseLogon(objDerived.username, objDerived.Password)
             'rpt.SetParameterValue("@ClassificationID", Session("ClassificationID"))
+            AddTrace("GA_ID: " & Session("GA_ID"))
             rpt.SetParameterValue(0, CInt(Session("GA_ID")))
             Me.CrystalReportViewer1.ReportSource = rpt
         Else
