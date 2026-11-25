@@ -1,4 +1,5 @@
-﻿<%@ Page Language="VB" MasterPageFile="~/MasterPage.master" AutoEventWireup="false" CodeFile="t_rpt_RIS_Conso.aspx.vb" Inherits="Reports_and_Query_t_rpt_RIS_Conso" Title="RIS Consolidated Report" StylesheetTheme="SkinFile" %>
+﻿
+<%@ Page Language="VB" MasterPageFile="~/MasterPage.master" AutoEventWireup="false" CodeFile="t_rpt_RIS_Conso.aspx.vb" Inherits="Reports_and_Query_t_rpt_RIS_Conso" Title="RIS Consolidated Report" StylesheetTheme="SkinFile" %>
 
 <%@ Register Assembly="CrystalDecisions.Web, Version=13.0.3500.0, Culture=neutral, PublicKeyToken=692fbea5521e1304" Namespace="CrystalDecisions.Web" TagPrefix="CR" %>
 
@@ -6,7 +7,7 @@
     <asp:ScriptManager ID="ScriptManager1" runat="server">
     </asp:ScriptManager>
     <script type="text/javascript">
-        function PrintReport() {
+        function PrintReport(reportType) {
             var frame = document.getElementById("pdfPrintFrame");
             if (!frame) {
                 alert("Print frame not found.");
@@ -33,7 +34,7 @@
             };
 
             // Cache-buster so the browser always reloads the PDF fresh.
-            frame.src = "t_rpt_RIS_Conso.aspx?print=1&t=" + new Date().getTime();
+            frame.src = "t_rpt_RIS_Conso.aspx?print=" + (reportType || "1") + "&t=" + new Date().getTime();
         }
     </script>
 
@@ -108,6 +109,85 @@
                                         HasExportButton="True"
                                         EnableParameterPrompt="False" />
                                     <CR:CrystalReportSource ID="CrystalReportSource1" runat="server">
+                                    </CR:CrystalReportSource>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="width:100%;height:10px"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </td>
+                <td style="width:1%"></td>
+            </tr>
+
+            <tr>
+                <td style="width:1%"></td>
+                <td style="width:98%;height:20px"></td>
+                <td style="width:1%"></td>
+            </tr>
+
+            <tr>
+                <td style="width:1%"></td>
+                <td style="width:98%" class="PageTitle">
+                    <asp:Label runat="server" ID="lblInventoryTitle" Text="INVENTORY OF SUPPLIES REPORT">
+                    </asp:Label>
+                </td>
+                <td style="width:1%"></td>
+            </tr>
+
+            <tr>
+                <td style="width:1%"></td>
+                <td style="width:98%;height:10px"></td>
+                <td style="width:1%"></td>
+            </tr>
+
+            <tr>
+                <td style="width:1%"></td>
+                <td style="width:98%" align="left">
+                    <table width="1000px" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td align="right">
+                                <asp:LinkButton ID="btnPrintInventoryReport" runat="server" CssClass="LinkBtnSelect" OnClientClick="PrintReport('2'); return false;">Print Report</asp:LinkButton>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td style="width:1%"></td>
+            </tr>
+
+            <tr>
+                <td style="width:1%"></td>
+                <td style="width:98%" align="center">
+                    <div style="width: 1000px; background-color: #808080; text-align: center; vertical-align: middle">
+                        <table width="100%">
+                            <tr>
+                                <td style="width:100%;height:10px"></td>
+                            </tr>
+                            <tr>
+                                <td style="width:100%" align="center">
+                                    <CR:CrystalReportViewer ID="InventoryOfSuppliesReport"
+                                        runat="server"
+                                        AutoDataBind="true"
+                                        HasToggleGroupTreeButton="False"
+                                        HasCrystalLogo="False"
+                                        HasSearchButton="False"
+                                        HasDrilldownTabs="False"
+                                        BestFitPage="False"
+                                        BackColor="#ffffff"
+                                        Height="930px"
+                                        Width="980px"
+                                        BorderStyle="Solid"
+                                        BorderColor="#2977dc"
+                                        BorderWidth="1px"
+                                        ToolPanelView="None"
+                                        HasGroupTree="False"
+                                        HasPrintButton="False"
+                                        DisplayToolbar="True"
+                                        EnableExportButton="True"
+                                        HasExportButton="True"
+                                        EnableParameterPrompt="False" />
+                                    <CR:CrystalReportSource ID="CrystalReportSource2" runat="server">
                                     </CR:CrystalReportSource>
                                 </td>
                             </tr>

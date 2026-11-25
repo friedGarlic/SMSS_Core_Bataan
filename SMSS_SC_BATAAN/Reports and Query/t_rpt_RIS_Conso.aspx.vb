@@ -1,4 +1,5 @@
-﻿Imports CrystalDecisions.CrystalReports.Engine
+﻿
+Imports CrystalDecisions.CrystalReports.Engine
 Imports CrystalDecisions.Shared
 Imports CrystalDecisions.Web
 
@@ -7,6 +8,7 @@ Partial Class Reports_and_Query_t_rpt_RIS_Conso
 
     Private objDerived As New connectionreport
     Private rpt As New ReportDocument
+    Private rptInventory As New ReportDocument
 
     Private Sub AddTrace(ByVal message As String)
         Dim safeMessage As String = message.Replace("'", "\'")
@@ -26,9 +28,22 @@ Partial Class Reports_and_Query_t_rpt_RIS_Conso
         ' already in Session to PDF and stream it straight to the browser.
         ' This replaces the normal HTML output so the report opens in the
         ' browser's PDF viewer, ready to print, with all pages included.
-        If Request.QueryString("print") = "1" Then
+        If Request.QueryString("print") = "1" OrElse Request.QueryString("print") = "2" Then
 
-            Dim rptPrint As ReportDocument = CType(Session("RISConso_Report"), ReportDocument)
+            Dim rptPrint As ReportDocument
+            Dim reportFileName As String
+
+            If Request.QueryString("print") = "2" Then
+
+                rptPrint = CType(Session("InventoryOfSupplies_Report"), ReportDocument)
+                reportFileName = "Inventory_Of_Supplies_Report"
+
+            Else
+
+                rptPrint = CType(Session("RISConso_Report"), ReportDocument)
+                reportFileName = "RIS_Conso_Report"
+
+            End If
 
             If rptPrint Is Nothing Then
                 Me.Page.Response.Redirect("~/Reports and Query/t_requisition_and_issuance.aspx")
@@ -37,7 +52,7 @@ Partial Class Reports_and_Query_t_rpt_RIS_Conso
 
             rptPrint.SetDatabaseLogon(objDerived.username, objDerived.Password)
 
-            rptPrint.ExportToHttpResponse(ExportFormatType.PortableDocFormat, Me.Page.Response, False, "RIS_Conso_Report")
+            rptPrint.ExportToHttpResponse(ExportFormatType.PortableDocFormat, Me.Page.Response, False, reportFileName)
 
             Me.Page.Response.End()
 
@@ -49,12 +64,17 @@ Partial Class Reports_and_Query_t_rpt_RIS_Conso
 
     Private Sub Page_Init(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Init
 
+        If Request.QueryString("print") = "1" OrElse Request.QueryString("print") = "2" Then
+            Return
+        End If
+
         ' On the very first request, build the report and stash it in Session.
         ' On every subsequent request (including pagination postbacks),
         ' pull the SAME instance from Session — this preserves page state.
         If Not IsPostBack Then
 
             LoadRISConso()
+            LoadInventoryOfSupplies()
 
         Else
 
@@ -74,6 +94,20 @@ Partial Class Reports_and_Query_t_rpt_RIS_Conso
 
                 ' Bind BEFORE the viewer processes its view state.
                 Me.RISConsoReport.ReportSource = rpt
+
+            End If
+
+            rptInventory = CType(Session("InventoryOfSupplies_Report"), ReportDocument)
+
+            If rptInventory Is Nothing Then
+
+                LoadInventoryOfSupplies()
+
+            Else
+
+                rptInventory.SetDatabaseLogon(objDerived.username, objDerived.Password)
+
+                Me.InventoryOfSuppliesReport.ReportSource = rptInventory
 
             End If
 
@@ -114,6 +148,27 @@ Partial Class Reports_and_Query_t_rpt_RIS_Conso
 
         ' Bind the ReportDocument object DIRECTLY to the viewer
         Me.RISConsoReport.ReportSource = rpt
+
+    End Sub
+
+    Private Sub LoadInventoryOfSupplies()
+        AddTrace("Inventory_Year: " & Session("RIS_Year"))
+
+        InventoryOfSuppliesReport.ToolPanelView = ToolPanelViewType.None
+        InventoryOfSuppliesReport.HasToggleGroupTreeButton = False
+        InventoryOfSuppliesReport.HasCrystalLogo = False
+        InventoryOfSuppliesReport.BackColor = Drawing.Color.White
+
+        rptInventory = New ReportDocument()
+        rptInventory.Load(Server.MapPath("~/Inventory/Inventory_Of_Supplies.rpt"))
+
+        rptInventory.SetDatabaseLogon(objDerived.username, objDerived.Password)
+
+        rptInventory.SetParameterValue("@Year", Session("RIS_Year"))
+
+        Session("InventoryOfSupplies_Report") = rptInventory
+
+        Me.InventoryOfSuppliesReport.ReportSource = rptInventory
 
     End Sub
 
