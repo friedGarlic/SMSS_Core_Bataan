@@ -41,6 +41,17 @@ Public Class t_StockLedger
         End Set
     End Property
 
+
+    Private pRIS_Dtl_ID As Nullable(Of Long)
+    Public Property RIS_Dtl_ID() As Nullable(Of Long)
+        Get
+            Return pRIS_Dtl_ID
+        End Get
+        Set(ByVal value As Nullable(Of Long))
+            pRIS_Dtl_ID = value
+        End Set
+    End Property
+
     Private pdDate As Date
     Public Property dDate() As Date
         Get
@@ -223,6 +234,7 @@ Public Class t_StockLedger
 
 #End Region
 
+
     Public Function save() As Long
         Dim objDerived As New DerivedDal
         Dim i As Long
@@ -247,7 +259,10 @@ Public Class t_StockLedger
         objDerived.cmd.Parameters.AddWithValue("@BalanceQty", BalanceQty)
         objDerived.cmd.Parameters.AddWithValue("@BalanceUnit", BalanceUnit)
         objDerived.cmd.Parameters.AddWithValue("@BalanceCost", BalanceCost)
+        objDerived.cmd.Parameters.AddWithValue("@RIS_Dtl_ID", If(RIS_Dtl_ID.HasValue, CType(RIS_Dtl_ID.Value, Object), DBNull.Value))
         objDerived.cmd.Parameters.Add("@CurrID", SqlDbType.BigInt).Direction = ParameterDirection.Output
         i = objDerived.Execute("@CurrID", "[AMS].[Save_TbStock_Ledger]", CommandType.StoredProcedure, Nothing)
     End Function
+
+
 End Class

@@ -222,10 +222,12 @@
                                                 </td>
                                             </tr>
 
+
                                             <tr>
-                                                <td class="column_RightBold">  <span class="required-label">Date:</span> </td>
+                                                <td class="column_RightBold" style="vertical-align: top; padding-top: 5px;">  <span class="required-label">Date:</span> </td>
                                                 <td class="column_Left">
-                                                    <asp:TextBox ID="txtSellectDate" runat="server" CssClass="txtbox_Var0"   AutoPostBack="true"></asp:TextBox>
+                                                    <asp:TextBox ID="txtSellectDate" runat="server" CssClass="txtbox_Var0"   AutoPostBack="true" OnTextChanged="txtSellectDate_TextChanged"></asp:TextBox>
+                                                    <asp:Label ID="lblDateNote" runat="server" Text="Note: " Visible="false" ForeColor="Red" Style="display: block; font-size: 11px; margin-top: 3px;"></asp:Label>
                                                 </td>
                                                 <cc1:CalendarExtender ID="CalendarExtender4" runat="server"
                                                     TargetControlID="txtSellectDate" PopupButtonID="txtSellectDate"></cc1:CalendarExtender>
@@ -235,6 +237,9 @@
                                                     <asp:HiddenField ID="hndLoad" Value="1" runat="server" />
                                                 </td>
                                             </tr>
+
+
+
 
                                             <tr>
                                                 <td colspan="4">

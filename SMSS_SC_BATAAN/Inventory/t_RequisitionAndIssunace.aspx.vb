@@ -2169,6 +2169,8 @@ Partial Class Inventory_RIS
                 hdr.Approved_By = IIf((ddApprovedBy.SelectedItem.Text = "Select"), "", (ddApprovedBy.SelectedItem.Text))
                 Dim hdrid As Long = hdr.saveRISHdr()
 
+
+
                 For i As Integer = 0 To Me.gvbody.Rows.Count - 1
                     If pbody.Rows(i)("qty2") <> "0" Then
                         'Dim NewMAB As Decimal = CType(mab.Rows(0)("mab"), Decimal) - CType(pbody.Rows(i)("total"), Decimal)
@@ -2185,7 +2187,7 @@ Partial Class Inventory_RIS
                         dtl.StockID = pbody.Rows(i)("StockID")
                         dtl.Remarks = CType(gvbody.Rows(i).FindControl("txtRemarks"), TextBox).Text
 
-                        dtl.saveRISDtl()
+                        Dim dtlid As Long = dtl.saveRISDtl()
 
                         Dim balance As Decimal = objDerived.GetValue("Select Balance from AMS.Stock where stockID ='" & pbody.Rows(i)("StockID") & "'", CommandType.Text)
                         Dim issuance As Decimal = objDerived.GetValue("Select Issuance from AMS.Stock where stockID ='" & pbody.Rows(i)("StockID") & "'", CommandType.Text)
@@ -2198,7 +2200,8 @@ Partial Class Inventory_RIS
                         dtStockLedger = objStockLedger.GetDataTable("Select StockLedger_ID from AMS.TbStock_Ledger", CommandType.Text)
                         With objStockLedger
                             '.StockLedger_ID = StockLedger_ID
-                            .StockID = "0" 'objDerived.GetValue("Select StockID FROM AMS.Stock where Item_ID = '" & pbody.Rows(i)("item_id") & "'", CommandType.Text)
+                            .StockID = pbody.Rows(i)("StockID")
+                            .RIS_Dtl_ID = dtlid
                             .Trans_Type = "Issuance"
                             .Ref = Session("ris_no")
                             .AccountablePerson = Trim(txtRequestedBy.Text)
@@ -2323,8 +2326,11 @@ Partial Class Inventory_RIS
                 Me.drpFunction.Enabled = False
                 btnADD.Enabled = False
 
-                LoadMainRIS()
 
+                gvbody.DataSource = Nothing
+                gvbody.DataBind()
+
+                LoadMainRIS()
             End If
         Catch ex As Exception
             MsgBox(ex.Message)

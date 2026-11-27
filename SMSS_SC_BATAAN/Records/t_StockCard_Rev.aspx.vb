@@ -244,6 +244,72 @@ Partial Class Records_t_StockCard_Rev
 
 
 
+    Private Sub CheckSuppliesLedger()
+
+        lblDateNote.Visible = False
+
+        If String.IsNullOrEmpty(drpItemDesc1.SelectedValue) OrElse drpItemDesc1.SelectedValue = "0" Then
+            Exit Sub
+        End If
+
+        Dim dtStock As DataTable = objDerived.GetDataTable(
+        "EXEC [AMS].[sp_SuppliesLedger] '" & drpItemDesc1.SelectedValue & "'",
+        CommandType.Text
+         )
+
+        If dtStock Is Nothing OrElse dtStock.Rows.Count = 0 Then
+            lblDateNote.Text = "Note: No existing records found for this item. Please encode the oldest record first."
+            lblDateNote.Visible = True
+        Else
+            lblDateNote.Visible = False
+            Exit Sub
+        End If
+
+    End Sub
+
+
+    Private Sub CheckSuppliesLedgerDate()
+
+        If String.IsNullOrEmpty(drpItemDesc1.SelectedValue) OrElse drpItemDesc1.SelectedValue = "0" Then
+            Exit Sub
+        End If
+
+        Dim selectDateValue As Date
+
+        If Not Date.TryParse(txtSellectDate.Text, selectDateValue) Then
+            Exit Sub
+        End If
+
+        Dim dtStock As DataTable = objDerived.GetDataTable(
+        "EXEC [AMS].[sp_SuppliesLedger] '" & drpItemDesc1.SelectedValue & "'",
+        CommandType.Text
+         )
+
+        If dtStock Is Nothing OrElse dtStock.Rows.Count = 0 Then
+            Exit Sub
+        End If
+
+        If IsDBNull(dtStock.Rows(0)("dDate")) Then
+            Exit Sub
+        End If
+
+        Dim ledgerDate As Date = Convert.ToDateTime(dtStock.Rows(0)("dDate"))
+
+        If selectDateValue.Date < ledgerDate.Date Then
+            MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "You cannot select a date earlier than " & ledgerDate.ToString("MMMM dd, yyyy") & ", as this may cause inconsistencies with existing ledger records.")
+            txtSellectDate.Text = ledgerDate.ToString("MM/dd/yyyy")
+            Exit Sub
+        End If
+
+    End Sub
+
+
+
+    Protected Sub txtSellectDate_TextChanged(ByVal sender As Object, ByVal e As EventArgs)
+        CheckSuppliesLedgerDate()
+    End Sub
+
+
     '========================
     ' DROPDOWN HANDLER
     '========================
@@ -314,6 +380,7 @@ Partial Class Records_t_StockCard_Rev
         Session("Item_ID") = drpItemDesc1.SelectedValue
         LoadLedger()
         loadUnit()
+        CheckSuppliesLedger()
     End Sub
 
     Protected Sub grdLedger_RowDataBound(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewRowEventArgs)

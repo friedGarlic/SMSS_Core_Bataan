@@ -170,17 +170,18 @@
                                             </tr>
 
                                             <tr>
-                                                <td style="width: 15%" class="column_RightBold">Reorder Pt. :</td>
-                                                <td style="width: 35%" class="column_Left">
+                                                <td style="width: 15%; vertical-align: top; padding-top: 5px;" class="column_RightBold">Reorder Pt. :</td>
+                                                <td style="width: 35%; vertical-align: top;" class="column_Left">
                                                     <asp:TextBox ID="txtReOrderPt" runat="server" AutoPostBack="True"  CssClass="txtbox_Amt" ReadOnly="False" Width="50px"></asp:TextBox>
                                                     <asp:Button ID="btnROP" runat="server" CssClass="CSButton" OnClick="btnROP_Click" Text="R.O.P" Width="40" />
                                                 </td>
 
-                                                <td style="width: 15%" class="column_RightBold"><span class="required-label">Date :</span></td>
-                                                <td style="width: 35%" class="column_Left">
-                                                    <asp:TextBox ID="txtSellectDate" runat="server"   CssClass="txtbox_Var0"></asp:TextBox>
+                                                <td style="width: 15%; vertical-align: top; padding-top: 5px;" class="column_RightBold"><span class="required-label">Date :</span></td>
+                                                <td style="width: 35%; vertical-align: top;" class="column_Left">
+                                                    <asp:TextBox ID="txtSellectDate" runat="server"   CssClass="txtbox_Var0" AutoPostBack="true" OnTextChanged="txtSellectDate_TextChanged"></asp:TextBox>
                                                     <cc1:CalendarExtender ID="CalendarExtender7" runat="server"
                                                         TargetControlID="txtSellectDate" PopupButtonID="txtSellectDate"></cc1:CalendarExtender>
+                                                    <asp:Label ID="lblDateNote" runat="server" Text="Note: " Visible="false" ForeColor="Red" Style="display: block; font-size: 11px; margin-top: 3px;"></asp:Label>
                                                 </td>
                                             </tr>
 

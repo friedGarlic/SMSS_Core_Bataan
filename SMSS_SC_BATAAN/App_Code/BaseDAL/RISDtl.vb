@@ -130,7 +130,7 @@ Public Class RISDtl
 
     End Sub
 
-    Public Sub saveRISDtl()
+    Public Function saveRISDtl() As Long
         Dim objDerived As New DerivedDal
         Dim i As Long
 
@@ -147,7 +147,7 @@ Public Class RISDtl
         objDerived.cmd.Parameters.Add("@CurrID", SqlDbType.BigInt).Direction = ParameterDirection.Output
 
         i = objDerived.Execute("@CurrID", "AMS.spSave_RIS_Dtl", CommandType.StoredProcedure, Nothing)
-
-    End Sub
+        Return i
+    End Function
 
 End Class

@@ -257,6 +257,76 @@ Partial Class Records_t_StockCard_Rev_MRO
         End If
     End Sub
 
+
+    Private Sub CheckSuppliesLedger()
+
+        lblDateNote.Visible = False
+
+        If String.IsNullOrEmpty(drpItemDesc2.SelectedValue) OrElse drpItemDesc2.SelectedValue = "0" Then
+            Exit Sub
+        End If
+
+        Dim dtStock As DataTable = objDerived.GetDataTable(
+        "EXEC [AMS].[sp_SuppliesLedger] '" & drpItemDesc2.SelectedValue & "'",
+        CommandType.Text
+         )
+
+        If dtStock Is Nothing OrElse dtStock.Rows.Count = 0 Then
+            lblDateNote.Text = "Note: No existing records found for this item. Please encode the oldest record first."
+            lblDateNote.Visible = True
+        Else
+            lblDateNote.Visible = False
+            Exit Sub
+        End If
+
+    End Sub
+
+
+    Private Sub CheckSuppliesLedgerDate()
+
+        If String.IsNullOrEmpty(drpItemDesc2.SelectedValue) OrElse drpItemDesc2.SelectedValue = "0" Then
+            Exit Sub
+        End If
+
+        Dim selectDateValue As Date
+
+        If Not Date.TryParse(txtSellectDate.Text, selectDateValue) Then
+            Exit Sub
+        End If
+
+        Dim dtStock As DataTable = objDerived.GetDataTable(
+        "EXEC [AMS].[sp_SuppliesLedger] '" & drpItemDesc2.SelectedValue & "'",
+        CommandType.Text
+         )
+
+        If dtStock Is Nothing OrElse dtStock.Rows.Count = 0 Then
+            Exit Sub
+        End If
+
+        If IsDBNull(dtStock.Rows(0)("dDate")) Then
+            Exit Sub
+        End If
+
+        Dim ledgerDate As Date = Convert.ToDateTime(dtStock.Rows(0)("dDate"))
+
+        If selectDateValue.Date < ledgerDate.Date Then
+            MsgeBox.CreateMessageAlertInUpdatePanel(Me.UpdatePanel1, "You cannot select a date earlier than " & ledgerDate.ToString("MMMM dd, yyyy") & ", as this may cause inconsistencies with existing ledger records.")
+            txtSellectDate.Text = ledgerDate.ToString("MM/dd/yyyy")
+            Exit Sub
+        End If
+
+    End Sub
+
+
+    Protected Sub txtSellectDate_TextChanged(ByVal sender As Object, ByVal e As EventArgs)
+        CheckSuppliesLedgerDate()
+    End Sub
+
+
+
+
+
+
     Protected Sub DrpSubClass_SelectedIndexChanged(
     ByVal sender As Object,
     ByVal e As System.EventArgs
@@ -320,13 +390,14 @@ Partial Class Records_t_StockCard_Rev_MRO
     End Sub
 
     Protected Sub drpItemDesc2_SelectedIndexChanged(
-    ByVal sender As Object,
-    ByVal e As EventArgs
+ByVal sender As Object,
+ByVal e As EventArgs
 )
 
         Session("Item_ID") = drpItemDesc2.SelectedValue
         LoadLedger()
         loadUnit()
+        CheckSuppliesLedger()
 
     End Sub
 
