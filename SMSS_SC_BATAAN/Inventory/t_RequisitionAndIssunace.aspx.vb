@@ -1723,6 +1723,21 @@ Partial Class Inventory_RIS
         Return 0D
     End Function
 
+    Private Function GetLatestLedgerBalance(ByVal itemId As Long) As Integer
+
+        Dim dtStock As DataTable = objDerived.GetDataTable(
+        "EXEC [AMS].[sp_SuppliesLedger] '" & itemId & "'",
+        CommandType.Text
+         )
+
+        If dtStock Is Nothing OrElse dtStock.Rows.Count = 0 Then
+            Return 0
+        End If
+
+        Return ToInt(dtStock.Rows(0)("BalQty"))
+
+    End Function
+
     Protected Sub chkSelect_CheckedChanged(sender As Object, e As EventArgs)
         Dim chk As CheckBox = CType(sender, CheckBox)
         Dim row As GridViewRow = CType(chk.NamingContainer, GridViewRow)
@@ -1734,12 +1749,16 @@ Partial Class Inventory_RIS
         Dim itemDesc As String = ToStr(keys("Item_Desc"))
         Dim unit As String = ToStr(keys("Description"))
         If unit = "" Then unit = ToStr(keys("Unit")) ' fallback if Description is missing/empty
-        Dim balance As Integer = ToInt(keys("Balance"))
+        Dim balance As Integer = 0
         Dim unitCost As Decimal = ToDec(keys("cost"))
         Dim stockId As Integer = ToInt(keys("stockID"))
 
         ' Skip placeholder rows (e.g., CreatedatatableSupplist)
         If itemId = 0 AndAlso itemDesc = "" Then Exit Sub
+
+        If chk.Checked Then
+            balance = GetLatestLedgerBalance(itemId)
+        End If
 
         EnsurePBodySchema()
 
@@ -1767,6 +1786,10 @@ Partial Class Inventory_RIS
                 dr("total") = 0D
                 dr("stockID") = stockId
                 pbody.Rows.Add(dr)
+            Else
+                For Each r As DataRow In existing
+                    r("qty") = balance
+                Next
             End If
         Else
             For Each r As DataRow In existing
@@ -1829,7 +1852,7 @@ Partial Class Inventory_RIS
                         dr("Item_Desc") = pItems.Rows(i)("Item_Desc")
                         dr("Description") = pItems.Rows(i)("Description")
                         dr("Item_ID") = pItems.Rows(i)("Item_ID")
-                        dr("qty") = pItems.Rows(i)("balance")
+                        dr("qty") = GetLatestLedgerBalance(CLng(pItems.Rows(i)("Item_ID")))
                         dr("qty2") = 0
                         dr("cost") = pItems.Rows(i)("cost")
                         dr("total") = "0.00"
@@ -1847,7 +1870,7 @@ Partial Class Inventory_RIS
                         dr("Item_Desc") = pItems.Rows(i)("Item_Desc")
                         dr("Description") = pItems.Rows(i)("Description")
                         dr("Item_ID") = pItems.Rows(i)("Item_ID")
-                        dr("qty") = pItems.Rows(i)("balance")
+                        dr("qty") = GetLatestLedgerBalance(CLng(pItems.Rows(i)("Item_ID")))
                         dr("qty2") = 0
                         dr("cost") = pItems.Rows(i)("cost")
                         dr("total") = "0.00"
@@ -2326,6 +2349,15 @@ Partial Class Inventory_RIS
                 Me.drpFunction.Enabled = False
                 btnADD.Enabled = False
 
+
+                pbody = Nothing
+
+                If pItems IsNot Nothing Then
+                    For Each r As DataRow In pItems.Rows
+                        r("isChecked") = False
+                        r("isUsed") = False
+                    Next
+                End If
 
                 gvbody.DataSource = Nothing
                 gvbody.DataBind()
